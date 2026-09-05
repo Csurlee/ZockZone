@@ -32,9 +32,14 @@ export function build(){
     });
     if(puck.x<0){ cScore++; document.getElementById('ahC').textContent=cScore; resetPuck(-1); }
     if(puck.x>400){ pScore++; document.getElementById('ahP').textContent=pScore; resetPuck(1); }
-    const dx=puck.x-cpu.x, dy=puck.y-cpu.y;
-    if(puck.x>200){ cpu.x+=Math.sign(dx)*2.4; cpu.y+=Math.sign(dy)*2.4; }
-    else { cpu.x+=(340-cpu.x)*0.05; cpu.y+=(130-cpu.y)*0.05; }
+    const dy=puck.y-cpu.y;
+    if(puck.x>200){
+      cpu.y+=Math.sign(dy)*Math.min(Math.abs(dy),3);
+      cpu.x+=(340-cpu.x)*0.12;
+    } else {
+      cpu.x+=(340-cpu.x)*0.08;
+      cpu.y+=(130-cpu.y)*0.08;
+    }
     cpu.x=Math.max(210,Math.min(390,cpu.x)); cpu.y=Math.max(12,Math.min(248,cpu.y));
     draw();
     if(pScore>=7||cScore>=7){ over.querySelector('div').textContent = pScore>=7?'Du gewinnst! 🎉':'CPU gewinnt.'; over.classList.add('show'); return; }
