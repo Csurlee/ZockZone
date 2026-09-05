@@ -54,15 +54,6 @@ export const countLabel = document.getElementById('countLabel');
 
 let lastFilter='all', lastSearch='';
 
-function renderStars(rating){
-  const num = parseFloat(rating);
-  const full = Math.floor(num);
-  const half = (num - full) >= 0.5 ? 1 : 0;
-  const empty = 5 - full - half;
-  return '<span class="star filled">' + '★'.repeat(full) + '</span>'
-       + (half ? '<span class="star half">½</span>' : '')
-       + '<span class="star empty">' + '☆'.repeat(empty) + '</span>';
-}
 
 function gameLockState(id){
   const v = window.zzGameVisibility && window.zzGameVisibility[id];
@@ -98,7 +89,7 @@ function renderGrid(filter=lastFilter, search=lastSearch){
       </div>
       <div class="card-info">
         <h3>${g.title}</h3>
-        <div class="meta"><span class="stars">${renderStars(g.rating)} ${g.rating}</span> · ${g.plays} Spiele heute</div>
+        <div class="meta"><span class="stars">★ ${g.rating}</span> · ${g.plays} Spiele heute</div>
       </div>
     </div>
   `;
