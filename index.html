@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260905u">
+<link rel="stylesheet" href="css/style.css?v=20260905v">
 </head>
 <body>
 
@@ -172,7 +172,7 @@
   <div class="cookie-banner-inner">
     <div class="cookie-banner-text">
       <strong>🍪 Diese Website verwendet Cookies</strong>
-      <p>Wir nutzen notwendige Cookies für den Login sowie optionale Statistik-Cookies zur Besucheranalyse. Du kannst frei wählen.</p>
+      <p>Wir nutzen notwendige Cookies für den Login, Cloudflare Turnstile (Bot-Schutz bei Registrierung) sowie optionale Statistik-Cookies. Du kannst frei wählen.</p>
     </div>
     <div class="cookie-banner-actions">
       <button class="cookie-btn-all"  onclick="zzAcceptAll()">Alle akzeptieren</button>
@@ -201,11 +201,14 @@
       <p><strong>Statistik-Cookies (nur mit Einwilligung):</strong><br>
       Mit deiner Zustimmung erfassen wir anonymisierte Besucherdaten: Seitenaufruf, gehashte IP-Adresse (nicht rückverfolgbar), ungefähren Standort (Land/Stadt) sowie Browser-Informationen. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO.</p>
 
+      <p><strong>Cloudflare Turnstile (CAPTCHA / Bot-Schutz):</strong><br>
+      Bei der Registrierung setzen wir Cloudflare Turnstile ein, um automatisierte Massenregistrierungen (Bots) zu verhindern. Dabei werden technische Daten (IP-Adresse, Browser-Informationen, Interaktionsmuster) an Cloudflare Inc., 101 Townsend St., San Francisco, CA 94107, USA übermittelt. Cloudflare setzt dabei keine Tracking-Cookies und zeigt kein klassisches Bild-CAPTCHA. Die Datenübertragung in die USA erfolgt auf Basis des EU-US Data Privacy Framework. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Sicherheit unserer Dienste). Weitere Informationen: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Datenschutzrichtlinie</a> · <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener">Turnstile-Produktseite</a>.</p>
+
       <p><strong>Google Fonts:</strong><br>
       Diese Website lädt Schriftarten von Google Fonts (fonts.googleapis.com). Dabei wird deine IP-Adresse an Google übertragen. Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Datenschutzrichtlinie</a>.</p>
 
       <h3>3. Speicherdauer</h3>
-      <p>Session-Daten: bis zum Logout. Profildaten: bis zur Kontolöschung. Besucherdaten: max. 90 Tage.</p>
+      <p>Session-Daten: bis zum Logout. Profildaten: bis zur Kontolöschung. Besucherdaten: max. 90 Tage. Turnstile-Daten: werden von Cloudflare nach kurzer Zeit automatisch gelöscht (kein dauerhaftes Tracking).</p>
 
       <h3>4. Deine Rechte (DSGVO)</h3>
       <p>Du hast das Recht auf <strong>Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung</strong> sowie <strong>Datenübertragbarkeit</strong>. Du kannst deine Einwilligung zur Statistik jederzeit widerrufen.</p>
@@ -220,8 +223,8 @@
 </div>
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<script type="module" src="js/consent.js?v=20260905u"></script>
-<script type="module" src="js/auth.js?v=20260905u"></script>
-<script type="module" src="js/core.js?v=20260905u"></script>
+<script type="module" src="js/consent.js?v=20260905v"></script>
+<script type="module" src="js/auth.js?v=20260905v"></script>
+<script type="module" src="js/core.js?v=20260905v"></script>
 </body>
 </html>
