@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260905s">
+<link rel="stylesheet" href="css/style.css?v=20260905t">
 </head>
 <body>
 
@@ -16,8 +16,10 @@
     🔍 <input id="searchInput" placeholder="Spiele suchen…">
   </div>
   <button class="account-btn ranking-btn" onclick="zzOpenRanking()">🏆 Rangliste</button>
-  <button class="account-btn signup-btn" id="signupBtn" onclick="zzOpenSignup()">Registrieren</button>
-  <button class="account-btn" id="accountBtn" onclick="zzToggleAccount()">👤 Login</button>
+  <div class="auth-btn-group">
+    <button class="account-btn" id="accountBtn" onclick="zzToggleAccount()">👤 Login</button>
+    <button class="account-btn signup-btn" id="signupBtn" onclick="zzOpenSignup()">Registrieren</button>
+  </div>
 </header>
 
 <div class="auth-overlay" id="authOverlay">
@@ -218,8 +220,8 @@
 </div>
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<script type="module" src="js/consent.js?v=20260905s"></script>
-<script type="module" src="js/auth.js?v=20260905s"></script>
-<script type="module" src="js/core.js?v=20260905s"></script>
+<script type="module" src="js/consent.js?v=20260905t"></script>
+<script type="module" src="js/auth.js?v=20260905t"></script>
+<script type="module" src="js/core.js?v=20260905t"></script>
 </body>
 </html>
