@@ -31,7 +31,8 @@ function renderAvatarGrid(){
   const grid = document.getElementById('avatarGrid');
   grid.innerHTML = '';
   AVATARS.forEach(a => {
-    const el = document.createElement('div');
+    const el = document.createElement('button');
+    el.type = 'button';
     el.className = 'avatar-opt';
     el.dataset.avatarId = a.id;
     el.style.background = a.bg;

@@ -235,6 +235,7 @@
     aspect-ratio:1; border-radius:12px; border:2px solid rgba(255,255,255,0.08);
     cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center;
     transition:border-color 0.15s, transform 0.12s;
+    -webkit-tap-highlight-color:transparent; outline:none;
   }
   .avatar-opt:hover{transform:scale(1.07);}
   .avatar-opt.selected{border-color:var(--lime); box-shadow:0 0 10px rgba(198,255,61,0.35);}
