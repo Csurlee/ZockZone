@@ -68,6 +68,23 @@ if ($method === 'POST') {
     exit;
 }
 
+if ($method === 'PUT' && isset($_GET['role'])) {
+    // Rollen-Änderung: nur Admins dürfen Rollen vergeben
+    if (($_SESSION['zz_admin_role'] ?? '') !== 'admin') {
+        http_response_code(403); echo json_encode(['error' => 'Nur Admins dürfen Rollen ändern.']); exit;
+    }
+    $input = json_decode(file_get_contents('php://input'), true) ?? [];
+    $id   = $input['id'] ?? '';
+    $role = $input['role'] ?? '';
+    if ($id === '' || !in_array($role, ['user', 'moderator', 'admin'], true)) {
+        http_response_code(400); echo json_encode(['error' => 'Ungültige Eingabe']); exit;
+    }
+    [$status,] = sb_request('PATCH', '/rest/v1/profiles?id=eq.' . rawurlencode($id), ['role' => $role]);
+    http_response_code($status < 300 ? 200 : $status);
+    echo json_encode(['ok' => $status < 300]);
+    exit;
+}
+
 if ($method === 'PUT') {
     $input = json_decode(file_get_contents('php://input'), true) ?? [];
     $id = $input['id'] ?? '';
@@ -112,23 +129,6 @@ if ($method === 'DELETE') {
     [$status, $data] = sb_request('DELETE', '/auth/v1/admin/users/' . rawurlencode($id));
     http_response_code($status);
     echo json_encode(['ok' => $status < 300, 'detail' => $data]);
-    exit;
-}
-
-if ($method === 'PUT' && isset($_GET['role'])) {
-    // Rollen-Änderung: nur Admins dürfen Rollen vergeben
-    if (($_SESSION['zz_admin_role'] ?? '') !== 'admin') {
-        http_response_code(403); echo json_encode(['error' => 'Nur Admins dürfen Rollen ändern.']); exit;
-    }
-    $input = json_decode(file_get_contents('php://input'), true) ?? [];
-    $id   = $input['id'] ?? '';
-    $role = $input['role'] ?? '';
-    if ($id === '' || !in_array($role, ['user', 'moderator', 'admin'], true)) {
-        http_response_code(400); echo json_encode(['error' => 'Ungültige Eingabe']); exit;
-    }
-    [$status,] = sb_request('PATCH', '/rest/v1/profiles?id=eq.' . rawurlencode($id), ['role' => $role]);
-    http_response_code($status < 300 ? 200 : $status);
-    echo json_encode(['ok' => $status < 300]);
     exit;
 }
 
