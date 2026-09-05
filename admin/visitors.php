@@ -6,6 +6,11 @@ require __DIR__ . '/includes/layout_top.php';
 ?>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  /* Standard OpenStreetMap tiles need no API key (unlike CARTO's hosted styles) --
+     this filter fakes a dark map to match the admin theme. */
+  #visitorMap .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9); }
+</style>
 
 <p class="admin-hint">GeoIP-Daten stammen aus einer Live-Abfrage bei ip-api.com und sind nur für öffentliche IP-Adressen verfügbar (nicht für Besuche aus dem lokalen Netz).</p>
 
@@ -44,8 +49,8 @@ async function loadVisitors(){
     : '<tr><td>Noch keine Daten.</td></tr>';
 
   const map = L.map('visitorMap', { attributionControl: true }).setView([20, 0], 2);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende',
     maxZoom: 19,
   }).addTo(map);
   data.mapPoints.forEach(p => {
