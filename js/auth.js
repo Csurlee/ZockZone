@@ -355,7 +355,7 @@ function updateAccountUI(user){
   currentUser = user;
   const btn = document.getElementById('accountBtn');
   if(user){
-    btn.textContent = avatarEmojiOf(user) + ' ' + displayNameOf(user) + ' · Logout';
+    btn.textContent = avatarEmojiOf(user) + ' ' + displayNameOf(user);
   } else {
     btn.textContent = '👤 Login';
   }
