@@ -14,6 +14,7 @@ let selectedAvatar = null;
 let pendingSignup = null; // { email, password, name }
 let currentUser = null;
 let isReauthForDeletion = false; // verhindert dass der SIGNED_IN-Handler die Löschvormerkung löscht
+let cachedProfileAvatar = null;  // Fallback wenn user_metadata.avatar fehlt
 
 const AVATARS = [
   { id: 'snake',    emoji: '🐍', label: 'Snake',    bg: '#14532d' },
@@ -50,8 +51,17 @@ function displayNameOf(user){
 }
 
 function avatarEmojiOf(user){
-  const av = AVATARS.find(a => a.id === user?.user_metadata?.avatar);
+  const id = user?.user_metadata?.avatar || cachedProfileAvatar;
+  const av = AVATARS.find(a => a.id === id);
   return av ? av.emoji : '👤';
+}
+
+async function fetchAndCacheProfileAvatar(user){
+  const { data } = await supabase.from('profiles').select('avatar').eq('id', user.id).maybeSingle();
+  if(data?.avatar){
+    cachedProfileAvatar = data.avatar;
+    updateAccountUI(user); // Button neu rendern mit Avatar
+  }
 }
 
 window.zzToggleAccount = () => {
@@ -366,9 +376,11 @@ window.zzIsLoggedIn = () => !!currentUser;
 
 supabase.auth.onAuthStateChange((event, session) => {
   const user = session?.user || null;
+  if(!user) cachedProfileAvatar = null;
   updateAccountUI(user);
   if(event === 'SIGNED_IN' && user){
     ensureProfile(user);
+    if(!user.user_metadata?.avatar) fetchAndCacheProfileAvatar(user);
     if(!isReauthForDeletion){
       // Echter Login → prüfen ob Löschvormerkung aktiv, falls ja: abbrechen + Meldung
       supabase.from('profiles')
@@ -386,7 +398,11 @@ supabase.auth.onAuthStateChange((event, session) => {
     }
   }
 });
-supabase.auth.getSession().then(({ data }) => updateAccountUI(data.session?.user || null));
+supabase.auth.getSession().then(({ data }) => {
+  const user = data.session?.user || null;
+  updateAccountUI(user);
+  if(user && !user.user_metadata?.avatar) fetchAndCacheProfileAvatar(user);
+});
 
 // ============ GAME VISIBILITY (guest vs. registered) ============
 // Backed by the `games` table, managed from the admin panel. Missing/failed data
