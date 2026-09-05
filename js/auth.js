@@ -13,8 +13,12 @@ let authStep = 1;       // 1 = Zugangsdaten, 2 = Avatar
 let selectedAvatar = null;
 let pendingSignup = null; // { email, password, name }
 let currentUser = null;
-let isReauthForDeletion = false; // verhindert dass der SIGNED_IN-Handler die Löschvormerkung löscht
-let cachedProfileAvatar = null;  // Fallback wenn user_metadata.avatar fehlt
+let isReauthForDeletion = false;
+let cachedProfileAvatar = null;
+let captchaToken = null; // Turnstile-Token
+
+window.zzCaptchaOk    = (token) => { captchaToken = token; };
+window.zzCaptchaReset = ()      => { captchaToken = null; };
 
 const AVATARS = [
   { id: 'snake',    emoji: '🐍', label: 'Snake',    bg: '#14532d' },
@@ -190,10 +194,13 @@ window.zzSwitchTab = (mode) => {
 
   const isSignup = mode === 'signup';
   document.getElementById('signupOnlyFields').style.display = isSignup ? '' : 'none';
-  document.getElementById('signupPw2Wrap').style.display = isSignup ? '' : 'none';
+  document.getElementById('signupPw2Wrap').style.display    = isSignup ? '' : 'none';
+  document.getElementById('turnstileWrap').style.display    = isSignup ? '' : 'none';
   document.getElementById('authSubmitBtn').textContent = isSignup ? 'Weiter →' : 'Einloggen';
   document.getElementById('authStep1').style.display = '';
   document.getElementById('authStep2').style.display = 'none';
+  captchaToken = null;
+  if(!isSignup && typeof turnstile !== 'undefined') turnstile.reset('#turnstileWidget');
 };
 
 async function ensureProfile(user){
@@ -235,6 +242,26 @@ window.zzSubmitAuth = async () => {
   if(!pw)              { errEl.textContent = 'Bitte Passwort ausfüllen.'; return; }
   if(pw.length < 6)    { errEl.textContent = 'Passwort muss mindestens 6 Zeichen haben.'; return; }
   if(pw !== pw2)       { errEl.textContent = 'Passwörter stimmen nicht überein.'; return; }
+  if(!captchaToken)    { errEl.textContent = 'Bitte das CAPTCHA lösen.'; return; }
+
+  // CAPTCHA server-seitig überprüfen
+  try{
+    const r = await fetch('/captcha-verify.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: captchaToken })
+    });
+    const result = await r.json();
+    if(!result.ok){
+      errEl.textContent = 'CAPTCHA ungültig. Bitte erneut versuchen.';
+      captchaToken = null;
+      if(typeof turnstile !== 'undefined') turnstile.reset('#turnstileWidget');
+      return;
+    }
+  } catch{
+    errEl.textContent = 'CAPTCHA-Prüfung fehlgeschlagen. Bitte erneut versuchen.';
+    return;
+  }
 
   pendingSignup = { email, password: pw, name };
   renderAvatarGrid();

@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260905q">
+<link rel="stylesheet" href="css/style.css?v=20260905r">
 </head>
 <body>
 
@@ -37,6 +37,9 @@
       <input class="auth-field" id="authPassword" type="password" placeholder="Passwort (min. 6 Zeichen)">
       <div id="signupPw2Wrap" style="display:none">
         <input class="auth-field" id="authPassword2" type="password" placeholder="Passwort wiederholen">
+      </div>
+      <div id="turnstileWrap" style="display:none; margin-bottom:10px;">
+        <div class="cf-turnstile" id="turnstileWidget" data-sitekey="DEIN_TURNSTILE_SITE_KEY" data-theme="dark" data-callback="zzCaptchaOk" data-expired-callback="zzCaptchaReset"></div>
       </div>
       <button class="auth-submit" id="authSubmitBtn" onclick="zzSubmitAuth()">Einloggen</button>
     </div>
@@ -213,8 +216,9 @@
   </div>
 </div>
 
-<script type="module" src="js/consent.js?v=20260905q"></script>
-<script type="module" src="js/auth.js?v=20260905q"></script>
-<script type="module" src="js/core.js?v=20260905q"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script type="module" src="js/consent.js?v=20260905r"></script>
+<script type="module" src="js/auth.js?v=20260905r"></script>
+<script type="module" src="js/core.js?v=20260905r"></script>
 </body>
 </html>
