@@ -1,8 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { t } from './i18n.js';
+
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
 
-let ratingsMap  = {}; // game_id → { avg, count }
-let userRatings = {}; // game_id → 1-5
+let ratingsMap  = {};
+let userRatings = {};
 
 async function loadRatings(){
   try{
@@ -31,10 +33,9 @@ window.zzRateGame = async (gameId, stars) => {
   );
   userRatings[gameId] = stars;
   await loadRatings();
-  renderPlayerRating(gameId); // Sterne im Player sofort aktualisieren
+  renderPlayerRating(gameId);
 };
 
-// Hover-Effekt für Sterne (Event Delegation)
 document.addEventListener('mouseover', e => {
   const star = e.target.closest('.cstar[data-star]');
   if(!star) return;
@@ -52,7 +53,6 @@ document.addEventListener('mouseout', e => {
   wrap.querySelectorAll('.cstar').forEach(s => s.classList.remove('hover'));
 });
 
-// ZockZone core: catalog, loader, shared UI helpers.
 const GAMES = [
   {id:'snake', title:'Snake Reloaded', icon:'🐍', cat:'arcade', tag:'hot', rating:'4.8', plays:'1.2k'},
   {id:'twenty48', title:'2048 Fusion', icon:'🔢', cat:'puzzle', tag:'', rating:'4.7', plays:'980'},
@@ -108,10 +108,9 @@ export const countLabel = document.getElementById('countLabel');
 
 let lastFilter='all', lastSearch='';
 
-
 function gameLockState(id){
   const v = window.zzGameVisibility && window.zzGameVisibility[id];
-  if(!v) return null; // no visibility data yet/at all -> treat as fully enabled
+  if(!v) return null;
   if(v.enabled_registered === false) return 'disabled';
   if(v.enabled_guest === false && !(window.zzIsLoggedIn && window.zzIsLoggedIn())) return 'guest-locked';
   return null;
@@ -130,26 +129,26 @@ function renderGrid(filter=lastFilter, search=lastSearch){
     (filter==='all' || g.cat===filter || g.tag===filter) &&
     g.title.toLowerCase().includes(search.toLowerCase())
   );
-  countLabel.textContent = list.length + ' Spiele';
+  countLabel.textContent = t('count.games', list.length);
   const loggedIn = window.zzIsLoggedIn && window.zzIsLoggedIn();
   grid.innerHTML = list.map(g => {
     const lock = gameLockState(g.id);
-    const lockBadge = lock === 'disabled' ? '<span class="tag locked">Vorübergehend deaktiviert</span>'
-      : lock === 'guest-locked' ? '<span class="tag locked">🔒 Login erforderlich</span>' : '';
+    const lockBadge = lock === 'disabled' ? `<span class="tag locked">${t('game.disabled')}</span>`
+      : lock === 'guest-locked' ? `<span class="tag locked">${t('game.login-required')}</span>` : '';
     const rData = ratingsMap[g.id];
     const avg = rData ? rData.avg : g.rating;
     const cnt = rData ? ` (${rData.count})` : '';
-    const ur  = userRatings[g.id] || 0;
     const starsHtml = `<span class="stars">★ ${avg}${cnt}</span>`;
+    const tagLabel = g.tag === 'hot' ? t('tag.hot') : t('tag.new');
     return `
     <div class="game-card${lock ? ' locked' : ''}" onclick="zzCardClick('${g.id}')">
       <div class="thumb" style="background:${thumbBg(g.id)}">
-        ${lockBadge || (g.tag ? `<span class="tag ${g.tag}">${g.tag==='hot'?'HOT':'NEU'}</span>` : '')}
+        ${lockBadge || (g.tag ? `<span class="tag ${g.tag}">${tagLabel}</span>` : '')}
         ${g.icon}
       </div>
       <div class="card-info">
         <h3>${g.title}</h3>
-        <div class="meta">${starsHtml} · ${g.plays} Spiele heute</div>
+        <div class="meta">${starsHtml} · ${t('card.plays', g.plays)}</div>
       </div>
     </div>
   `;
@@ -158,6 +157,7 @@ function renderGrid(filter=lastFilter, search=lastSearch){
 
 window.addEventListener('zz:visibility-updated', () => renderGrid());
 window.addEventListener('zz:auth-changed', () => loadRatings());
+window.addEventListener('zz:lang-changed', () => renderGrid());
 
 function thumbBg(id){
   const map = {
@@ -349,7 +349,7 @@ export function hud(...items){
 export function overMsg(wrap, text, onRestart){
   const m = document.createElement('div');
   m.className = 'game-overmsg';
-  m.innerHTML = `<div style="font-size:20px; font-weight:700;">${text}</div><button>Nochmal spielen</button>`;
+  m.innerHTML = `<div style="font-size:20px; font-weight:700;">${text}</div><button>${t('game.play-again')}</button>`;
   m.querySelector('button').onclick = ()=>{ m.classList.remove('show'); onRestart(); };
   wrap.appendChild(m);
   return m;
@@ -363,7 +363,7 @@ export function mkButton(label, bg, color){
 }
 
 export function addLeaderboardUI(gameId, gameTitle){
-  const btn = mkButton('🏆 Bestenliste', 'var(--card)', '#fff');
+  const btn = mkButton(t('leaderboard.btn'), 'var(--card)', '#fff');
   const panel = document.createElement('div');
   panel.className = 'hs-panel';
   panel.style.display = 'none';

@@ -6,19 +6,26 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260905v">
+<link rel="stylesheet" href="css/style.css?v=20260905w">
 </head>
 <body>
 
 <header>
   <div class="brand"><span class="dot"></span>ZockZone</div>
   <div class="searchbar">
-    🔍 <input id="searchInput" placeholder="Spiele suchen…">
+    🔍 <input id="searchInput" data-i18n-placeholder="search.placeholder" placeholder="Spiele suchen…">
   </div>
-  <button class="account-btn ranking-btn" onclick="zzOpenRanking()">🏆 Rangliste</button>
+  <button class="account-btn ranking-btn" onclick="zzOpenRanking()" data-i18n="header.ranking">🏆 Rangliste</button>
+  <div class="lang-switcher" id="langSwitcher">
+    <button class="lang-btn" onclick="zzToggleLangMenu()"><span id="langFlag">🇩🇪</span></button>
+    <div class="lang-menu" id="langMenu" hidden>
+      <button data-lang="de" onclick="zzSetLang('de')">🇩🇪 Deutsch</button>
+      <button data-lang="en" onclick="zzSetLang('en')">🇬🇧 English</button>
+    </div>
+  </div>
   <div class="auth-btn-group">
     <button class="account-btn" id="accountBtn" onclick="zzToggleAccount()">👤 Login</button>
-    <button class="account-btn signup-btn" id="signupBtn" onclick="zzOpenSignup()">Registrieren</button>
+    <button class="account-btn signup-btn" id="signupBtn" onclick="zzOpenSignup()" data-i18n="header.register">Registrieren</button>
   </div>
 </header>
 
@@ -26,34 +33,34 @@
   <div class="auth-box" style="position:relative;">
     <button class="icon-btn auth-close" onclick="zzCloseAuth()">✕</button>
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin" onclick="zzSwitchTab('login')">Login</button>
-      <button class="auth-tab" id="tabSignup" onclick="zzSwitchTab('signup')">Registrieren</button>
+      <button class="auth-tab active" id="tabLogin" onclick="zzSwitchTab('login')" data-i18n="auth.tab.login">Login</button>
+      <button class="auth-tab" id="tabSignup" onclick="zzSwitchTab('signup')" data-i18n="auth.tab.signup">Registrieren</button>
     </div>
     <div class="auth-error" id="authError"></div>
 
     <!-- Schritt 1: Zugangsdaten -->
     <div id="authStep1">
       <div id="signupOnlyFields" style="display:none">
-        <input class="auth-field" id="authName" type="text" placeholder="Anzeigename" autocomplete="nickname">
+        <input class="auth-field" id="authName" type="text" data-i18n-placeholder="auth.field.name" placeholder="Anzeigename" autocomplete="nickname">
       </div>
-      <input class="auth-field" id="authEmail" type="email" placeholder="E-Mail">
-      <input class="auth-field" id="authPassword" type="password" placeholder="Passwort (min. 6 Zeichen)">
+      <input class="auth-field" id="authEmail" type="email" data-i18n-placeholder="auth.field.email" placeholder="E-Mail">
+      <input class="auth-field" id="authPassword" type="password" data-i18n-placeholder="auth.field.password" placeholder="Passwort (min. 6 Zeichen)">
       <div id="signupPw2Wrap" style="display:none">
-        <input class="auth-field" id="authPassword2" type="password" placeholder="Passwort wiederholen">
+        <input class="auth-field" id="authPassword2" type="password" data-i18n-placeholder="auth.field.password2" placeholder="Passwort wiederholen">
       </div>
       <div id="turnstileWrap" class="turnstile-wrap" style="display:none;">
         <div class="cf-turnstile" id="turnstileWidget" data-sitekey="0x4AAAAAAEpjTAhsIQoKBUkO" data-theme="dark" data-callback="zzCaptchaOk" data-expired-callback="zzCaptchaReset"></div>
       </div>
-      <button class="auth-submit" id="authSubmitBtn" onclick="zzSubmitAuth()">Einloggen</button>
+      <button class="auth-submit" id="authSubmitBtn" onclick="zzSubmitAuth()" data-i18n="auth.btn.login">Einloggen</button>
     </div>
 
     <!-- Schritt 2: Avatar auswählen -->
     <div id="authStep2" style="display:none">
-      <p class="auth-step-label">Wähle deinen Avatar</p>
+      <p class="auth-step-label" data-i18n="auth.avatar.label">Wähle deinen Avatar</p>
       <div class="avatar-grid" id="avatarGrid"></div>
       <div style="display:flex; gap:8px;">
-        <button class="auth-back" onclick="zzBackToStep1()">← Zurück</button>
-        <button class="auth-submit" style="flex:1; margin-bottom:0" onclick="zzConfirmSignup()">Konto erstellen</button>
+        <button class="auth-back" onclick="zzBackToStep1()" data-i18n="auth.btn.back">← Zurück</button>
+        <button class="auth-submit" style="flex:1; margin-bottom:0" onclick="zzConfirmSignup()" data-i18n="auth.btn.create">Konto erstellen</button>
       </div>
     </div>
   </div>
@@ -64,7 +71,7 @@
 <div class="auth-overlay" id="rankingOverlay">
   <div class="auth-box ranking-box" style="position:relative;">
     <button class="icon-btn auth-close" onclick="zzCloseRanking()">✕</button>
-    <h2 class="profile-title">🏆 Rangliste</h2>
+    <h2 class="profile-title" data-i18n="ranking.title">🏆 Rangliste</h2>
     <div id="rankingContent"><div class="ranking-loading">Lade…</div></div>
   </div>
 </div>
@@ -73,50 +80,50 @@
 <div class="auth-overlay" id="profileOverlay">
   <div class="auth-box profile-box" style="position:relative;">
     <button class="icon-btn auth-close" onclick="zzCloseProfile()">✕</button>
-    <h2 class="profile-title">Mein Profil</h2>
+    <h2 class="profile-title" data-i18n="profile.title">Mein Profil</h2>
 
     <div class="profile-avatar-wrap">
       <div class="profile-avatar-big" id="profileAvatarBig"></div>
     </div>
-    <p class="auth-step-label">Avatar ändern:</p>
+    <p class="auth-step-label" data-i18n="profile.avatar.change">Avatar ändern:</p>
     <div class="avatar-grid" id="profileAvatarGrid"></div>
 
     <div class="auth-error" id="profileError"></div>
     <div class="profile-success" id="profileSuccess"></div>
 
-    <input class="auth-field" id="profileName"  type="text"     placeholder="Anzeigename">
-    <input class="auth-field" id="profileEmail" type="email"    placeholder="E-Mail">
-    <input class="auth-field" id="profilePw"    type="password" placeholder="Neues Passwort (leer = nicht ändern)">
-    <input class="auth-field" id="profilePw2"   type="password" placeholder="Passwort wiederholen">
+    <input class="auth-field" id="profileName"  type="text"     data-i18n-placeholder="profile.field.name"  placeholder="Anzeigename">
+    <input class="auth-field" id="profileEmail" type="email"    data-i18n-placeholder="profile.field.email" placeholder="E-Mail">
+    <input class="auth-field" id="profilePw"    type="password" data-i18n-placeholder="profile.field.pw"    placeholder="Neues Passwort (leer = nicht ändern)">
+    <input class="auth-field" id="profilePw2"   type="password" data-i18n-placeholder="profile.field.pw2"   placeholder="Passwort wiederholen">
 
     <label class="profile-hide-label">
       <input type="checkbox" id="profileHide">
-      Meinen Namen in der Rangliste verbergen
+      <span data-i18n="profile.hide">Meinen Namen in der Rangliste verbergen</span>
     </label>
 
-    <button class="auth-submit" onclick="zzSaveProfile()">Speichern</button>
-    <button class="profile-logout-btn" onclick="zzLogOut(); zzCloseProfile();">Logout</button>
+    <button class="auth-submit" onclick="zzSaveProfile()" data-i18n="profile.btn.save">Speichern</button>
+    <button class="profile-logout-btn" onclick="zzLogOut(); zzCloseProfile();" data-i18n="profile.btn.logout">Logout</button>
 
     <div id="profileDeleteWarning" hidden class="profile-delete-warning"></div>
-    <button id="profileDeleteBtn" class="profile-delete-btn" onclick="zzShowDeleteConfirm()">Konto löschen</button>
+    <button id="profileDeleteBtn" class="profile-delete-btn" onclick="zzShowDeleteConfirm()" data-i18n="profile.btn.delete">Konto löschen</button>
 
     <!-- Lösch-Bestätigung (wird eingeblendet) -->
     <div id="profileDeleteConfirm" hidden class="profile-delete-confirm">
       <div class="profile-delete-confirm-icon">⚠️</div>
-      <p class="profile-delete-confirm-title">Konto wirklich löschen?</p>
-      <p class="profile-delete-confirm-text">
+      <p class="profile-delete-confirm-title" data-i18n="profile.delete.title">Konto wirklich löschen?</p>
+      <p class="profile-delete-confirm-text" data-i18n-html="profile.delete.text1">
         Dein Konto und alle deine Daten werden <strong>nach 10 Tagen endgültig gelöscht</strong>,
         sofern du dich nicht vorher wieder einloggst.<br>
         Loggst du dich innerhalb dieser Zeit ein, wird die Löschung automatisch abgebrochen.
       </p>
-      <p class="profile-delete-confirm-text" style="margin-top:8px;">
+      <p class="profile-delete-confirm-text" style="margin-top:8px;" data-i18n-html="profile.delete.text2">
         Bitte gib dein <strong>Passwort</strong> ein, um die Löschung zu bestätigen:
       </p>
-      <input class="auth-field" id="profileDeletePw" type="password" placeholder="Dein Passwort">
+      <input class="auth-field" id="profileDeletePw" type="password" data-i18n-placeholder="profile.delete.pw" placeholder="Dein Passwort">
       <div class="auth-error" id="profileDeleteError"></div>
       <div style="display:flex; gap:8px; margin-top:4px;">
-        <button class="profile-cancel-delete-btn" style="flex:1" onclick="zzHideDeleteConfirm()">Abbrechen</button>
-        <button class="profile-delete-confirm-btn" style="flex:1" onclick="zzRequestDeletion()">Konto löschen</button>
+        <button class="profile-cancel-delete-btn" style="flex:1" onclick="zzHideDeleteConfirm()" data-i18n="profile.delete.cancel">Abbrechen</button>
+        <button class="profile-delete-confirm-btn" style="flex:1" onclick="zzRequestDeletion()" data-i18n="profile.delete.confirm">Konto löschen</button>
       </div>
     </div>
   </div>
@@ -124,33 +131,33 @@
 
 <div class="hero">
   <div class="hero-card">
-    <span class="badge-hot">⚡ JETZT SPIELEN</span>
-    <h1>Snake Reloaded</h1>
-    <p>Der Klassiker mit Geschwindigkeitsrausch. Wie lang wird deine Schlange, bevor du dich selbst beißt?</p>
-    <button class="cta" onclick="openGame('snake')">▶ Spielen</button>
+    <span class="badge-hot" data-i18n="hero.badge">⚡ JETZT SPIELEN</span>
+    <h1 data-i18n="hero.title">Snake Reloaded</h1>
+    <p data-i18n="hero.desc">Der Klassiker mit Geschwindigkeitsrausch. Wie lang wird deine Schlange, bevor du dich selbst beißt?</p>
+    <button class="cta" onclick="openGame('snake')" data-i18n="hero.cta">▶ Spielen</button>
   </div>
   <div class="side-stats">
-    <div class="stat-card"><div class="stat-num" id="gameCountStat">6</div><div class="stat-label">Spiele im Katalog</div></div>
-    <div class="stat-card"><div class="stat-num">0€</div><div class="stat-label">Kostenlos, Konto optional</div></div>
+    <div class="stat-card"><div class="stat-num" id="gameCountStat">6</div><div class="stat-label" data-i18n="hero.stat.games">Spiele im Katalog</div></div>
+    <div class="stat-card"><div class="stat-num">0€</div><div class="stat-label" data-i18n="hero.stat.free">Kostenlos, Konto optional</div></div>
   </div>
 </div>
 
 <div class="chips">
-  <div class="chip active" data-filter="all">Alle</div>
-  <div class="chip chip-hot" data-filter="hot">🔥 HOT</div>
-  <div class="chip chip-new" data-filter="new">✨ NEU</div>
-  <div class="chip" data-filter="arcade">Arcade</div>
-  <div class="chip" data-filter="puzzle">Puzzle</div>
-  <div class="chip" data-filter="reflex">Reflex</div>
-  <div class="chip" data-filter="2player">2 Spieler</div>
+  <div class="chip active" data-filter="all" data-i18n="filter.all">Alle</div>
+  <div class="chip chip-hot" data-filter="hot" data-i18n="filter.hot">🔥 HOT</div>
+  <div class="chip chip-new" data-filter="new" data-i18n="filter.new">✨ NEU</div>
+  <div class="chip" data-filter="arcade" data-i18n="filter.arcade">Arcade</div>
+  <div class="chip" data-filter="puzzle" data-i18n="filter.puzzle">Puzzle</div>
+  <div class="chip" data-filter="reflex" data-i18n="filter.reflex">Reflex</div>
+  <div class="chip" data-filter="2player" data-i18n="filter.2player">2 Spieler</div>
 </div>
 
 <section class="games">
-  <div class="section-head"><h2>Alle Spiele</h2><span id="countLabel"></span></div>
+  <div class="section-head"><h2 data-i18n="section.allgames">Alle Spiele</h2><span id="countLabel"></span></div>
   <div class="grid" id="grid"></div>
 </section>
 
-<footer>ZockZone — gebaut zum Zocken in der Mittagspause. Keine Ads, keine Downloads. · <button class="footer-link" onclick="zzOpenDatenschutz()">Datenschutz</button></footer>
+<footer><span data-i18n="footer.text">ZockZone — gebaut zum Zocken in der Mittagspause. Keine Ads, keine Downloads.</span> · <button class="footer-link" onclick="zzOpenDatenschutz()" data-i18n="footer.privacy">Datenschutz</button></footer>
 
 <!-- PLAYER OVERLAY -->
 <div class="player-overlay" id="overlay">
@@ -171,13 +178,13 @@
 <div id="cookieBanner" hidden class="cookie-banner">
   <div class="cookie-banner-inner">
     <div class="cookie-banner-text">
-      <strong>🍪 Diese Website verwendet Cookies</strong>
-      <p>Wir nutzen notwendige Cookies für den Login, Cloudflare Turnstile (Bot-Schutz bei Registrierung) sowie optionale Statistik-Cookies. Du kannst frei wählen.</p>
+      <strong data-i18n="cookie.title">🍪 Diese Website verwendet Cookies</strong>
+      <p data-i18n="cookie.text">Wir nutzen notwendige Cookies für den Login, Cloudflare Turnstile (Bot-Schutz bei Registrierung) sowie optionale Statistik-Cookies. Du kannst frei wählen.</p>
     </div>
     <div class="cookie-banner-actions">
-      <button class="cookie-btn-all"  onclick="zzAcceptAll()">Alle akzeptieren</button>
-      <button class="cookie-btn-ess"  onclick="zzAcceptEssential()">Nur notwendige</button>
-      <button class="cookie-btn-info" onclick="zzOpenDatenschutz()">Datenschutz</button>
+      <button class="cookie-btn-all"  onclick="zzAcceptAll()" data-i18n="cookie.btn.all">Alle akzeptieren</button>
+      <button class="cookie-btn-ess"  onclick="zzAcceptEssential()" data-i18n="cookie.btn.essential">Nur notwendige</button>
+      <button class="cookie-btn-info" onclick="zzOpenDatenschutz()" data-i18n="cookie.btn.info">Datenschutz</button>
     </div>
   </div>
 </div>
@@ -186,7 +193,7 @@
 <div class="auth-overlay" id="datenschutzOverlay">
   <div class="auth-box datenschutz-box" style="position:relative;">
     <button class="icon-btn auth-close" onclick="zzCloseDatenschutz()">✕</button>
-    <h2 class="profile-title">Datenschutzerklärung</h2>
+    <h2 class="profile-title" data-i18n="privacy.title">Datenschutzerklärung</h2>
     <div class="datenschutz-content">
       <h3>1. Verantwortlicher</h3>
       <p>ZockZone, betrieben von Csurlee · Kontakt: dembrovszky@gmail.com</p>
@@ -215,16 +222,17 @@
 
       <h3>5. Einwilligung verwalten</h3>
       <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
-        <button class="cookie-btn-all" onclick="zzAcceptAll(); zzCloseDatenschutz();">Statistik erlauben</button>
-        <button class="cookie-btn-ess" onclick="zzAcceptEssential(); zzCloseDatenschutz();">Nur notwendige</button>
+        <button class="cookie-btn-all" onclick="zzAcceptAll(); zzCloseDatenschutz();" data-i18n="datenschutz.btn.stats">Statistik erlauben</button>
+        <button class="cookie-btn-ess" onclick="zzAcceptEssential(); zzCloseDatenschutz();" data-i18n="datenschutz.btn.essential">Nur notwendige</button>
       </div>
     </div>
   </div>
 </div>
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<script type="module" src="js/consent.js?v=20260905v"></script>
-<script type="module" src="js/auth.js?v=20260905v"></script>
-<script type="module" src="js/core.js?v=20260905v"></script>
+<script type="module" src="js/i18n.js?v=20260905w"></script>
+<script type="module" src="js/consent.js?v=20260905w"></script>
+<script type="module" src="js/auth.js?v=20260905w"></script>
+<script type="module" src="js/core.js?v=20260905w"></script>
 </body>
 </html>

@@ -1,36 +1,35 @@
 // ============ SUPABASE SETUP ============
-// Self-hosted Supabase, reachable via the Cloudflare Tunnel at supabase.hackthelab.uk
-// (intentionally not the internal 10.0.10.10 address -- that only works from the home LAN).
 const SUPABASE_URL = 'https://supabase.hackthelab.uk';
 const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { t, getLang } from './i18n.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let authMode = 'login'; // 'login' | 'signup'
-let authStep = 1;       // 1 = Zugangsdaten, 2 = Avatar
+let authMode = 'login';
+let authStep = 1;
 let selectedAvatar = null;
-let pendingSignup = null; // { email, password, name }
+let pendingSignup = null;
 let currentUser = null;
 let isReauthForDeletion = false;
 let cachedProfileAvatar = null;
-let captchaToken = null; // Turnstile-Token
+let captchaToken = null;
 
 window.zzCaptchaOk    = (token) => { captchaToken = token; };
 window.zzCaptchaReset = ()      => { captchaToken = null; };
 
 const AVATARS = [
-  { id: 'snake',    emoji: '🐍', label: 'Snake',    bg: '#14532d' },
-  { id: 'alien',    emoji: '👾', label: 'Alien',    bg: '#3b0764' },
-  { id: 'rocket',   emoji: '🚀', label: 'Rakete',   bg: '#172554' },
-  { id: 'bomb',     emoji: '💣', label: 'Bombe',    bg: '#1c1917' },
-  { id: 'dice',     emoji: '🎲', label: 'Würfel',   bg: '#7c2d12' },
-  { id: 'joker',    emoji: '🃏', label: 'Joker',    bg: '#1f2937' },
-  { id: 'puzzle',   emoji: '🧩', label: 'Puzzle',   bg: '#0c4a6e' },
-  { id: 'lightning',emoji: '⚡', label: 'Blitz',    bg: '#713f12' },
-  { id: 'ghost',    emoji: '👻', label: 'Geist',    bg: '#2e1065' },
-  { id: 'trophy',   emoji: '🏆', label: 'Champ',    bg: '#78350f' },
+  { id: 'snake',     emoji: '🐍', labelKey: 'avatar.snake',     bg: '#14532d' },
+  { id: 'alien',     emoji: '👾', labelKey: 'avatar.alien',     bg: '#3b0764' },
+  { id: 'rocket',    emoji: '🚀', labelKey: 'avatar.rocket',    bg: '#172554' },
+  { id: 'bomb',      emoji: '💣', labelKey: 'avatar.bomb',      bg: '#1c1917' },
+  { id: 'dice',      emoji: '🎲', labelKey: 'avatar.dice',      bg: '#7c2d12' },
+  { id: 'joker',     emoji: '🃏', labelKey: 'avatar.joker',     bg: '#1f2937' },
+  { id: 'puzzle',    emoji: '🧩', labelKey: 'avatar.puzzle',    bg: '#0c4a6e' },
+  { id: 'lightning', emoji: '⚡', labelKey: 'avatar.lightning', bg: '#713f12' },
+  { id: 'ghost',     emoji: '👻', labelKey: 'avatar.ghost',     bg: '#2e1065' },
+  { id: 'trophy',    emoji: '🏆', labelKey: 'avatar.trophy',    bg: '#78350f' },
 ];
 
 function renderAvatarGrid(){
@@ -42,7 +41,7 @@ function renderAvatarGrid(){
     el.className = 'avatar-opt';
     el.dataset.avatarId = a.id;
     el.style.background = a.bg;
-    el.innerHTML = `<span class="avatar-emoji">${a.emoji}</span><span class="avatar-label">${a.label}</span>`;
+    el.innerHTML = `<span class="avatar-emoji">${a.emoji}</span><span class="avatar-label">${t(a.labelKey)}</span>`;
     el.onclick = () => window.zzSelectAvatar(a.id);
     grid.appendChild(el);
   });
@@ -51,7 +50,7 @@ function renderAvatarGrid(){
 
 function displayNameOf(user){
   return (user?.user_metadata?.display_name) || (user?.user_metadata?.full_name)
-    || (user?.email ? user.email.split('@')[0] : 'Spieler');
+    || (user?.email ? user.email.split('@')[0] : t('player.default'));
 }
 
 function avatarEmojiOf(user){
@@ -64,7 +63,7 @@ async function fetchAndCacheProfileAvatar(user){
   const { data } = await supabase.from('profiles').select('avatar').eq('id', user.id).maybeSingle();
   if(data?.avatar){
     cachedProfileAvatar = data.avatar;
-    updateAccountUI(user); // Button neu rendern mit Avatar
+    updateAccountUI(user);
   }
 }
 
@@ -96,13 +95,11 @@ window.zzOpenProfile = async () => {
   document.getElementById('profileError').textContent   = '';
   document.getElementById('profileSuccess').textContent = '';
 
-  // Profil aus DB laden (hide_from_ranking + deletion_requested_at)
   const { data: prof } = await supabase.from('profiles')
     .select('hide_from_ranking, deletion_requested_at')
     .eq('id', currentUser.id).maybeSingle();
   document.getElementById('profileHide').checked = prof?.hide_from_ranking ?? false;
 
-  // Löschungs-Warnung anzeigen wenn vorgemerkt
   const delWarning = document.getElementById('profileDeleteWarning');
   const delBtn = document.getElementById('profileDeleteBtn');
   const confirmBox = document.getElementById('profileDeleteConfirm');
@@ -110,8 +107,8 @@ window.zzOpenProfile = async () => {
     const d = new Date(prof.deletion_requested_at);
     const deleteOn = new Date(d.getTime() + 10 * 24 * 60 * 60 * 1000);
     const opts = { day:'2-digit', month:'2-digit', year:'numeric' };
-    delWarning.innerHTML = `⚠️ Dein Konto wird am <strong>${deleteOn.toLocaleDateString('de-DE', opts)}</strong> endgültig gelöscht, sofern du dich nicht vorher einloggst.<br>
-      <button class="profile-cancel-delete-btn" onclick="zzCancelDeletion()">Löschung abbrechen</button>`;
+    const locale = t('date.locale');
+    delWarning.innerHTML = t('profile.delete.warning', deleteOn.toLocaleDateString(locale, opts));
     delWarning.hidden = false;
     if(delBtn) delBtn.hidden = true;
     if(confirmBox) confirmBox.hidden = true;
@@ -138,7 +135,7 @@ function renderProfileAvatarGrid(currentId){
     el.className = 'avatar-opt' + (a.id === currentId ? ' selected' : '');
     el.dataset.avatarId = a.id;
     el.style.background = a.bg;
-    el.innerHTML = `<span class="avatar-emoji">${a.emoji}</span><span class="avatar-label">${a.label}</span>`;
+    el.innerHTML = `<span class="avatar-emoji">${a.emoji}</span><span class="avatar-label">${t(a.labelKey)}</span>`;
     el.onclick = () => {
       profileSelectedAvatar = a.id;
       grid.querySelectorAll('.avatar-opt').forEach(b => b.classList.toggle('selected', b.dataset.avatarId === a.id));
@@ -161,10 +158,10 @@ window.zzSaveProfile = async () => {
   const pw     = document.getElementById('profilePw').value;
   const pw2    = document.getElementById('profilePw2').value;
 
-  if(!name)  { errEl.textContent = 'Anzeigename darf nicht leer sein.'; return; }
-  if(!email) { errEl.textContent = 'E-Mail darf nicht leer sein.'; return; }
-  if(pw && pw.length < 6)  { errEl.textContent = 'Passwort muss mindestens 6 Zeichen haben.'; return; }
-  if(pw && pw !== pw2)     { errEl.textContent = 'Passwörter stimmen nicht überein.'; return; }
+  if(!name)  { errEl.textContent = t('err.name.empty'); return; }
+  if(!email) { errEl.textContent = t('err.email.empty'); return; }
+  if(pw && pw.length < 6)  { errEl.textContent = t('err.pw.short'); return; }
+  if(pw && pw !== pw2)     { errEl.textContent = t('err.pw.mismatch'); return; }
 
   const updates = { data: { display_name: name, avatar: profileSelectedAvatar || currentUser.user_metadata?.avatar || '' } };
   if(email !== currentUser.email)  updates.email    = email;
@@ -181,10 +178,10 @@ window.zzSaveProfile = async () => {
       hide_from_ranking: hideFromRanking,
     }).eq('id', currentUser.id);
 
-    successEl.textContent = 'Gespeichert!';
+    successEl.textContent = t('profile.saved');
     setTimeout(() => { successEl.textContent = ''; }, 2500);
   } catch(e){
-    errEl.textContent = 'Fehler: ' + e.message;
+    errEl.textContent = t('err.prefix') + e.message;
   }
 };
 window.zzCloseAuth = () => document.getElementById('authOverlay').classList.remove('open');
@@ -201,7 +198,7 @@ window.zzSwitchTab = (mode) => {
   document.getElementById('signupOnlyFields').style.display = isSignup ? '' : 'none';
   document.getElementById('signupPw2Wrap').style.display    = isSignup ? '' : 'none';
   document.getElementById('turnstileWrap').style.display    = isSignup ? 'flex' : 'none';
-  document.getElementById('authSubmitBtn').textContent = isSignup ? 'Weiter →' : 'Einloggen';
+  document.getElementById('authSubmitBtn').textContent = isSignup ? t('auth.btn.next') : t('auth.btn.login');
   document.getElementById('authStep1').style.display = '';
   document.getElementById('authStep2').style.display = 'none';
   captchaToken = null;
@@ -226,7 +223,7 @@ window.zzSubmitAuth = async () => {
   if(authMode === 'login'){
     const email = document.getElementById('authEmail').value.trim();
     const pw = document.getElementById('authPassword').value;
-    if(!email || !pw){ errEl.textContent = 'Bitte E-Mail und Passwort ausfüllen.'; return; }
+    if(!email || !pw){ errEl.textContent = t('err.fill.email.pw'); return; }
     try{
       const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
       if(error) throw error;
@@ -237,19 +234,17 @@ window.zzSubmitAuth = async () => {
     return;
   }
 
-  // Signup: Schritt 1 — Felder validieren, dann zu Avatar-Auswahl wechseln
   const name  = document.getElementById('authName').value.trim();
   const email = document.getElementById('authEmail').value.trim();
   const pw    = document.getElementById('authPassword').value;
   const pw2   = document.getElementById('authPassword2').value;
-  if(!name)            { errEl.textContent = 'Bitte einen Anzeigenamen eingeben.'; return; }
-  if(!email)           { errEl.textContent = 'Bitte E-Mail ausfüllen.'; return; }
-  if(!pw)              { errEl.textContent = 'Bitte Passwort ausfüllen.'; return; }
-  if(pw.length < 6)    { errEl.textContent = 'Passwort muss mindestens 6 Zeichen haben.'; return; }
-  if(pw !== pw2)       { errEl.textContent = 'Passwörter stimmen nicht überein.'; return; }
-  if(!captchaToken)    { errEl.textContent = 'Bitte das CAPTCHA lösen.'; return; }
+  if(!name)            { errEl.textContent = t('err.fill.name'); return; }
+  if(!email)           { errEl.textContent = t('err.fill.email'); return; }
+  if(!pw)              { errEl.textContent = t('err.fill.pw'); return; }
+  if(pw.length < 6)    { errEl.textContent = t('err.pw.short'); return; }
+  if(pw !== pw2)       { errEl.textContent = t('err.pw.mismatch'); return; }
+  if(!captchaToken)    { errEl.textContent = t('err.captcha'); return; }
 
-  // CAPTCHA server-seitig überprüfen
   try{
     const r = await fetch('/captcha-verify.php', {
       method: 'POST',
@@ -258,13 +253,13 @@ window.zzSubmitAuth = async () => {
     });
     const result = await r.json();
     if(!result.ok){
-      errEl.textContent = 'CAPTCHA ungültig. Bitte erneut versuchen.';
+      errEl.textContent = t('err.captcha.invalid');
       captchaToken = null;
       if(typeof turnstile !== 'undefined') turnstile.reset('#turnstileWidget');
       return;
     }
   } catch{
-    errEl.textContent = 'CAPTCHA-Prüfung fehlgeschlagen. Bitte erneut versuchen.';
+    errEl.textContent = t('err.captcha.failed');
     return;
   }
 
@@ -290,7 +285,7 @@ window.zzSelectAvatar = (id) => {
 window.zzConfirmSignup = async () => {
   const errEl = document.getElementById('authError');
   errEl.textContent = '';
-  if(!selectedAvatar){ errEl.textContent = 'Bitte einen Avatar auswählen.'; return; }
+  if(!selectedAvatar){ errEl.textContent = t('err.avatar'); return; }
   try{
     const { data, error } = await supabase.auth.signUp({
       email: pendingSignup.email,
@@ -328,9 +323,8 @@ window.zzRequestDeletion = async () => {
   const errEl = document.getElementById('profileDeleteError');
   errEl.textContent = '';
 
-  if(!pw){ errEl.textContent = 'Bitte Passwort eingeben.'; return; }
+  if(!pw){ errEl.textContent = t('err.pw.enter'); return; }
 
-  // Passwort per Re-Authentifizierung prüfen (Flag verhindert Race-Condition im SIGNED_IN-Handler)
   isReauthForDeletion = true;
   const { error: authErr } = await supabase.auth.signInWithPassword({
     email: currentUser.email,
@@ -338,7 +332,7 @@ window.zzRequestDeletion = async () => {
   });
   isReauthForDeletion = false;
 
-  if(authErr){ errEl.textContent = 'Passwort falsch. Bitte erneut versuchen.'; return; }
+  if(authErr){ errEl.textContent = t('err.pw.wrong'); return; }
 
   try{
     const now = new Date().toISOString();
@@ -347,21 +341,20 @@ window.zzRequestDeletion = async () => {
       .eq('id', currentUser.id);
     if(error) throw error;
     document.getElementById('profileDeleteConfirm').hidden = true;
-    await window.zzOpenProfile(); // Warnung mit Löschdatum anzeigen
+    await window.zzOpenProfile();
   } catch(e){
-    errEl.textContent = 'Fehler: ' + e.message;
+    errEl.textContent = t('err.prefix') + e.message;
   }
 };
 
 function showDeletionCancelledNotice(){
-  // Toast-Meldung: Konto wurde reaktiviert
   let toast = document.getElementById('zzToast');
   if(!toast){
     toast = document.createElement('div');
     toast.id = 'zzToast';
     document.body.appendChild(toast);
   }
-  toast.textContent = '✅ Löschung abgebrochen — dein Konto ist wieder aktiv!';
+  toast.textContent = t('toast.deletion.cancelled');
   toast.className = 'zz-toast zz-toast-show';
   clearTimeout(toast._hideTimer);
   toast._hideTimer = setTimeout(() => { toast.className = 'zz-toast'; }, 4000);
@@ -376,20 +369,18 @@ window.zzCancelDeletion = async () => {
       .update({ deletion_requested_at: null })
       .eq('id', currentUser.id);
     if(error) throw error;
-    await window.zzOpenProfile(); // Neu laden
+    await window.zzOpenProfile();
   } catch(e){
-    errEl.textContent = 'Fehler: ' + e.message;
+    errEl.textContent = t('err.prefix') + e.message;
   }
 };
 
 function translateAuthError(msg){
-  const map = {
-    'User already registered': 'Diese E-Mail ist schon registriert. Wechsle zu Login.',
-    'Invalid login credentials': 'E-Mail oder Passwort falsch.',
-    'Password should be at least 6 characters': 'Passwort muss mindestens 6 Zeichen haben.',
-    'Unable to validate email address: invalid format': 'Ungültige E-Mail-Adresse.'
-  };
-  return map[msg] || ('Fehler: ' + msg);
+  if(msg.includes('User already registered')) return t('authErr.already_registered');
+  if(msg.includes('Invalid login credentials')) return t('authErr.invalid_credentials');
+  if(msg.includes('Password should be at least 6 characters')) return t('authErr.pw_too_short');
+  if(msg.includes('Unable to validate email address')) return t('authErr.invalid_email');
+  return t('err.prefix') + msg;
 }
 
 function updateAccountUI(user){
@@ -401,7 +392,7 @@ function updateAccountUI(user){
     btn.textContent = avatarEmojiOf(user) + ' ' + displayNameOf(user);
     if(signupBtn) signupBtn.hidden = true;
   } else {
-    btn.textContent = '👤 Login';
+    btn.textContent = t('header.login');
     if(signupBtn) signupBtn.hidden = false;
   }
   if(changed) window.dispatchEvent(new Event('zz:auth-changed'));
@@ -417,7 +408,6 @@ supabase.auth.onAuthStateChange((event, session) => {
     ensureProfile(user);
     if(!user.user_metadata?.avatar) fetchAndCacheProfileAvatar(user);
     if(!isReauthForDeletion){
-      // Echter Login → prüfen ob Löschvormerkung aktiv, falls ja: abbrechen + Meldung
       supabase.from('profiles')
         .select('deletion_requested_at')
         .eq('id', user.id)
@@ -439,10 +429,13 @@ supabase.auth.getSession().then(({ data }) => {
   if(user && !user.user_metadata?.avatar) fetchAndCacheProfileAvatar(user);
 });
 
-// ============ GAME VISIBILITY (guest vs. registered) ============
-// Backed by the `games` table, managed from the admin panel. Missing/failed data
-// is treated as "everything enabled" downstream (see core.js's gameLockState) so
-// the catalog never breaks if this table is empty or unreachable.
+window.addEventListener('zz:lang-changed', () => {
+  updateAccountUI(currentUser);
+  const submitBtn = document.getElementById('authSubmitBtn');
+  if(submitBtn) submitBtn.textContent = authMode === 'signup' ? t('auth.btn.next') : t('auth.btn.login');
+});
+
+// ============ GAME VISIBILITY ============
 window.zzGameVisibility = {};
 
 async function refreshGameVisibility(){
@@ -455,13 +448,12 @@ async function refreshGameVisibility(){
     const map = {};
     rows.forEach(r => { map[r.id] = { enabled_guest: r.enabled_guest, enabled_registered: r.enabled_registered }; });
     window.zzGameVisibility = map;
-  } catch(e){ /* keep whatever we had (possibly empty) -- missing data means "enabled" */ }
+  } catch(e){ /* treat as enabled */ }
   window.dispatchEvent(new Event('zz:visibility-updated'));
 }
 refreshGameVisibility();
 
-// ============ HIGHSCORES (Supabase/Postgres) ============
-// Aktuell angebunden an: Snake, 2048, Flappy Block, Runner Jump, Space Invaders
+// ============ HIGHSCORES ============
 window.zzSaveHighScore = async (gameId, gameTitle, score) => {
   if(!currentUser || !score || score<=0) return;
   try{
@@ -481,14 +473,14 @@ window.zzSaveHighScore = async (gameId, gameTitle, score) => {
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id,game_id' });
     }
-  } catch(e){ console.warn('Highscore konnte nicht gespeichert werden:', e.message); }
+  } catch(e){ console.warn('Highscore save failed:', e.message); }
 };
 
 // ============ RANGLISTE ============
 window.zzOpenRanking = async () => {
   document.getElementById('rankingOverlay').classList.add('open');
   const content = document.getElementById('rankingContent');
-  content.innerHTML = '<div class="ranking-loading">Lade…</div>';
+  content.innerHTML = `<div class="ranking-loading">${t('ranking.loading')}</div>`;
 
   try{
     const [{ data: scores }, { data: profiles }] = await Promise.all([
@@ -499,7 +491,6 @@ window.zzOpenRanking = async () => {
     const profileMap = {};
     (profiles || []).forEach(p => { profileMap[p.id] = p; });
 
-    // Aggregiere pro Nutzer: Anzahl Spiele + Gesamtpunkte
     const userStats = {};
     (scores || []).forEach(s => {
       if(!userStats[s.user_id]) userStats[s.user_id] = { count: 0, total: 0 };
@@ -513,7 +504,7 @@ window.zzOpenRanking = async () => {
       .sort((a, b) => b.count - a.count || b.total - a.total);
 
     if(ranked.length === 0){
-      content.innerHTML = '<div class="ranking-empty">Noch keine Einträge. Spiel ein Spiel und erziele einen Highscore!</div>';
+      content.innerHTML = `<div class="ranking-empty">${t('ranking.empty')}</div>`;
       return;
     }
 
@@ -528,15 +519,15 @@ window.zzOpenRanking = async () => {
         <span class="ranking-rank">${medals[i] || (i+1) + '.'}</span>
         <span class="ranking-avatar">${hidden ? '👻' : (av ? av.emoji : '👤')}</span>
         <div class="ranking-info">
-          <div class="ranking-name">${hidden ? 'Anonym' : escapeHtml(u.profile.display_name || 'Spieler')}</div>
-          <div class="ranking-sub">${u.count} Spiel${u.count !== 1 ? 'e' : ''} auf der Bestenliste</div>
+          <div class="ranking-name">${hidden ? t('ranking.anonymous') : escapeHtml(u.profile.display_name || t('ranking.player'))}</div>
+          <div class="ranking-sub">${t('ranking.games', u.count)}</div>
         </div>
-        <span class="ranking-score">${u.total.toLocaleString('de-DE')}</span>
+        <span class="ranking-score">${u.total.toLocaleString(t('score.locale'))}</span>
       `;
       content.appendChild(row);
     });
   } catch(e){
-    content.innerHTML = '<div class="ranking-empty">Rangliste konnte nicht geladen werden.</div>';
+    content.innerHTML = `<div class="ranking-empty">${t('ranking.error')}</div>`;
   }
 };
 window.zzCloseRanking = () => document.getElementById('rankingOverlay').classList.remove('open');
@@ -544,7 +535,7 @@ window.zzCloseRanking = () => document.getElementById('rankingOverlay').classLis
 function escapeHtml(str){ return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 window.zzShowLeaderboard = async (gameId, gameTitle, containerEl) => {
-  containerEl.innerHTML = '<div class="hs-row">Lade Bestenliste…</div>';
+  containerEl.innerHTML = `<div class="hs-row">${t('leaderboard.loading')}</div>`;
   try{
     const { data, error } = await supabase
       .from('highscores')
@@ -553,7 +544,7 @@ window.zzShowLeaderboard = async (gameId, gameTitle, containerEl) => {
       .order('score', { ascending: false })
       .limit(10);
     if(error) throw error;
-    if(!data || data.length===0){ containerEl.innerHTML = '<div class="hs-row">Noch keine Einträge. Sei der/die Erste!</div>'; return; }
+    if(!data || data.length===0){ containerEl.innerHTML = `<div class="hs-row">${t('leaderboard.empty')}</div>`; return; }
     containerEl.innerHTML = '';
     data.forEach((row, i) => {
       const el = document.createElement('div');
@@ -562,6 +553,6 @@ window.zzShowLeaderboard = async (gameId, gameTitle, containerEl) => {
       containerEl.appendChild(el);
     });
   } catch(e){
-    containerEl.innerHTML = '<div class="hs-row">Bestenliste konnte nicht geladen werden. (RLS-Policies geprüft?)</div>';
+    containerEl.innerHTML = `<div class="hs-row">${t('leaderboard.error')}</div>`;
   }
 };
