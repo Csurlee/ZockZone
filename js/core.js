@@ -151,11 +151,15 @@ function thumbBg(id){
   return map[id] || 'linear-gradient(135deg,#4C1D95,#1D1730)';
 }
 
-fetch('/track.php', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ path: location.pathname, referrer: document.referrer })
-}).catch(() => {});
+try{
+  if(localStorage.getItem('zz_consent') === 'all'){
+    fetch('/track.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: location.pathname, referrer: document.referrer })
+    }).catch(() => {});
+  }
+}catch{}
 
 renderGrid();
 document.getElementById('gameCountStat').textContent = GAMES.length;

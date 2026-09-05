@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260905e">
+<link rel="stylesheet" href="css/style.css?v=20260905f">
 </head>
 <body>
 
@@ -122,7 +122,7 @@
   <div class="grid" id="grid"></div>
 </section>
 
-<footer>ZockZone — gebaut zum Zocken in der Mittagspause. Keine Ads, keine Downloads.</footer>
+<footer>ZockZone — gebaut zum Zocken in der Mittagspause. Keine Ads, keine Downloads. · <button class="footer-link" onclick="zzOpenDatenschutz()">Datenschutz</button></footer>
 
 <!-- PLAYER OVERLAY -->
 <div class="player-overlay" id="overlay">
@@ -138,7 +138,60 @@
   </div>
 </div>
 
-<script type="module" src="js/auth.js?v=20260905e"></script>
-<script type="module" src="js/core.js?v=20260905e"></script>
+<!-- COOKIE BANNER -->
+<div id="cookieBanner" hidden class="cookie-banner">
+  <div class="cookie-banner-inner">
+    <div class="cookie-banner-text">
+      <strong>🍪 Diese Website verwendet Cookies</strong>
+      <p>Wir nutzen notwendige Cookies für den Login sowie optionale Statistik-Cookies zur Besucheranalyse. Du kannst frei wählen.</p>
+    </div>
+    <div class="cookie-banner-actions">
+      <button class="cookie-btn-all"  onclick="zzAcceptAll()">Alle akzeptieren</button>
+      <button class="cookie-btn-ess"  onclick="zzAcceptEssential()">Nur notwendige</button>
+      <button class="cookie-btn-info" onclick="zzOpenDatenschutz()">Datenschutz</button>
+    </div>
+  </div>
+</div>
+
+<!-- DATENSCHUTZ OVERLAY -->
+<div class="auth-overlay" id="datenschutzOverlay">
+  <div class="auth-box datenschutz-box" style="position:relative;">
+    <button class="icon-btn auth-close" onclick="zzCloseDatenschutz()">✕</button>
+    <h2 class="profile-title">Datenschutzerklärung</h2>
+    <div class="datenschutz-content">
+      <h3>1. Verantwortlicher</h3>
+      <p>ZockZone, betrieben von Csurlee · Kontakt: dembrovszky@gmail.com</p>
+
+      <h3>2. Welche Daten wir speichern</h3>
+      <p><strong>Notwendige Cookies / Lokaler Speicher:</strong><br>
+      Für den Login speichern wir deine Session-Daten im lokalen Speicher deines Browsers (localStorage). Dies ist technisch notwendig und erfordert keine Einwilligung. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.</p>
+
+      <p><strong>Profildaten (bei Registrierung):</strong><br>
+      E-Mail-Adresse, Anzeigename, gewählter Avatar und Highscores werden in unserer Datenbank gespeichert. Du kannst dein Konto jederzeit löschen. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.</p>
+
+      <p><strong>Statistik-Cookies (nur mit Einwilligung):</strong><br>
+      Mit deiner Zustimmung erfassen wir anonymisierte Besucherdaten: Seitenaufruf, gehashte IP-Adresse (nicht rückverfolgbar), ungefähren Standort (Land/Stadt) sowie Browser-Informationen. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO.</p>
+
+      <p><strong>Google Fonts:</strong><br>
+      Diese Website lädt Schriftarten von Google Fonts (fonts.googleapis.com). Dabei wird deine IP-Adresse an Google übertragen. Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Datenschutzrichtlinie</a>.</p>
+
+      <h3>3. Speicherdauer</h3>
+      <p>Session-Daten: bis zum Logout. Profildaten: bis zur Kontolöschung. Besucherdaten: max. 90 Tage.</p>
+
+      <h3>4. Deine Rechte (DSGVO)</h3>
+      <p>Du hast das Recht auf <strong>Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung</strong> sowie <strong>Datenübertragbarkeit</strong>. Du kannst deine Einwilligung zur Statistik jederzeit widerrufen.</p>
+
+      <h3>5. Einwilligung verwalten</h3>
+      <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+        <button class="cookie-btn-all" onclick="zzAcceptAll(); zzCloseDatenschutz();">Statistik erlauben</button>
+        <button class="cookie-btn-ess" onclick="zzAcceptEssential(); zzCloseDatenschutz();">Nur notwendige</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/consent.js?v=20260905f"></script>
+<script type="module" src="js/auth.js?v=20260905f"></script>
+<script type="module" src="js/core.js?v=20260905f"></script>
 </body>
 </html>

@@ -272,6 +272,33 @@
   .ranking-sub{font-size:11px; color:var(--text-dim); margin-top:2px;}
   .ranking-score{font-family:'JetBrains Mono'; font-size:13px; color:var(--lime); font-weight:700; flex-shrink:0;}
   .ranking-empty{text-align:center; color:var(--text-dim); padding:40px 0; font-size:14px;}
+
+  /* ---- Cookie Banner ---- */
+  .cookie-banner{
+    position:fixed; bottom:0; left:0; right:0; z-index:200;
+    background:var(--bg-alt); border-top:1px solid rgba(255,255,255,0.1);
+    padding:16px 20px;
+  }
+  .cookie-banner-inner{display:flex; gap:16px; align-items:center; flex-wrap:wrap; max-width:1100px; margin:0 auto;}
+  .cookie-banner-text{flex:1; min-width:200px;}
+  .cookie-banner-text strong{font-family:'Fredoka'; font-size:15px;}
+  .cookie-banner-text p{font-size:12px; color:var(--text-dim); margin-top:4px;}
+  .cookie-banner-actions{display:flex; gap:8px; flex-wrap:wrap; flex-shrink:0;}
+  .cookie-btn-all{background:var(--lime); color:#14101F; border:none; font-weight:700; font-family:'Fredoka'; padding:9px 16px; border-radius:10px; cursor:pointer; font-size:14px;}
+  .cookie-btn-ess{background:var(--card); color:var(--text); border:1px solid rgba(255,255,255,0.12); font-family:'Fredoka'; font-weight:600; padding:9px 16px; border-radius:10px; cursor:pointer; font-size:14px;}
+  .cookie-btn-info{background:transparent; color:var(--text-dim); border:1px solid rgba(255,255,255,0.08); font-family:'Inter'; padding:9px 14px; border-radius:10px; cursor:pointer; font-size:13px;}
+  .cookie-btn-info:hover{color:var(--text);}
+
+  /* ---- Datenschutz Modal ---- */
+  .datenschutz-box{width:min(600px,100%); max-height:85vh; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  .datenschutz-content h3{font-family:'Fredoka'; font-size:15px; color:var(--lime); margin:16px 0 6px;}
+  .datenschutz-content p{font-size:13px; color:var(--text-dim); line-height:1.6; margin-bottom:8px;}
+  .datenschutz-content a{color:var(--violet-light);}
+  .datenschutz-content strong{color:var(--text);}
+
+  /* ---- Footer Link ---- */
+  .footer-link{background:none; border:none; color:inherit; cursor:pointer; text-decoration:underline; font-size:inherit; font-family:inherit; padding:0; opacity:0.7;}
+  .footer-link:hover{opacity:1;}
   .hs-panel{
     width:100%; max-width:340px; background:var(--card); border-radius:14px; padding:14px 16px;
     border:1px solid rgba(255,255,255,0.08); font-size:13.5px;
