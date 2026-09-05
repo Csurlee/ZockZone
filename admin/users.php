@@ -43,6 +43,8 @@ require __DIR__ . '/includes/layout_top.php';
     <input class="create-field" type="text" id="newUserName" placeholder="Anzeigename">
     <input class="create-field" type="email" id="newUserEmail" placeholder="E-Mail" required>
     <input class="create-field" type="password" id="newUserPassword" placeholder="Passwort (min. 6 Zeichen)" required minlength="6">
+    <input class="create-field" type="password" id="newUserPassword2" placeholder="Passwort wiederholen" required minlength="6">
+    <div id="createError" style="color:var(--orange); font-size:13px; margin-bottom:8px; min-height:16px;"></div>
     <div class="avatar-picker-label">Avatar wählen (optional)</div>
     <div class="avatar-picker" id="adminAvatarPicker"></div>
     <div class="create-panel-actions">
@@ -177,9 +179,14 @@ document.getElementById('createUserForm').addEventListener('submit', async (e) =
   const display_name = document.getElementById('newUserName').value.trim();
   const email = document.getElementById('newUserEmail').value.trim();
   const password = document.getElementById('newUserPassword').value;
+  const password2 = document.getElementById('newUserPassword2').value;
+  const errEl = document.getElementById('createError');
+  errEl.textContent = '';
+  if (password !== password2) { errEl.textContent = 'Passwörter stimmen nicht überein.'; return; }
   await apiCall('POST', 'api/users.php', { email, password, display_name, avatar: selectedAvatar });
   e.target.reset();
   selectedAvatar = '';
+  document.getElementById('createError').textContent = '';
   document.querySelectorAll('.avatar-opt-admin').forEach(b => b.classList.remove('selected'));
   document.getElementById('createPanel').classList.remove('open');
   loadUsers();
