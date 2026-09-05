@@ -1,0 +1,21 @@
+<?php
+// Copy this file to config.php and fill in real values. Never commit config.php.
+
+// Supabase self-hosted API base URL (the tunneled public hostname, or the LAN IP if
+// running the admin panel on the same server and preferring a direct connection).
+define('SUPABASE_URL', 'https://supabase.hackthelab.uk');
+
+// The service_role key from the Supabase project's .env (SUPABASE_SERVICE_ROLE_KEY /
+// SUPABASE_SECRET_KEY) -- NOT the publishable/anon key. This bypasses Postgres RLS
+// entirely, so it must never reach the browser or a public repo.
+define('SUPABASE_SERVICE_ROLE_KEY', 'DEIN_SERVICE_ROLE_KEY');
+
+// Admin panel login (independent of Supabase Auth -- this is a separate, single-account
+// login just for this admin tool).
+define('ADMIN_USERNAME', 'admin');
+// Generate a hash with: php -r "echo password_hash('DEIN_PASSWORT', PASSWORD_DEFAULT);"
+define('ADMIN_PASSWORD_HASH', '$2y$10$DEINHASHDEINHASHDEINHASHDEINHASHDEINHASHDEINHASHDE');
+
+// Server-side salt mixed into the daily visitor hash (track.php) -- any random string,
+// only needs to be consistent so the same visitor hashes the same way within a day.
+define('VISITOR_HASH_SALT', 'DEIN_ZUFAELLIGER_SALT_STRING');
