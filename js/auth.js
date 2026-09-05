@@ -53,10 +53,92 @@ function avatarEmojiOf(user){
   return av ? av.emoji : '👤';
 }
 
+window.zzToggleAccount = () => {
+  if(currentUser){ window.zzOpenProfile(); } else { window.zzOpenAuth(); }
+};
+
 window.zzOpenAuth = () => {
-  if(currentUser){ zzLogOut(); return; }
   window.zzSwitchTab('login');
   document.getElementById('authOverlay').classList.add('open');
+};
+
+window.zzOpenProfile = () => {
+  if(!currentUser) return;
+  const av = AVATARS.find(a => a.id === currentUser.user_metadata?.avatar);
+  const bigEl = document.getElementById('profileAvatarBig');
+  bigEl.textContent = av ? av.emoji : '👤';
+  bigEl.style.background = av ? av.bg : '#241D3B';
+
+  document.getElementById('profileName').value  = displayNameOf(currentUser);
+  document.getElementById('profileEmail').value = currentUser.email || '';
+  document.getElementById('profilePw').value    = '';
+  document.getElementById('profilePw2').value   = '';
+  document.getElementById('profileError').textContent   = '';
+  document.getElementById('profileSuccess').textContent = '';
+
+  renderProfileAvatarGrid(currentUser.user_metadata?.avatar || '');
+  document.getElementById('profileOverlay').classList.add('open');
+};
+window.zzCloseProfile = () => document.getElementById('profileOverlay').classList.remove('open');
+
+let profileSelectedAvatar = null;
+
+function renderProfileAvatarGrid(currentId){
+  const grid = document.getElementById('profileAvatarGrid');
+  grid.innerHTML = '';
+  profileSelectedAvatar = currentId || null;
+  AVATARS.forEach(a => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'avatar-opt' + (a.id === currentId ? ' selected' : '');
+    el.dataset.avatarId = a.id;
+    el.style.background = a.bg;
+    el.innerHTML = `<span class="avatar-emoji">${a.emoji}</span><span class="avatar-label">${a.label}</span>`;
+    el.onclick = () => {
+      profileSelectedAvatar = a.id;
+      grid.querySelectorAll('.avatar-opt').forEach(b => b.classList.toggle('selected', b.dataset.avatarId === a.id));
+      const bigEl = document.getElementById('profileAvatarBig');
+      bigEl.textContent = a.emoji;
+      bigEl.style.background = a.bg;
+    };
+    grid.appendChild(el);
+  });
+}
+
+window.zzSaveProfile = async () => {
+  const errEl     = document.getElementById('profileError');
+  const successEl = document.getElementById('profileSuccess');
+  errEl.textContent     = '';
+  successEl.textContent = '';
+
+  const name   = document.getElementById('profileName').value.trim();
+  const email  = document.getElementById('profileEmail').value.trim();
+  const pw     = document.getElementById('profilePw').value;
+  const pw2    = document.getElementById('profilePw2').value;
+
+  if(!name)  { errEl.textContent = 'Anzeigename darf nicht leer sein.'; return; }
+  if(!email) { errEl.textContent = 'E-Mail darf nicht leer sein.'; return; }
+  if(pw && pw.length < 6)  { errEl.textContent = 'Passwort muss mindestens 6 Zeichen haben.'; return; }
+  if(pw && pw !== pw2)     { errEl.textContent = 'Passwörter stimmen nicht überein.'; return; }
+
+  const updates = { data: { display_name: name, avatar: profileSelectedAvatar || currentUser.user_metadata?.avatar || '' } };
+  if(email !== currentUser.email)  updates.email    = email;
+  if(pw)                           updates.password = pw;
+
+  try{
+    const { error } = await supabase.auth.updateUser(updates);
+    if(error) throw error;
+
+    await supabase.from('profiles').update({
+      display_name: name,
+      email: email,
+    }).eq('id', currentUser.id);
+
+    successEl.textContent = 'Gespeichert!';
+    setTimeout(() => { successEl.textContent = ''; }, 2500);
+  } catch(e){
+    errEl.textContent = 'Fehler: ' + e.message;
+  }
 };
 window.zzCloseAuth = () => document.getElementById('authOverlay').classList.remove('open');
 window.zzSwitchTab = (mode) => {

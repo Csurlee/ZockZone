@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260905c">
+<link rel="stylesheet" href="css/style.css?v=20260905d">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
   <div class="navlinks">
     <span>Neu</span><span>Beliebt</span><span>2-Spieler</span><span>Denksport</span>
   </div>
-  <button class="account-btn" id="accountBtn" onclick="zzOpenAuth()">👤 Login</button>
+  <button class="account-btn" id="accountBtn" onclick="zzToggleAccount()">👤 Login</button>
 </header>
 
 <div class="auth-overlay" id="authOverlay">
@@ -55,6 +55,31 @@
   </div>
 </div>
 
+
+<!-- PROFIL OVERLAY -->
+<div class="auth-overlay" id="profileOverlay">
+  <div class="auth-box profile-box" style="position:relative;">
+    <button class="icon-btn auth-close" onclick="zzCloseProfile()">✕</button>
+    <h2 class="profile-title">Mein Profil</h2>
+
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar-big" id="profileAvatarBig"></div>
+    </div>
+    <p class="auth-step-label">Avatar ändern:</p>
+    <div class="avatar-grid" id="profileAvatarGrid"></div>
+
+    <div class="auth-error" id="profileError"></div>
+    <div class="profile-success" id="profileSuccess"></div>
+
+    <input class="auth-field" id="profileName"  type="text"     placeholder="Anzeigename">
+    <input class="auth-field" id="profileEmail" type="email"    placeholder="E-Mail">
+    <input class="auth-field" id="profilePw"    type="password" placeholder="Neues Passwort (leer = nicht ändern)">
+    <input class="auth-field" id="profilePw2"   type="password" placeholder="Passwort wiederholen">
+
+    <button class="auth-submit" onclick="zzSaveProfile()">Speichern</button>
+    <button class="profile-logout-btn" onclick="zzLogOut(); zzCloseProfile();">Logout</button>
+  </div>
+</div>
 
 <div class="hero">
   <div class="hero-card">
@@ -98,7 +123,7 @@
   </div>
 </div>
 
-<script type="module" src="js/auth.js?v=20260905c"></script>
-<script type="module" src="js/core.js?v=20260905c"></script>
+<script type="module" src="js/auth.js?v=20260905d"></script>
+<script type="module" src="js/core.js?v=20260905d"></script>
 </body>
 </html>
