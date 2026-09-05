@@ -9,19 +9,72 @@ require __DIR__ . '/includes/layout_top.php';
 </div>
 
 <form id="createUserForm" class="inline-form">
+  <input type="text" id="newUserName" placeholder="Anzeigename">
   <input type="email" id="newUserEmail" placeholder="E-Mail" required>
   <input type="password" id="newUserPassword" placeholder="Passwort (min. 6 Zeichen)" required minlength="6">
+  <div class="avatar-picker-label">Avatar wählen:</div>
+  <div class="avatar-picker" id="adminAvatarPicker"></div>
   <button type="submit" class="btn btn-primary">Anlegen</button>
 </form>
 
 <table class="data-table" id="usersTable">
   <thead>
-    <tr><th>E-Mail</th><th>Anzeigename</th><th>Registriert</th><th>Highscores</th><th>Status</th><th>Aktionen</th></tr>
+    <tr><th>Avatar</th><th>E-Mail</th><th>Anzeigename</th><th>Registriert</th><th>Highscores</th><th>Status</th><th>Aktionen</th></tr>
   </thead>
-  <tbody><tr><td colspan="6">Lade…</td></tr></tbody>
+  <tbody><tr><td colspan="7">Lade…</td></tr></tbody>
 </table>
 
+<style>
+.avatar-picker-label { font-size: 13px; color: var(--text-dim, #888); margin-top: 6px; }
+.avatar-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
+.avatar-opt-admin {
+  width: 44px; height: 44px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.12);
+  cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 20px; background: #1a1a2e; transition: border-color .15s;
+}
+.avatar-opt-admin.selected { border-color: #7C3AED; box-shadow: 0 0 8px rgba(124,58,237,0.4); }
+.avatar-cell { font-size: 22px; text-align: center; }
+</style>
+
 <script>
+const AVATARS = [
+  { id: 'snake',     emoji: '🐍', bg: '#14532d' },
+  { id: 'alien',     emoji: '👾', bg: '#3b0764' },
+  { id: 'rocket',    emoji: '🚀', bg: '#172554' },
+  { id: 'bomb',      emoji: '💣', bg: '#1c1917' },
+  { id: 'dice',      emoji: '🎲', bg: '#7c2d12' },
+  { id: 'joker',     emoji: '🃏', bg: '#1f2937' },
+  { id: 'puzzle',    emoji: '🧩', bg: '#0c4a6e' },
+  { id: 'lightning', emoji: '⚡', bg: '#713f12' },
+  { id: 'ghost',     emoji: '👻', bg: '#2e1065' },
+  { id: 'trophy',    emoji: '🏆', bg: '#78350f' },
+];
+
+let selectedAvatar = '';
+
+function avatarEmoji(id) {
+  return AVATARS.find(a => a.id === id)?.emoji ?? '👤';
+}
+
+function buildAvatarPicker() {
+  const picker = document.getElementById('adminAvatarPicker');
+  picker.innerHTML = '';
+  AVATARS.forEach(a => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'avatar-opt-admin';
+    btn.title = a.id;
+    btn.style.background = a.bg;
+    btn.textContent = a.emoji;
+    btn.dataset.id = a.id;
+    btn.addEventListener('click', () => {
+      selectedAvatar = a.id;
+      picker.querySelectorAll('.avatar-opt-admin').forEach(b => b.classList.toggle('selected', b.dataset.id === a.id));
+    });
+    picker.appendChild(btn);
+  });
+}
+
 async function loadUsers(){
   const users = await apiCall('GET', 'api/users.php');
   const tbody = document.querySelector('#usersTable tbody');
@@ -29,7 +82,7 @@ async function loadUsers(){
   if(!Array.isArray(users) || users.length===0){
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 6;
+    td.colSpan = 7;
     td.textContent = 'Keine Nutzer.';
     tr.appendChild(td);
     tbody.appendChild(tr);
@@ -37,6 +90,11 @@ async function loadUsers(){
   }
   users.forEach(u => {
     const tr = document.createElement('tr');
+
+    const tdAvatar = document.createElement('td');
+    tdAvatar.className = 'avatar-cell';
+    tdAvatar.textContent = avatarEmoji(u.avatar);
+    tr.appendChild(tdAvatar);
 
     const tdEmail = document.createElement('td');
     tdEmail.textContent = u.email;
@@ -94,14 +152,18 @@ async function deleteUser(id, email){
 
 document.getElementById('createUserForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email = document.getElementById('newUserEmail').value;
+  const display_name = document.getElementById('newUserName').value.trim();
+  const email = document.getElementById('newUserEmail').value.trim();
   const password = document.getElementById('newUserPassword').value;
-  await apiCall('POST', 'api/users.php', { email, password });
+  await apiCall('POST', 'api/users.php', { email, password, display_name, avatar: selectedAvatar });
   e.target.reset();
+  selectedAvatar = '';
+  document.querySelectorAll('.avatar-opt-admin').forEach(b => b.classList.remove('selected'));
   e.target.classList.remove('open');
   loadUsers();
 });
 
+buildAvatarPicker();
 loadUsers();
 </script>
 <?php require __DIR__ . '/includes/layout_bottom.php'; ?>

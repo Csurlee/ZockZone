@@ -24,12 +24,14 @@ if ($method === 'GET') {
 
     $result = array_map(function ($u) use ($profileById, $countByUser) {
         $p = $profileById[$u['id']] ?? null;
+        $meta = $u['raw_user_meta_data'] ?? [];
         $bannedUntil = $u['banned_until'] ?? null;
         $isBanned = $bannedUntil && strtotime($bannedUntil) > time();
         return [
             'id' => $u['id'],
             'email' => $u['email'] ?? '',
-            'display_name' => $p['display_name'] ?? '',
+            'display_name' => $p['display_name'] ?? ($meta['display_name'] ?? ''),
+            'avatar' => $meta['avatar'] ?? '',
             'created_at' => $u['created_at'] ?? '',
             'active' => !$isBanned,
             'score_count' => $countByUser[$u['id']] ?? 0,
@@ -45,17 +47,19 @@ if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true) ?? [];
     $email = trim($input['email'] ?? '');
     $password = $input['password'] ?? '';
+    $displayName = trim($input['display_name'] ?? '') ?: explode('@', $email)[0];
+    $avatar = trim($input['avatar'] ?? '');
     if ($email === '' || strlen($password) < 6) {
         http_response_code(400); echo json_encode(['error' => 'E-Mail und Passwort (min. 6 Zeichen) erforderlich']); exit;
     }
-    [$status, $data] = sb_request('POST', '/auth/v1/admin/users', [
-        'email' => $email, 'password' => $password, 'email_confirm' => true,
-    ]);
+    $userPayload = ['email' => $email, 'password' => $password, 'email_confirm' => true,
+        'user_metadata' => ['display_name' => $displayName, 'avatar' => $avatar]];
+    [$status, $data] = sb_request('POST', '/auth/v1/admin/users', $userPayload);
     if ($status >= 300) { http_response_code($status); echo json_encode(['error' => 'Anlegen fehlgeschlagen', 'detail' => $data]); exit; }
     $userId = $data['id'] ?? null;
     if ($userId) {
         sb_request('POST', '/rest/v1/profiles', [
-            'id' => $userId, 'email' => $email, 'display_name' => explode('@', $email)[0],
+            'id' => $userId, 'email' => $email, 'display_name' => $displayName,
         ], ['Prefer: resolution=merge-duplicates']);
     }
     http_response_code(201);
