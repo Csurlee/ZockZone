@@ -31,6 +31,7 @@ window.zzRateGame = async (gameId, stars) => {
   );
   userRatings[gameId] = stars;
   await loadRatings();
+  renderPlayerRating(gameId); // Sterne im Player sofort aktualisieren
 };
 
 // Hover-Effekt für Sterne (Event Delegation)
@@ -139,13 +140,7 @@ function renderGrid(filter=lastFilter, search=lastSearch){
     const avg = rData ? rData.avg : g.rating;
     const cnt = rData ? ` (${rData.count})` : '';
     const ur  = userRatings[g.id] || 0;
-    const starsHtml = loggedIn
-      ? `<span class="stars-wrap" data-gid="${g.id}">`
-        + [1,2,3,4,5].map(n =>
-            `<span class="cstar${ur>=n?' on':''}" data-star="${n}" onclick="event.stopPropagation();zzRateGame('${g.id}',${n})">★</span>`
-          ).join('')
-        + ` <span class="rating-val">${avg}</span><span class="rating-cnt">${cnt}</span></span>`
-      : `<span class="stars">★ ${avg}${cnt}</span>`;
+    const starsHtml = `<span class="stars">★ ${avg}${cnt}</span>`;
     return `
     <div class="game-card${lock ? ' locked' : ''}" onclick="zzCardClick('${g.id}')">
       <div class="thumb" style="background:${thumbBg(g.id)}">
@@ -252,7 +247,28 @@ function openGame(id){
   const g = GAMES.find(x=>x.id===id);
   playerTitle.textContent = g.icon + '  ' + g.title;
   overlay.classList.add('open');
+  renderPlayerRating(id);
   loadGame(id);
+}
+
+function renderPlayerRating(gameId){
+  const el = document.getElementById('playerRating');
+  if(!el) return;
+  const rData = ratingsMap[gameId];
+  const avg = rData ? rData.avg : (GAMES.find(g=>g.id===gameId)?.rating || '–');
+  const cnt = rData ? rData.count : 0;
+  const ur  = userRatings[gameId] || 0;
+  const loggedIn = window.zzIsLoggedIn && window.zzIsLoggedIn();
+
+  if(loggedIn){
+    el.innerHTML = [1,2,3,4,5].map(n =>
+      `<span class="cstar${ur>=n?' on':''}" data-star="${n}" onclick="zzRateGame('${gameId}',${n})">★</span>`
+    ).join('') + ` <span class="rating-val">${avg}</span><span class="rating-cnt">${cnt ? ` (${cnt})` : ''}</span>`;
+    el.className = 'player-rating stars-wrap';
+  } else {
+    el.innerHTML = `<span class="stars">★ ${avg}${cnt ? ` (${cnt})` : ''}</span>`;
+    el.className = 'player-rating';
+  }
 }
 
 function closeGame(){
