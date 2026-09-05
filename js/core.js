@@ -1,3 +1,56 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
+
+let ratingsMap  = {}; // game_id → { avg, count }
+let userRatings = {}; // game_id → 1-5
+
+async function loadRatings(){
+  try{
+    const { data: avgs } = await _sb.from('game_ratings_avg').select('game_id,avg_rating,rating_count');
+    ratingsMap = {};
+    (avgs || []).forEach(r => { ratingsMap[r.game_id] = { avg: r.avg_rating, count: r.rating_count }; });
+  }catch{}
+
+  userRatings = {};
+  try{
+    const { data: { session } } = await _sb.auth.getSession();
+    if(session?.user){
+      const { data } = await _sb.from('ratings').select('game_id,rating').eq('user_id', session.user.id);
+      (data || []).forEach(r => { userRatings[r.game_id] = r.rating; });
+    }
+  }catch{}
+  renderGrid();
+}
+
+window.zzRateGame = async (gameId, stars) => {
+  const { data: { session } } = await _sb.auth.getSession();
+  if(!session){ if(window.zzOpenAuth) window.zzOpenAuth(); return; }
+  await _sb.from('ratings').upsert(
+    { user_id: session.user.id, game_id: gameId, rating: stars },
+    { onConflict: 'user_id,game_id' }
+  );
+  userRatings[gameId] = stars;
+  await loadRatings();
+};
+
+// Hover-Effekt für Sterne (Event Delegation)
+document.addEventListener('mouseover', e => {
+  const star = e.target.closest('.cstar[data-star]');
+  if(!star) return;
+  const wrap = star.closest('.stars-wrap');
+  if(!wrap) return;
+  const n = parseInt(star.dataset.star);
+  wrap.querySelectorAll('.cstar').forEach(s =>
+    s.classList.toggle('hover', parseInt(s.dataset.star) <= n));
+});
+document.addEventListener('mouseout', e => {
+  const star = e.target.closest('.cstar[data-star]');
+  if(!star) return;
+  const wrap = star.closest('.stars-wrap');
+  if(!wrap || (e.relatedTarget && wrap.contains(e.relatedTarget))) return;
+  wrap.querySelectorAll('.cstar').forEach(s => s.classList.remove('hover'));
+});
+
 // ZockZone core: catalog, loader, shared UI helpers.
 const GAMES = [
   {id:'snake', title:'Snake Reloaded', icon:'🐍', cat:'arcade', tag:'hot', rating:'4.8', plays:'1.2k'},
@@ -77,10 +130,22 @@ function renderGrid(filter=lastFilter, search=lastSearch){
     g.title.toLowerCase().includes(search.toLowerCase())
   );
   countLabel.textContent = list.length + ' Spiele';
+  const loggedIn = window.zzIsLoggedIn && window.zzIsLoggedIn();
   grid.innerHTML = list.map(g => {
     const lock = gameLockState(g.id);
     const lockBadge = lock === 'disabled' ? '<span class="tag locked">Vorübergehend deaktiviert</span>'
       : lock === 'guest-locked' ? '<span class="tag locked">🔒 Login erforderlich</span>' : '';
+    const rData = ratingsMap[g.id];
+    const avg = rData ? rData.avg : g.rating;
+    const cnt = rData ? ` (${rData.count})` : '';
+    const ur  = userRatings[g.id] || 0;
+    const starsHtml = loggedIn
+      ? `<span class="stars-wrap" data-gid="${g.id}">`
+        + [1,2,3,4,5].map(n =>
+            `<span class="cstar${ur>=n?' on':''}" data-star="${n}" onclick="event.stopPropagation();zzRateGame('${g.id}',${n})">★</span>`
+          ).join('')
+        + ` <span class="rating-val">${avg}</span><span class="rating-cnt">${cnt}</span></span>`
+      : `<span class="stars">★ ${avg}${cnt}</span>`;
     return `
     <div class="game-card${lock ? ' locked' : ''}" onclick="zzCardClick('${g.id}')">
       <div class="thumb" style="background:${thumbBg(g.id)}">
@@ -89,7 +154,7 @@ function renderGrid(filter=lastFilter, search=lastSearch){
       </div>
       <div class="card-info">
         <h3>${g.title}</h3>
-        <div class="meta"><span class="stars">★ ${g.rating}</span> · ${g.plays} Spiele heute</div>
+        <div class="meta">${starsHtml} · ${g.plays} Spiele heute</div>
       </div>
     </div>
   `;
@@ -97,7 +162,7 @@ function renderGrid(filter=lastFilter, search=lastSearch){
 }
 
 window.addEventListener('zz:visibility-updated', () => renderGrid());
-window.addEventListener('zz:auth-changed', () => renderGrid());
+window.addEventListener('zz:auth-changed', () => loadRatings());
 
 function thumbBg(id){
   const map = {
@@ -162,7 +227,7 @@ try{
   }
 }catch{}
 
-renderGrid();
+loadRatings();
 document.getElementById('gameCountStat').textContent = GAMES.length;
 
 document.querySelectorAll('.chip').forEach(chip=>{
