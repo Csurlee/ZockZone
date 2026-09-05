@@ -77,6 +77,11 @@ window.zzOpenAuth = () => {
   document.getElementById('authOverlay').classList.add('open');
 };
 
+window.zzOpenSignup = () => {
+  window.zzSwitchTab('signup');
+  document.getElementById('authOverlay').classList.add('open');
+};
+
 window.zzOpenProfile = async () => {
   if(!currentUser) return;
   const av = AVATARS.find(a => a.id === currentUser.user_metadata?.avatar);
@@ -391,10 +396,13 @@ function updateAccountUI(user){
   const changed = currentUser?.id !== user?.id;
   currentUser = user;
   const btn = document.getElementById('accountBtn');
+  const signupBtn = document.getElementById('signupBtn');
   if(user){
     btn.textContent = avatarEmojiOf(user) + ' ' + displayNameOf(user);
+    if(signupBtn) signupBtn.hidden = true;
   } else {
     btn.textContent = '👤 Login';
+    if(signupBtn) signupBtn.hidden = false;
   }
   if(changed) window.dispatchEvent(new Event('zz:auth-changed'));
 }
