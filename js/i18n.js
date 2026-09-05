@@ -282,10 +282,14 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     el.placeholder = t(el.dataset.i18nPlaceholder);
   });
+  // Show/hide language-specific content blocks
+  document.querySelectorAll('[data-lang]').forEach(el => {
+    el.hidden = el.dataset.lang !== lang;
+  });
   const flag = document.getElementById('langFlag');
   if (flag) flag.textContent = lang === 'de' ? '🇩🇪' : '🇬🇧';
-  document.querySelectorAll('.lang-menu button[data-lang]').forEach(btn => {
-    btn.classList.toggle('active-lang', btn.dataset.lang === lang);
+  document.querySelectorAll('button[data-lang-btn]').forEach(btn => {
+    btn.classList.toggle('active-lang', btn.dataset.langBtn === lang);
   });
 }
 

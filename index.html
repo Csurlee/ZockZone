@@ -16,16 +16,16 @@
     🔍 <input id="searchInput" data-i18n-placeholder="search.placeholder" placeholder="Spiele suchen…">
   </div>
   <button class="account-btn ranking-btn" onclick="zzOpenRanking()" data-i18n="header.ranking">🏆 Rangliste</button>
-  <div class="lang-switcher" id="langSwitcher">
-    <button class="lang-btn" onclick="zzToggleLangMenu()"><span id="langFlag">🇩🇪</span></button>
-    <div class="lang-menu" id="langMenu" hidden>
-      <button data-lang="de" onclick="zzSetLang('de')">🇩🇪 Deutsch</button>
-      <button data-lang="en" onclick="zzSetLang('en')">🇬🇧 English</button>
-    </div>
-  </div>
   <div class="auth-btn-group">
     <button class="account-btn" id="accountBtn" onclick="zzToggleAccount()">👤 Login</button>
     <button class="account-btn signup-btn" id="signupBtn" onclick="zzOpenSignup()" data-i18n="header.register">Registrieren</button>
+  </div>
+  <div class="lang-switcher" id="langSwitcher">
+    <button class="lang-btn" onclick="zzToggleLangMenu()"><span id="langFlag">🇩🇪</span></button>
+    <div class="lang-menu" id="langMenu" hidden>
+      <button data-lang-btn="de" onclick="zzSetLang('de')">🇩🇪 Deutsch</button>
+      <button data-lang-btn="en" onclick="zzSetLang('en')">🇬🇧 English</button>
+    </div>
   </div>
 </header>
 
@@ -195,36 +195,75 @@
     <button class="icon-btn auth-close" onclick="zzCloseDatenschutz()">✕</button>
     <h2 class="profile-title" data-i18n="privacy.title">Datenschutzerklärung</h2>
     <div class="datenschutz-content">
-      <h3>1. Verantwortlicher</h3>
-      <p>ZockZone, betrieben von Csurlee · Kontakt: dembrovszky@gmail.com</p>
 
-      <h3>2. Welche Daten wir speichern</h3>
-      <p><strong>Notwendige Cookies / Lokaler Speicher:</strong><br>
-      Für den Login speichern wir deine Session-Daten im lokalen Speicher deines Browsers (localStorage). Dies ist technisch notwendig und erfordert keine Einwilligung. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.</p>
+      <!-- DEUTSCH -->
+      <div data-lang="de">
+        <h3>1. Verantwortlicher</h3>
+        <p>ZockZone, betrieben von Csurlee · Kontakt: dembrovszky@gmail.com</p>
 
-      <p><strong>Profildaten (bei Registrierung):</strong><br>
-      E-Mail-Adresse, Anzeigename, gewählter Avatar und Highscores werden in unserer Datenbank gespeichert. Du kannst dein Konto jederzeit löschen. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.</p>
+        <h3>2. Welche Daten wir speichern</h3>
+        <p><strong>Notwendige Cookies / Lokaler Speicher:</strong><br>
+        Für den Login speichern wir deine Session-Daten im lokalen Speicher deines Browsers (localStorage). Dies ist technisch notwendig und erfordert keine Einwilligung. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.</p>
 
-      <p><strong>Statistik-Cookies (nur mit Einwilligung):</strong><br>
-      Mit deiner Zustimmung erfassen wir anonymisierte Besucherdaten: Seitenaufruf, gehashte IP-Adresse (nicht rückverfolgbar), ungefähren Standort (Land/Stadt) sowie Browser-Informationen. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO.</p>
+        <p><strong>Profildaten (bei Registrierung):</strong><br>
+        E-Mail-Adresse, Anzeigename, gewählter Avatar und Highscores werden in unserer Datenbank gespeichert. Du kannst dein Konto jederzeit löschen. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.</p>
 
-      <p><strong>Cloudflare Turnstile (CAPTCHA / Bot-Schutz):</strong><br>
-      Bei der Registrierung setzen wir Cloudflare Turnstile ein, um automatisierte Massenregistrierungen (Bots) zu verhindern. Dabei werden technische Daten (IP-Adresse, Browser-Informationen, Interaktionsmuster) an Cloudflare Inc., 101 Townsend St., San Francisco, CA 94107, USA übermittelt. Cloudflare setzt dabei keine Tracking-Cookies und zeigt kein klassisches Bild-CAPTCHA. Die Datenübertragung in die USA erfolgt auf Basis des EU-US Data Privacy Framework. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Sicherheit unserer Dienste). Weitere Informationen: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Datenschutzrichtlinie</a> · <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener">Turnstile-Produktseite</a>.</p>
+        <p><strong>Statistik-Cookies (nur mit Einwilligung):</strong><br>
+        Mit deiner Zustimmung erfassen wir anonymisierte Besucherdaten: Seitenaufruf, gehashte IP-Adresse (nicht rückverfolgbar), ungefähren Standort (Land/Stadt) sowie Browser-Informationen. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO.</p>
 
-      <p><strong>Google Fonts:</strong><br>
-      Diese Website lädt Schriftarten von Google Fonts (fonts.googleapis.com). Dabei wird deine IP-Adresse an Google übertragen. Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Datenschutzrichtlinie</a>.</p>
+        <p><strong>Cloudflare Turnstile (CAPTCHA / Bot-Schutz):</strong><br>
+        Bei der Registrierung setzen wir Cloudflare Turnstile ein, um automatisierte Massenregistrierungen (Bots) zu verhindern. Dabei werden technische Daten (IP-Adresse, Browser-Informationen, Interaktionsmuster) an Cloudflare Inc., 101 Townsend St., San Francisco, CA 94107, USA übermittelt. Cloudflare setzt dabei keine Tracking-Cookies und zeigt kein klassisches Bild-CAPTCHA. Die Datenübertragung in die USA erfolgt auf Basis des EU-US Data Privacy Framework. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Sicherheit unserer Dienste). Weitere Informationen: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Datenschutzrichtlinie</a> · <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener">Turnstile-Produktseite</a>.</p>
 
-      <h3>3. Speicherdauer</h3>
-      <p>Session-Daten: bis zum Logout. Profildaten: bis zur Kontolöschung. Besucherdaten: max. 90 Tage. Turnstile-Daten: werden von Cloudflare nach kurzer Zeit automatisch gelöscht (kein dauerhaftes Tracking).</p>
+        <p><strong>Google Fonts:</strong><br>
+        Diese Website lädt Schriftarten von Google Fonts (fonts.googleapis.com). Dabei wird deine IP-Adresse an Google übertragen. Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Datenschutzrichtlinie</a>.</p>
 
-      <h3>4. Deine Rechte (DSGVO)</h3>
-      <p>Du hast das Recht auf <strong>Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung</strong> sowie <strong>Datenübertragbarkeit</strong>. Du kannst deine Einwilligung zur Statistik jederzeit widerrufen.</p>
+        <h3>3. Speicherdauer</h3>
+        <p>Session-Daten: bis zum Logout. Profildaten: bis zur Kontolöschung. Besucherdaten: max. 90 Tage. Turnstile-Daten: werden von Cloudflare nach kurzer Zeit automatisch gelöscht (kein dauerhaftes Tracking).</p>
 
-      <h3>5. Einwilligung verwalten</h3>
-      <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
-        <button class="cookie-btn-all" onclick="zzAcceptAll(); zzCloseDatenschutz();" data-i18n="datenschutz.btn.stats">Statistik erlauben</button>
-        <button class="cookie-btn-ess" onclick="zzAcceptEssential(); zzCloseDatenschutz();" data-i18n="datenschutz.btn.essential">Nur notwendige</button>
+        <h3>4. Deine Rechte (DSGVO)</h3>
+        <p>Du hast das Recht auf <strong>Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung</strong> sowie <strong>Datenübertragbarkeit</strong>. Du kannst deine Einwilligung zur Statistik jederzeit widerrufen.</p>
+
+        <h3>5. Einwilligung verwalten</h3>
+        <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+          <button class="cookie-btn-all" onclick="zzAcceptAll(); zzCloseDatenschutz();">Statistik erlauben</button>
+          <button class="cookie-btn-ess" onclick="zzAcceptEssential(); zzCloseDatenschutz();">Nur notwendige</button>
+        </div>
       </div>
+
+      <!-- ENGLISH -->
+      <div data-lang="en" hidden>
+        <h3>1. Controller</h3>
+        <p>ZockZone, operated by Csurlee · Contact: dembrovszky@gmail.com</p>
+
+        <h3>2. Data we collect</h3>
+        <p><strong>Necessary cookies / Local storage:</strong><br>
+        For login purposes, we store your session data in your browser's local storage (localStorage). This is technically necessary and does not require your consent. Legal basis: Art. 6(1)(b) GDPR.</p>
+
+        <p><strong>Profile data (upon registration):</strong><br>
+        Your email address, display name, chosen avatar, and high scores are stored in our database. You can delete your account at any time. Legal basis: Art. 6(1)(b) GDPR.</p>
+
+        <p><strong>Analytics cookies (with consent only):</strong><br>
+        With your consent, we collect anonymised visitor data: page view, hashed IP address (not traceable back to you), approximate location (country/city), and browser information. Legal basis: Art. 6(1)(a) GDPR.</p>
+
+        <p><strong>Cloudflare Turnstile (CAPTCHA / Bot protection):</strong><br>
+        During registration, we use Cloudflare Turnstile to prevent automated mass registrations (bots). Technical data (IP address, browser information, interaction patterns) is transmitted to Cloudflare Inc., 101 Townsend St., San Francisco, CA 94107, USA. Cloudflare does not set tracking cookies and does not display a traditional image CAPTCHA. Data transfers to the USA are based on the EU–US Data Privacy Framework. Legal basis: Art. 6(1)(f) GDPR (legitimate interest in protecting our services). Further information: <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Privacy Policy</a> · <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener">Turnstile product page</a>.</p>
+
+        <p><strong>Google Fonts:</strong><br>
+        This website loads fonts from Google Fonts (fonts.googleapis.com). Your IP address is transmitted to Google in this process. Further information: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>.</p>
+
+        <h3>3. Retention periods</h3>
+        <p>Session data: until logout. Profile data: until account deletion. Visitor data: max. 90 days. Turnstile data: automatically deleted by Cloudflare after a short period (no permanent tracking).</p>
+
+        <h3>4. Your rights (GDPR)</h3>
+        <p>You have the right to <strong>access, rectification, erasure, restriction of processing</strong>, and <strong>data portability</strong>. You may withdraw your consent to analytics at any time.</p>
+
+        <h3>5. Manage consent</h3>
+        <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+          <button class="cookie-btn-all" onclick="zzAcceptAll(); zzCloseDatenschutz();">Allow analytics</button>
+          <button class="cookie-btn-ess" onclick="zzAcceptEssential(); zzCloseDatenschutz();">Essential only</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
