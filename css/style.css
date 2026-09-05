@@ -108,6 +108,10 @@
     transition: all .15s;
   }
   .chip.active, .chip:hover{background:var(--violet); color:white; border-color:var(--violet);}
+  .chip-hot{color:#fb923c; border-color:rgba(251,146,60,0.3);}
+  .chip-hot.active, .chip-hot:hover{background:#ea580c; color:white; border-color:#ea580c;}
+  .chip-new{color:#a3e635; border-color:rgba(163,230,53,0.3);}
+  .chip-new.active, .chip-new:hover{background:#65a30d; color:white; border-color:#65a30d;}
 
   section.games{padding: 0 5vw;}
   .section-head{display:flex; align-items:baseline; justify-content:space-between; margin: 30px 0 16px;}

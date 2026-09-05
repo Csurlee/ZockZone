@@ -72,7 +72,7 @@ window.zzCardClick = (id) => {
 function renderGrid(filter=lastFilter, search=lastSearch){
   lastFilter = filter; lastSearch = search;
   const list = GAMES.filter(g =>
-    (filter==='all' || g.cat===filter) &&
+    (filter==='all' || g.cat===filter || g.tag===filter) &&
     g.title.toLowerCase().includes(search.toLowerCase())
   );
   countLabel.textContent = list.length + ' Spiele';
