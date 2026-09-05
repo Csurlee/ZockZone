@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=20260905b">
 </head>
 <body>
 
@@ -25,13 +25,33 @@
   <div class="auth-box" style="position:relative;">
     <button class="icon-btn auth-close" onclick="zzCloseAuth()">✕</button>
     <div class="auth-tabs">
-      <div class="auth-tab active" id="tabLogin" onclick="zzSwitchTab('login')">Login</div>
-      <div class="auth-tab" id="tabSignup" onclick="zzSwitchTab('signup')">Registrieren</div>
+      <button class="auth-tab active" id="tabLogin" onclick="zzSwitchTab('login')">Login</button>
+      <button class="auth-tab" id="tabSignup" onclick="zzSwitchTab('signup')">Registrieren</button>
     </div>
     <div class="auth-error" id="authError"></div>
-    <input class="auth-field" id="authEmail" type="email" placeholder="E-Mail">
-    <input class="auth-field" id="authPassword" type="password" placeholder="Passwort (min. 6 Zeichen)">
-    <button class="auth-submit" id="authSubmitBtn" onclick="zzSubmitAuth()">Einloggen</button>
+
+    <!-- Schritt 1: Zugangsdaten -->
+    <div id="authStep1">
+      <div id="signupOnlyFields" style="display:none">
+        <input class="auth-field" id="authName" type="text" placeholder="Anzeigename" autocomplete="nickname">
+      </div>
+      <input class="auth-field" id="authEmail" type="email" placeholder="E-Mail">
+      <input class="auth-field" id="authPassword" type="password" placeholder="Passwort (min. 6 Zeichen)">
+      <div id="signupPw2Wrap" style="display:none">
+        <input class="auth-field" id="authPassword2" type="password" placeholder="Passwort wiederholen">
+      </div>
+      <button class="auth-submit" id="authSubmitBtn" onclick="zzSubmitAuth()">Einloggen</button>
+    </div>
+
+    <!-- Schritt 2: Avatar auswählen -->
+    <div id="authStep2" style="display:none">
+      <p class="auth-step-label">Wähle deinen Avatar</p>
+      <div class="avatar-grid" id="avatarGrid"></div>
+      <div style="display:flex; gap:8px;">
+        <button class="auth-back" onclick="zzBackToStep1()">← Zurück</button>
+        <button class="auth-submit" style="flex:1; margin-bottom:0" onclick="zzConfirmSignup()">Konto erstellen</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -78,7 +98,7 @@
   </div>
 </div>
 
-<script type="module" src="js/auth.js"></script>
-<script type="module" src="js/core.js"></script>
+<script type="module" src="js/auth.js?v=20260905b"></script>
+<script type="module" src="js/core.js?v=20260905b"></script>
 </body>
 </html>

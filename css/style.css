@@ -203,17 +203,20 @@
   .account-btn:hover{border-color:var(--violet-light);}
   .auth-overlay{
     position:fixed; inset:0; background:rgba(10,8,18,0.92); backdrop-filter: blur(6px);
-    z-index:110; display:none; align-items:center; justify-content:center; padding:20px;
+    z-index:110; display:none; align-items:flex-start; justify-content:center;
+    padding:20px; overflow-y:auto; -webkit-overflow-scrolling:touch;
   }
   .auth-overlay.open{display:flex;}
   .auth-box{
     background: var(--bg-alt); border-radius:22px; width:min(380px,100%); border:1px solid rgba(255,255,255,0.08);
-    padding: 28px;
+    padding: 28px; margin:auto;
   }
   .auth-tabs{display:flex; gap:8px; margin-bottom:20px;}
   .auth-tab{
     flex:1; text-align:center; padding:10px; border-radius:10px; font-family:'Fredoka'; font-weight:600;
     cursor:pointer; background:var(--card); color:var(--text-dim); font-size:14px;
+    -webkit-tap-highlight-color:transparent; user-select:none;
+    border:none; outline:none;
   }
   .auth-tab.active{background:var(--violet); color:#fff;}
   .auth-field{
@@ -226,6 +229,22 @@
   }
   .auth-error{color:var(--orange); font-size:13px; margin-bottom:10px; min-height:16px;}
   .auth-close{position:absolute; top:16px; right:16px;}
+  .auth-step-label{color:var(--text-dim); font-size:13px; margin-bottom:12px; text-align:center; font-family:'Fredoka'; font-size:15px;}
+  .avatar-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px;}
+  .avatar-opt{
+    aspect-ratio:1; border-radius:12px; border:2px solid rgba(255,255,255,0.08);
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition:border-color 0.15s, transform 0.12s;
+  }
+  .avatar-opt:hover{transform:scale(1.07);}
+  .avatar-opt.selected{border-color:var(--lime); box-shadow:0 0 10px rgba(198,255,61,0.35);}
+  .avatar-emoji{font-size:24px; line-height:1;}
+  .avatar-label{font-size:9px; color:rgba(255,255,255,0.55); font-family:'Inter'; margin-top:3px;}
+  .auth-back{
+    flex-shrink:0; background:var(--card); color:var(--text-dim); border:1px solid rgba(255,255,255,0.1);
+    border-radius:12px; padding:12px 16px; cursor:pointer; font-size:14px; font-family:'Inter';
+  }
+  .auth-back:hover{border-color:rgba(124,58,237,0.6);}
   .hs-panel{
     width:100%; max-width:340px; background:var(--card); border-radius:14px; padding:14px 16px;
     border:1px solid rgba(255,255,255,0.08); font-size:13.5px;
