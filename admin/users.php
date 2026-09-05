@@ -4,18 +4,53 @@ $pageTitle = 'Nutzer';
 $activeNav = 'users';
 require __DIR__ . '/includes/layout_top.php';
 ?>
+
+<style>
+.create-panel {
+  display: none; background: var(--card); border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.08); padding: 24px;
+  margin-bottom: 20px; max-width: 480px;
+}
+.create-panel.open { display: block; }
+.create-panel h3 { margin-bottom: 16px; color: var(--text); }
+.create-field {
+  width: 100%; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.12); background: var(--bg-alt);
+  color: var(--text); font-size: 13.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif;
+}
+.create-field:focus { outline: none; border-color: var(--violet-light); }
+.avatar-picker-label { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+.avatar-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.avatar-opt-admin {
+  width: 46px; height: 46px; border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.1); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; transition: border-color .15s, transform .12s;
+}
+.avatar-opt-admin:hover { transform: scale(1.08); }
+.avatar-opt-admin.selected { border-color: var(--violet-light); box-shadow: 0 0 8px rgba(124,58,237,0.4); }
+.create-panel-actions { display: flex; gap: 10px; }
+.avatar-cell { font-size: 20px; text-align: center; }
+</style>
+
 <div class="toolbar">
-  <button class="btn btn-primary" onclick="document.getElementById('createUserForm').classList.toggle('open')">+ Nutzer anlegen</button>
+  <button class="btn btn-primary" onclick="document.getElementById('createPanel').classList.toggle('open')">+ Nutzer anlegen</button>
 </div>
 
-<form id="createUserForm" class="inline-form">
-  <input type="text" id="newUserName" placeholder="Anzeigename">
-  <input type="email" id="newUserEmail" placeholder="E-Mail" required>
-  <input type="password" id="newUserPassword" placeholder="Passwort (min. 6 Zeichen)" required minlength="6">
-  <div class="avatar-picker-label">Avatar wählen:</div>
-  <div class="avatar-picker" id="adminAvatarPicker"></div>
-  <button type="submit" class="btn btn-primary">Anlegen</button>
-</form>
+<div class="create-panel" id="createPanel">
+  <h3>Neuen Nutzer anlegen</h3>
+  <form id="createUserForm">
+    <input class="create-field" type="text" id="newUserName" placeholder="Anzeigename">
+    <input class="create-field" type="email" id="newUserEmail" placeholder="E-Mail" required>
+    <input class="create-field" type="password" id="newUserPassword" placeholder="Passwort (min. 6 Zeichen)" required minlength="6">
+    <div class="avatar-picker-label">Avatar wählen (optional)</div>
+    <div class="avatar-picker" id="adminAvatarPicker"></div>
+    <div class="create-panel-actions">
+      <button type="submit" class="btn btn-primary">Anlegen</button>
+      <button type="button" class="btn" onclick="document.getElementById('createPanel').classList.remove('open')">Abbrechen</button>
+    </div>
+  </form>
+</div>
 
 <table class="data-table" id="usersTable">
   <thead>
@@ -23,18 +58,6 @@ require __DIR__ . '/includes/layout_top.php';
   </thead>
   <tbody><tr><td colspan="7">Lade…</td></tr></tbody>
 </table>
-
-<style>
-.avatar-picker-label { font-size: 13px; color: var(--text-dim, #888); margin-top: 6px; }
-.avatar-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 12px; }
-.avatar-opt-admin {
-  width: 44px; height: 44px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.12);
-  cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-size: 20px; background: #1a1a2e; transition: border-color .15s;
-}
-.avatar-opt-admin.selected { border-color: #7C3AED; box-shadow: 0 0 8px rgba(124,58,237,0.4); }
-.avatar-cell { font-size: 22px; text-align: center; }
-</style>
 
 <script>
 const AVATARS = [
@@ -58,7 +81,6 @@ function avatarEmoji(id) {
 
 function buildAvatarPicker() {
   const picker = document.getElementById('adminAvatarPicker');
-  picker.innerHTML = '';
   AVATARS.forEach(a => {
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -75,11 +97,11 @@ function buildAvatarPicker() {
   });
 }
 
-async function loadUsers(){
+async function loadUsers() {
   const users = await apiCall('GET', 'api/users.php');
   const tbody = document.querySelector('#usersTable tbody');
   tbody.innerHTML = '';
-  if(!Array.isArray(users) || users.length===0){
+  if (!Array.isArray(users) || users.length === 0) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
     td.colSpan = 7;
@@ -139,13 +161,13 @@ async function loadUsers(){
   });
 }
 
-async function toggleActive(id, active){
+async function toggleActive(id, active) {
   await apiCall('PATCH', 'api/users.php', { id, active });
   loadUsers();
 }
 
-async function deleteUser(id, email){
-  if(!confirm(`Nutzer ${email} wirklich löschen? Das entfernt auch alle Highscores dieses Nutzers.`)) return;
+async function deleteUser(id, email) {
+  if (!confirm(`Nutzer ${email} wirklich löschen? Das entfernt auch alle Highscores dieses Nutzers.`)) return;
   await apiCall('DELETE', `api/users.php?id=${encodeURIComponent(id)}`);
   loadUsers();
 }
@@ -159,7 +181,7 @@ document.getElementById('createUserForm').addEventListener('submit', async (e) =
   e.target.reset();
   selectedAvatar = '';
   document.querySelectorAll('.avatar-opt-admin').forEach(b => b.classList.remove('selected'));
-  e.target.classList.remove('open');
+  document.getElementById('createPanel').classList.remove('open');
   loadUsers();
 });
 
