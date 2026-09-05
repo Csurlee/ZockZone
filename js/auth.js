@@ -62,7 +62,7 @@ window.zzOpenAuth = () => {
   document.getElementById('authOverlay').classList.add('open');
 };
 
-window.zzOpenProfile = () => {
+window.zzOpenProfile = async () => {
   if(!currentUser) return;
   const av = AVATARS.find(a => a.id === currentUser.user_metadata?.avatar);
   const bigEl = document.getElementById('profileAvatarBig');
@@ -75,6 +75,10 @@ window.zzOpenProfile = () => {
   document.getElementById('profilePw2').value   = '';
   document.getElementById('profileError').textContent   = '';
   document.getElementById('profileSuccess').textContent = '';
+
+  // hide_from_ranking aus DB laden
+  const { data: prof } = await supabase.from('profiles').select('hide_from_ranking').eq('id', currentUser.id).maybeSingle();
+  document.getElementById('profileHide').checked = prof?.hide_from_ranking ?? false;
 
   renderProfileAvatarGrid(currentUser.user_metadata?.avatar || '');
   document.getElementById('profileOverlay').classList.add('open');
@@ -129,9 +133,11 @@ window.zzSaveProfile = async () => {
     const { error } = await supabase.auth.updateUser(updates);
     if(error) throw error;
 
+    const hideFromRanking = document.getElementById('profileHide').checked;
     await supabase.from('profiles').update({
       display_name: name,
       email: email,
+      hide_from_ranking: hideFromRanking,
     }).eq('id', currentUser.id);
 
     successEl.textContent = 'Gespeichert!';
@@ -313,6 +319,65 @@ window.zzSaveHighScore = async (gameId, gameTitle, score) => {
     }
   } catch(e){ console.warn('Highscore konnte nicht gespeichert werden:', e.message); }
 };
+
+// ============ RANGLISTE ============
+window.zzOpenRanking = async () => {
+  document.getElementById('rankingOverlay').classList.add('open');
+  const content = document.getElementById('rankingContent');
+  content.innerHTML = '<div class="ranking-loading">Lade…</div>';
+
+  try{
+    const [{ data: scores }, { data: profiles }] = await Promise.all([
+      supabase.from('highscores').select('user_id, game_id, score'),
+      supabase.from('profiles').select('id, display_name, avatar, hide_from_ranking').eq('active', true),
+    ]);
+
+    const profileMap = {};
+    (profiles || []).forEach(p => { profileMap[p.id] = p; });
+
+    // Aggregiere pro Nutzer: Anzahl Spiele + Gesamtpunkte
+    const userStats = {};
+    (scores || []).forEach(s => {
+      if(!userStats[s.user_id]) userStats[s.user_id] = { count: 0, total: 0 };
+      userStats[s.user_id].count++;
+      userStats[s.user_id].total += s.score;
+    });
+
+    const ranked = Object.entries(userStats)
+      .map(([uid, stats]) => ({ uid, ...stats, profile: profileMap[uid] || null }))
+      .filter(u => u.profile)
+      .sort((a, b) => b.count - a.count || b.total - a.total);
+
+    if(ranked.length === 0){
+      content.innerHTML = '<div class="ranking-empty">Noch keine Einträge. Spiel ein Spiel und erziele einen Highscore!</div>';
+      return;
+    }
+
+    const medals = ['🥇','🥈','🥉'];
+    content.innerHTML = '';
+    ranked.forEach((u, i) => {
+      const hidden = u.profile.hide_from_ranking;
+      const av = AVATARS.find(a => a.id === u.profile.avatar);
+      const row = document.createElement('div');
+      row.className = 'ranking-row';
+      row.innerHTML = `
+        <span class="ranking-rank">${medals[i] || (i+1) + '.'}</span>
+        <span class="ranking-avatar">${hidden ? '👻' : (av ? av.emoji : '👤')}</span>
+        <div class="ranking-info">
+          <div class="ranking-name">${hidden ? 'Anonym' : escapeHtml(u.profile.display_name || 'Spieler')}</div>
+          <div class="ranking-sub">${u.count} Spiel${u.count !== 1 ? 'e' : ''} auf der Bestenliste</div>
+        </div>
+        <span class="ranking-score">${u.total.toLocaleString('de-DE')}</span>
+      `;
+      content.appendChild(row);
+    });
+  } catch(e){
+    content.innerHTML = '<div class="ranking-empty">Rangliste konnte nicht geladen werden.</div>';
+  }
+};
+window.zzCloseRanking = () => document.getElementById('rankingOverlay').classList.remove('open');
+
+function escapeHtml(str){ return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 window.zzShowLeaderboard = async (gameId, gameTitle, containerEl) => {
   containerEl.innerHTML = '<div class="hs-row">Lade Bestenliste…</div>';

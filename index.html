@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260905d">
+<link rel="stylesheet" href="css/style.css?v=20260905e">
 </head>
 <body>
 
@@ -18,6 +18,7 @@
   <div class="navlinks">
     <span>Neu</span><span>Beliebt</span><span>2-Spieler</span><span>Denksport</span>
   </div>
+  <button class="account-btn ranking-btn" onclick="zzOpenRanking()">🏆 Rangliste</button>
   <button class="account-btn" id="accountBtn" onclick="zzToggleAccount()">👤 Login</button>
 </header>
 
@@ -56,6 +57,15 @@
 </div>
 
 
+<!-- RANKING OVERLAY -->
+<div class="auth-overlay" id="rankingOverlay">
+  <div class="auth-box ranking-box" style="position:relative;">
+    <button class="icon-btn auth-close" onclick="zzCloseRanking()">✕</button>
+    <h2 class="profile-title">🏆 Rangliste</h2>
+    <div id="rankingContent"><div class="ranking-loading">Lade…</div></div>
+  </div>
+</div>
+
 <!-- PROFIL OVERLAY -->
 <div class="auth-overlay" id="profileOverlay">
   <div class="auth-box profile-box" style="position:relative;">
@@ -75,6 +85,11 @@
     <input class="auth-field" id="profileEmail" type="email"    placeholder="E-Mail">
     <input class="auth-field" id="profilePw"    type="password" placeholder="Neues Passwort (leer = nicht ändern)">
     <input class="auth-field" id="profilePw2"   type="password" placeholder="Passwort wiederholen">
+
+    <label class="profile-hide-label">
+      <input type="checkbox" id="profileHide">
+      Meinen Namen in der Rangliste verbergen
+    </label>
 
     <button class="auth-submit" onclick="zzSaveProfile()">Speichern</button>
     <button class="profile-logout-btn" onclick="zzLogOut(); zzCloseProfile();">Logout</button>
@@ -123,7 +138,7 @@
   </div>
 </div>
 
-<script type="module" src="js/auth.js?v=20260905d"></script>
-<script type="module" src="js/core.js?v=20260905d"></script>
+<script type="module" src="js/auth.js?v=20260905e"></script>
+<script type="module" src="js/core.js?v=20260905e"></script>
 </body>
 </html>
