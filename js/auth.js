@@ -13,6 +13,7 @@ let authStep = 1;       // 1 = Zugangsdaten, 2 = Avatar
 let selectedAvatar = null;
 let pendingSignup = null; // { email, password, name }
 let currentUser = null;
+let isReauthForDeletion = false; // verhindert dass der SIGNED_IN-Handler die Löschvormerkung löscht
 
 const AVATARS = [
   { id: 'snake',    emoji: '🐍', label: 'Snake',    bg: '#14532d' },
@@ -287,11 +288,14 @@ window.zzRequestDeletion = async () => {
 
   if(!pw){ errEl.textContent = 'Bitte Passwort eingeben.'; return; }
 
-  // Passwort per Re-Authentifizierung prüfen
+  // Passwort per Re-Authentifizierung prüfen (Flag verhindert Race-Condition im SIGNED_IN-Handler)
+  isReauthForDeletion = true;
   const { error: authErr } = await supabase.auth.signInWithPassword({
     email: currentUser.email,
     password: pw
   });
+  isReauthForDeletion = false;
+
   if(authErr){ errEl.textContent = 'Passwort falsch. Bitte erneut versuchen.'; return; }
 
   try{
@@ -301,11 +305,25 @@ window.zzRequestDeletion = async () => {
       .eq('id', currentUser.id);
     if(error) throw error;
     document.getElementById('profileDeleteConfirm').hidden = true;
-    await window.zzOpenProfile(); // Warnung anzeigen
+    await window.zzOpenProfile(); // Warnung mit Löschdatum anzeigen
   } catch(e){
     errEl.textContent = 'Fehler: ' + e.message;
   }
 };
+
+function showDeletionCancelledNotice(){
+  // Toast-Meldung: Konto wurde reaktiviert
+  let toast = document.getElementById('zzToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'zzToast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = '✅ Löschung abgebrochen — dein Konto ist wieder aktiv!';
+  toast.className = 'zz-toast zz-toast-show';
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => { toast.className = 'zz-toast'; }, 4000);
+}
 
 window.zzCancelDeletion = async () => {
   if(!currentUser) return;
@@ -351,11 +369,21 @@ supabase.auth.onAuthStateChange((event, session) => {
   updateAccountUI(user);
   if(event === 'SIGNED_IN' && user){
     ensureProfile(user);
-    // Login = Nutzer möchte das Konto behalten → Löschvormerkung aufheben
-    supabase.from('profiles')
-      .update({ deletion_requested_at: null })
-      .eq('id', user.id)
-      .then(() => {});
+    if(!isReauthForDeletion){
+      // Echter Login → prüfen ob Löschvormerkung aktiv, falls ja: abbrechen + Meldung
+      supabase.from('profiles')
+        .select('deletion_requested_at')
+        .eq('id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if(data?.deletion_requested_at){
+            supabase.from('profiles')
+              .update({ deletion_requested_at: null })
+              .eq('id', user.id)
+              .then(() => showDeletionCancelledNotice());
+          }
+        });
+    }
   }
 });
 supabase.auth.getSession().then(({ data }) => updateAccountUI(data.session?.user || null));

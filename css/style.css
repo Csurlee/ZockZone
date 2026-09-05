@@ -330,6 +330,15 @@
   /* ---- Footer Link ---- */
   .footer-link{background:none; border:none; color:inherit; cursor:pointer; text-decoration:underline; font-size:inherit; font-family:inherit; padding:0; opacity:0.7;}
   .footer-link:hover{opacity:1;}
+  .zz-toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+    background:#14532d; color:#bbf7d0; border:1px solid #4ade80;
+    padding:12px 20px; border-radius:14px; font-size:14px; font-weight:600;
+    z-index:999; white-space:nowrap; opacity:0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    pointer-events:none;
+  }
+  .zz-toast.zz-toast-show{transform:translateX(-50%) translateY(0); opacity:1;}
   .hs-panel{
     width:100%; max-width:340px; background:var(--card); border-radius:14px; padding:14px 16px;
     border:1px solid rgba(255,255,255,0.08); font-size:13.5px;
