@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260905f">
+<link rel="stylesheet" href="css/style.css?v=20260905g">
 </head>
 <body>
 
@@ -93,6 +93,9 @@
 
     <button class="auth-submit" onclick="zzSaveProfile()">Speichern</button>
     <button class="profile-logout-btn" onclick="zzLogOut(); zzCloseProfile();">Logout</button>
+
+    <div id="profileDeleteWarning" hidden class="profile-delete-warning"></div>
+    <button id="profileDeleteBtn" class="profile-delete-btn" onclick="zzRequestDeletion()">Konto löschen</button>
   </div>
 </div>
 
@@ -190,8 +193,8 @@
   </div>
 </div>
 
-<script type="module" src="js/consent.js?v=20260905f"></script>
-<script type="module" src="js/auth.js?v=20260905f"></script>
-<script type="module" src="js/core.js?v=20260905f"></script>
+<script type="module" src="js/consent.js?v=20260905g"></script>
+<script type="module" src="js/auth.js?v=20260905g"></script>
+<script type="module" src="js/core.js?v=20260905g"></script>
 </body>
 </html>

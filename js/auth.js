@@ -76,9 +76,27 @@ window.zzOpenProfile = async () => {
   document.getElementById('profileError').textContent   = '';
   document.getElementById('profileSuccess').textContent = '';
 
-  // hide_from_ranking aus DB laden
-  const { data: prof } = await supabase.from('profiles').select('hide_from_ranking').eq('id', currentUser.id).maybeSingle();
+  // Profil aus DB laden (hide_from_ranking + deletion_requested_at)
+  const { data: prof } = await supabase.from('profiles')
+    .select('hide_from_ranking, deletion_requested_at')
+    .eq('id', currentUser.id).maybeSingle();
   document.getElementById('profileHide').checked = prof?.hide_from_ranking ?? false;
+
+  // Löschungs-Warnung anzeigen wenn vorgemerkt
+  const delWarning = document.getElementById('profileDeleteWarning');
+  const delBtn = document.getElementById('profileDeleteBtn');
+  if(prof?.deletion_requested_at){
+    const d = new Date(prof.deletion_requested_at);
+    const deleteOn = new Date(d.getTime() + 10 * 24 * 60 * 60 * 1000);
+    const opts = { day:'2-digit', month:'2-digit', year:'numeric' };
+    delWarning.innerHTML = `⚠️ Dein Konto wird am <strong>${deleteOn.toLocaleDateString('de-DE', opts)}</strong> gelöscht, wenn du dich nicht vorher einloggst.<br>
+      <button class="profile-cancel-delete-btn" onclick="zzCancelDeletion()">Löschung abbrechen</button>`;
+    delWarning.hidden = false;
+    if(delBtn) delBtn.hidden = true;
+  } else {
+    delWarning.hidden = true;
+    if(delBtn) delBtn.hidden = false;
+  }
 
   renderProfileAvatarGrid(currentUser.user_metadata?.avatar || '');
   document.getElementById('profileOverlay').classList.add('open');
@@ -244,6 +262,43 @@ window.zzConfirmSignup = async () => {
 
 window.zzLogOut = () => supabase.auth.signOut();
 
+window.zzRequestDeletion = async () => {
+  if(!currentUser) return;
+  const confirmed = confirm(
+    'Möchtest du dein Konto wirklich löschen?\n\n' +
+    'Dein Konto wird in 10 Tagen automatisch gelöscht, sofern du dich nicht vorher einloggst.\n' +
+    'Du kannst die Löschung jederzeit abbrechen, indem du dich wieder einloggst oder auf "Löschung abbrechen" klickst.'
+  );
+  if(!confirmed) return;
+  const errEl = document.getElementById('profileError');
+  errEl.textContent = '';
+  try{
+    const now = new Date().toISOString();
+    const { error } = await supabase.from('profiles')
+      .update({ deletion_requested_at: now })
+      .eq('id', currentUser.id);
+    if(error) throw error;
+    await window.zzOpenProfile(); // Neu laden um Warnung anzuzeigen
+  } catch(e){
+    errEl.textContent = 'Fehler: ' + e.message;
+  }
+};
+
+window.zzCancelDeletion = async () => {
+  if(!currentUser) return;
+  const errEl = document.getElementById('profileError');
+  errEl.textContent = '';
+  try{
+    const { error } = await supabase.from('profiles')
+      .update({ deletion_requested_at: null })
+      .eq('id', currentUser.id);
+    if(error) throw error;
+    await window.zzOpenProfile(); // Neu laden
+  } catch(e){
+    errEl.textContent = 'Fehler: ' + e.message;
+  }
+};
+
 function translateAuthError(msg){
   const map = {
     'User already registered': 'Diese E-Mail ist schon registriert. Wechsle zu Login.',
@@ -271,7 +326,14 @@ window.zzIsLoggedIn = () => !!currentUser;
 supabase.auth.onAuthStateChange((event, session) => {
   const user = session?.user || null;
   updateAccountUI(user);
-  if(event === 'SIGNED_IN' && user) ensureProfile(user);
+  if(event === 'SIGNED_IN' && user){
+    ensureProfile(user);
+    // Login = Nutzer möchte das Konto behalten → Löschvormerkung aufheben
+    supabase.from('profiles')
+      .update({ deletion_requested_at: null })
+      .eq('id', user.id)
+      .then(() => {});
+  }
 });
 supabase.auth.getSession().then(({ data }) => updateAccountUI(data.session?.user || null));
 
