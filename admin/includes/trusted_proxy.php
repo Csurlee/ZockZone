@@ -36,12 +36,25 @@ function is_cloudflare_ip(string $ip): bool {
     return false;
 }
 
-// Resolves the real visitor IP: only honors CF-Connecting-IP when the direct
-// peer (REMOTE_ADDR) is actually a Cloudflare edge IP; otherwise a client could
-// forge that header by connecting straight to the origin and spoof any IP.
+// Returns true when REMOTE_ADDR is a private/loopback address — which means
+// the request arrived via Cloudflare Tunnel (cloudflared daemon runs locally
+// and forwards traffic; the origin never gets a public REMOTE_ADDR in this
+// setup). In that case CF-Connecting-IP is still trustworthy because the
+// tunnel blocks all direct external connections to the origin.
+function is_private_ip(string $ip): bool {
+    // A valid IP that fails the "no private/reserved range" check IS private.
+    return filter_var($ip, FILTER_VALIDATE_IP) !== false
+        && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
+}
+
+// Resolves the real visitor IP: honors CF-Connecting-IP when the direct peer
+// (REMOTE_ADDR) is either a Cloudflare edge IP (traditional Cloudflare proxy)
+// or a private/loopback IP (Cloudflare Tunnel). In both cases the header is
+// set by Cloudflare and cannot be forged by an external attacker.
 function resolve_visitor_ip(): string {
     $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
-    if (isset($_SERVER['HTTP_CF_CONNECTING_IP']) && is_cloudflare_ip($remoteAddr)) {
+    if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])
+        && (is_cloudflare_ip($remoteAddr) || is_private_ip($remoteAddr))) {
         return $_SERVER['HTTP_CF_CONNECTING_IP'];
     }
     return $remoteAddr;
