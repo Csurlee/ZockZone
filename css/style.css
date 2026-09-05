@@ -215,6 +215,7 @@
   .signup-btn{background:var(--violet); border-color:var(--violet); color:#fff;}
   .signup-btn:hover{background:#6d28d9; border-color:#6d28d9;}
   .auth-btn-group{display:flex; gap:6px; align-items:center;}
+  .turnstile-wrap{justify-content:center; margin-bottom:10px;}
   .auth-overlay{
     position:fixed; inset:0; background:rgba(10,8,18,0.92); backdrop-filter: blur(6px);
     z-index:110; display:none; align-items:flex-start; justify-content:center;

@@ -200,7 +200,7 @@ window.zzSwitchTab = (mode) => {
   const isSignup = mode === 'signup';
   document.getElementById('signupOnlyFields').style.display = isSignup ? '' : 'none';
   document.getElementById('signupPw2Wrap').style.display    = isSignup ? '' : 'none';
-  document.getElementById('turnstileWrap').style.display    = isSignup ? '' : 'none';
+  document.getElementById('turnstileWrap').style.display    = isSignup ? 'flex' : 'none';
   document.getElementById('authSubmitBtn').textContent = isSignup ? 'Weiter →' : 'Einloggen';
   document.getElementById('authStep1').style.display = '';
   document.getElementById('authStep2').style.display = 'none';
