@@ -31,6 +31,10 @@ require __DIR__ . '/includes/layout_top.php';
 .avatar-opt-admin.selected { border-color: var(--violet-light); box-shadow: 0 0 8px rgba(124,58,237,0.4); }
 .create-panel-actions { display: flex; gap: 10px; }
 .avatar-cell { font-size: 20px; text-align: center; }
+.role-select {
+  background: var(--bg-alt); color: var(--text); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif;
+}
 </style>
 
 <div class="toolbar">
@@ -56,9 +60,9 @@ require __DIR__ . '/includes/layout_top.php';
 
 <table class="data-table" id="usersTable">
   <thead>
-    <tr><th>Avatar</th><th>E-Mail</th><th>Anzeigename</th><th>Registriert</th><th>Highscores</th><th>Status</th><th>Aktionen</th></tr>
+    <tr><th>Avatar</th><th>E-Mail</th><th>Anzeigename</th><th>Rolle</th><th>Registriert</th><th>Highscores</th><th>Status</th><th>Aktionen</th></tr>
   </thead>
-  <tbody><tr><td colspan="7">Lade…</td></tr></tbody>
+  <tbody><tr><td colspan="8">Lade…</td></tr></tbody>
 </table>
 
 <script>
@@ -128,6 +132,19 @@ async function loadUsers() {
     tdName.textContent = u.display_name || '—';
     tr.appendChild(tdName);
 
+    const tdRole = document.createElement('td');
+    const roleSelect = document.createElement('select');
+    roleSelect.className = 'role-select';
+    ['user', 'moderator', 'admin'].forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r; opt.textContent = r.charAt(0).toUpperCase() + r.slice(1);
+      if (r === u.role) opt.selected = true;
+      roleSelect.appendChild(opt);
+    });
+    roleSelect.addEventListener('change', () => changeRole(u.id, roleSelect.value));
+    tdRole.appendChild(roleSelect);
+    tr.appendChild(tdRole);
+
     const tdCreated = document.createElement('td');
     tdCreated.textContent = new Date(u.created_at).toLocaleDateString('de-DE');
     tr.appendChild(tdCreated);
@@ -146,17 +163,24 @@ async function loadUsers() {
     const tdActions = document.createElement('td');
     tdActions.className = 'actions';
 
-    const toggleBtn = document.createElement('button');
-    toggleBtn.className = 'btn btn-sm';
-    toggleBtn.textContent = u.active ? 'Deaktivieren' : 'Aktivieren';
-    toggleBtn.addEventListener('click', () => toggleActive(u.id, !u.active));
-    tdActions.appendChild(toggleBtn);
+    if (u.role !== 'admin') {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'btn btn-sm';
+      toggleBtn.textContent = u.active ? 'Deaktivieren' : 'Aktivieren';
+      toggleBtn.addEventListener('click', () => toggleActive(u.id, !u.active));
+      tdActions.appendChild(toggleBtn);
 
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-sm btn-danger';
-    delBtn.textContent = 'Löschen';
-    delBtn.addEventListener('click', () => deleteUser(u.id, u.email));
-    tdActions.appendChild(delBtn);
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn btn-sm btn-danger';
+      delBtn.textContent = 'Löschen';
+      delBtn.addEventListener('click', () => deleteUser(u.id, u.email));
+      tdActions.appendChild(delBtn);
+    } else {
+      const note = document.createElement('span');
+      note.style.cssText = 'font-size:11px; color:var(--text-dim)';
+      note.textContent = 'Geschützt';
+      tdActions.appendChild(note);
+    }
 
     tr.appendChild(tdActions);
     tbody.appendChild(tr);
@@ -165,6 +189,11 @@ async function loadUsers() {
 
 async function toggleActive(id, active) {
   await apiCall('PATCH', 'api/users.php', { id, active });
+  loadUsers();
+}
+
+async function changeRole(id, role) {
+  await apiCall('PUT', 'api/users.php?role=1', { id, role });
   loadUsers();
 }
 

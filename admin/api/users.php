@@ -12,7 +12,7 @@ if ($method === 'GET') {
     $users = $data['users'] ?? [];
 
     // Join with profiles (display_name, active) and count highscores per user.
-    [, $profiles] = sb_request('GET', '/rest/v1/profiles?select=id,display_name,active');
+    [, $profiles] = sb_request('GET', '/rest/v1/profiles?select=id,display_name,active,role');
     $profileById = [];
     foreach (($profiles ?? []) as $p) $profileById[$p['id']] = $p;
 
@@ -35,6 +35,7 @@ if ($method === 'GET') {
             'created_at' => $u['created_at'] ?? '',
             'active' => !$isBanned,
             'score_count' => $countByUser[$u['id']] ?? 0,
+            'role' => $p['role'] ?? 'user',
         ];
     }, $users);
 
@@ -103,9 +104,31 @@ if ($method === 'PATCH') {
 if ($method === 'DELETE') {
     $id = $_GET['id'] ?? '';
     if ($id === '') { http_response_code(400); echo json_encode(['error' => 'id fehlt']); exit; }
+    // Admins dürfen nicht gelöscht werden
+    [, $profile] = sb_request('GET', '/rest/v1/profiles?id=eq.' . rawurlencode($id) . '&select=role');
+    if (($profile[0]['role'] ?? '') === 'admin') {
+        http_response_code(403); echo json_encode(['error' => 'Admin-Konten können nicht gelöscht werden.']); exit;
+    }
     [$status, $data] = sb_request('DELETE', '/auth/v1/admin/users/' . rawurlencode($id));
     http_response_code($status);
     echo json_encode(['ok' => $status < 300, 'detail' => $data]);
+    exit;
+}
+
+if ($method === 'PUT' && isset($_GET['role'])) {
+    // Rollen-Änderung: nur Admins dürfen Rollen vergeben
+    if (($_SESSION['zz_admin_role'] ?? '') !== 'admin') {
+        http_response_code(403); echo json_encode(['error' => 'Nur Admins dürfen Rollen ändern.']); exit;
+    }
+    $input = json_decode(file_get_contents('php://input'), true) ?? [];
+    $id   = $input['id'] ?? '';
+    $role = $input['role'] ?? '';
+    if ($id === '' || !in_array($role, ['user', 'moderator', 'admin'], true)) {
+        http_response_code(400); echo json_encode(['error' => 'Ungültige Eingabe']); exit;
+    }
+    [$status,] = sb_request('PATCH', '/rest/v1/profiles?id=eq.' . rawurlencode($id), ['role' => $role]);
+    http_response_code($status < 300 ? 200 : $status);
+    echo json_encode(['ok' => $status < 300]);
     exit;
 }
 

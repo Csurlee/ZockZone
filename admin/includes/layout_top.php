@@ -19,6 +19,10 @@
     <a href="games.php" class="<?= $activeNav==='games'?'active':'' ?>">Spiele</a>
     <a href="scores.php" class="<?= $activeNav==='scores'?'active':'' ?>">Highscores</a>
     <a href="visitors.php" class="<?= $activeNav==='visitors'?'active':'' ?>">Besucher</a>
+    <div class="admin-user-info">
+      <span class="admin-user-email"><?= htmlspecialchars($_SESSION['zz_admin_email'] ?? '') ?></span>
+      <span class="admin-user-role"><?= htmlspecialchars(ucfirst($_SESSION['zz_admin_role'] ?? '')) ?></span>
+    </div>
     <a href="logout.php" class="logout-link">Logout</a>
   </nav>
   <main class="admin-main">
