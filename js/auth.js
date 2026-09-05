@@ -85,17 +85,20 @@ window.zzOpenProfile = async () => {
   // Löschungs-Warnung anzeigen wenn vorgemerkt
   const delWarning = document.getElementById('profileDeleteWarning');
   const delBtn = document.getElementById('profileDeleteBtn');
+  const confirmBox = document.getElementById('profileDeleteConfirm');
   if(prof?.deletion_requested_at){
     const d = new Date(prof.deletion_requested_at);
     const deleteOn = new Date(d.getTime() + 10 * 24 * 60 * 60 * 1000);
     const opts = { day:'2-digit', month:'2-digit', year:'numeric' };
-    delWarning.innerHTML = `⚠️ Dein Konto wird am <strong>${deleteOn.toLocaleDateString('de-DE', opts)}</strong> gelöscht, wenn du dich nicht vorher einloggst.<br>
+    delWarning.innerHTML = `⚠️ Dein Konto wird am <strong>${deleteOn.toLocaleDateString('de-DE', opts)}</strong> endgültig gelöscht, sofern du dich nicht vorher einloggst.<br>
       <button class="profile-cancel-delete-btn" onclick="zzCancelDeletion()">Löschung abbrechen</button>`;
     delWarning.hidden = false;
     if(delBtn) delBtn.hidden = true;
+    if(confirmBox) confirmBox.hidden = true;
   } else {
     delWarning.hidden = true;
     if(delBtn) delBtn.hidden = false;
+    if(confirmBox) confirmBox.hidden = true;
   }
 
   renderProfileAvatarGrid(currentUser.user_metadata?.avatar || '');
@@ -262,23 +265,43 @@ window.zzConfirmSignup = async () => {
 
 window.zzLogOut = () => supabase.auth.signOut();
 
+window.zzShowDeleteConfirm = () => {
+  document.getElementById('profileDeleteConfirm').hidden = false;
+  document.getElementById('profileDeleteBtn').hidden = true;
+  document.getElementById('profileDeletePw').value = '';
+  document.getElementById('profileDeleteError').textContent = '';
+  document.getElementById('profileDeletePw').focus();
+};
+
+window.zzHideDeleteConfirm = () => {
+  document.getElementById('profileDeleteConfirm').hidden = true;
+  document.getElementById('profileDeleteBtn').hidden = false;
+  document.getElementById('profileDeleteError').textContent = '';
+};
+
 window.zzRequestDeletion = async () => {
   if(!currentUser) return;
-  const confirmed = confirm(
-    'Möchtest du dein Konto wirklich löschen?\n\n' +
-    'Dein Konto wird in 10 Tagen automatisch gelöscht, sofern du dich nicht vorher einloggst.\n' +
-    'Du kannst die Löschung jederzeit abbrechen, indem du dich wieder einloggst oder auf "Löschung abbrechen" klickst.'
-  );
-  if(!confirmed) return;
-  const errEl = document.getElementById('profileError');
+  const pw = document.getElementById('profileDeletePw').value;
+  const errEl = document.getElementById('profileDeleteError');
   errEl.textContent = '';
+
+  if(!pw){ errEl.textContent = 'Bitte Passwort eingeben.'; return; }
+
+  // Passwort per Re-Authentifizierung prüfen
+  const { error: authErr } = await supabase.auth.signInWithPassword({
+    email: currentUser.email,
+    password: pw
+  });
+  if(authErr){ errEl.textContent = 'Passwort falsch. Bitte erneut versuchen.'; return; }
+
   try{
     const now = new Date().toISOString();
     const { error } = await supabase.from('profiles')
       .update({ deletion_requested_at: now })
       .eq('id', currentUser.id);
     if(error) throw error;
-    await window.zzOpenProfile(); // Neu laden um Warnung anzuzeigen
+    document.getElementById('profileDeleteConfirm').hidden = true;
+    await window.zzOpenProfile(); // Warnung anzeigen
   } catch(e){
     errEl.textContent = 'Fehler: ' + e.message;
   }

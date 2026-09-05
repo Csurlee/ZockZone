@@ -272,6 +272,21 @@
     -webkit-tap-highlight-color:transparent;
   }
   .profile-cancel-delete-btn:hover{border-color:#4ade80; background:rgba(74,222,128,0.08);}
+  .profile-delete-confirm{
+    margin-top:14px; padding:16px; border-radius:14px;
+    background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.4);
+  }
+  .profile-delete-confirm-icon{font-size:28px; text-align:center; margin-bottom:8px;}
+  .profile-delete-confirm-title{
+    font-family:'Fredoka'; font-size:17px; font-weight:700; color:#fca5a5; text-align:center; margin-bottom:8px;
+  }
+  .profile-delete-confirm-text{font-size:13px; color:#fecaca; line-height:1.5; margin-bottom:4px;}
+  .profile-delete-confirm-btn{
+    background:#ef4444; color:#fff; border:none;
+    font-weight:700; font-family:'Fredoka'; padding:10px 14px; border-radius:10px; cursor:pointer; font-size:14px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .profile-delete-confirm-btn:hover{background:#dc2626;}
   .profile-hide-label{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-dim); margin-bottom:14px; cursor:pointer;}
   .profile-hide-label input[type=checkbox]{width:16px; height:16px; accent-color:var(--violet); cursor:pointer; flex-shrink:0;}
   .ranking-btn{border-color:rgba(198,255,61,0.3); color:var(--lime);}

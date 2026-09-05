@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260905g">
+<link rel="stylesheet" href="css/style.css?v=20260905h">
 </head>
 <body>
 
@@ -95,7 +95,27 @@
     <button class="profile-logout-btn" onclick="zzLogOut(); zzCloseProfile();">Logout</button>
 
     <div id="profileDeleteWarning" hidden class="profile-delete-warning"></div>
-    <button id="profileDeleteBtn" class="profile-delete-btn" onclick="zzRequestDeletion()">Konto löschen</button>
+    <button id="profileDeleteBtn" class="profile-delete-btn" onclick="zzShowDeleteConfirm()">Konto löschen</button>
+
+    <!-- Lösch-Bestätigung (wird eingeblendet) -->
+    <div id="profileDeleteConfirm" hidden class="profile-delete-confirm">
+      <div class="profile-delete-confirm-icon">⚠️</div>
+      <p class="profile-delete-confirm-title">Konto wirklich löschen?</p>
+      <p class="profile-delete-confirm-text">
+        Dein Konto und alle deine Daten werden <strong>nach 10 Tagen endgültig gelöscht</strong>,
+        sofern du dich nicht vorher wieder einloggst.<br>
+        Loggst du dich innerhalb dieser Zeit ein, wird die Löschung automatisch abgebrochen.
+      </p>
+      <p class="profile-delete-confirm-text" style="margin-top:8px;">
+        Bitte gib dein <strong>Passwort</strong> ein, um die Löschung zu bestätigen:
+      </p>
+      <input class="auth-field" id="profileDeletePw" type="password" placeholder="Dein Passwort">
+      <div class="auth-error" id="profileDeleteError"></div>
+      <div style="display:flex; gap:8px; margin-top:4px;">
+        <button class="profile-cancel-delete-btn" style="flex:1" onclick="zzHideDeleteConfirm()">Abbrechen</button>
+        <button class="profile-delete-confirm-btn" style="flex:1" onclick="zzRequestDeletion()">Konto löschen</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -193,8 +213,8 @@
   </div>
 </div>
 
-<script type="module" src="js/consent.js?v=20260905g"></script>
-<script type="module" src="js/auth.js?v=20260905g"></script>
-<script type="module" src="js/core.js?v=20260905g"></script>
+<script type="module" src="js/consent.js?v=20260905h"></script>
+<script type="module" src="js/auth.js?v=20260905h"></script>
+<script type="module" src="js/core.js?v=20260905h"></script>
 </body>
 </html>
