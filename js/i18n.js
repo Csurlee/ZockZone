@@ -284,7 +284,7 @@ function applyTranslations() {
   });
   // Show/hide language-specific content blocks
   document.querySelectorAll('[data-lang]').forEach(el => {
-    el.hidden = el.dataset.lang !== lang;
+    el.style.display = el.dataset.lang === lang ? '' : 'none';
   });
   const flag = document.getElementById('langFlag');
   if (flag) flag.textContent = lang === 'de' ? '🇩🇪' : '🇬🇧';
