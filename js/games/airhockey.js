@@ -54,8 +54,9 @@ export function build(){
   }
   function move(e){
     const rect=canvas.getBoundingClientRect();
-    const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
-    const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+    const sx=canvas.width/rect.width, sy=canvas.height/rect.height;
+    const x=((e.touches?e.touches[0].clientX:e.clientX)-rect.left)*sx;
+    const y=((e.touches?e.touches[0].clientY:e.clientY)-rect.top)*sy;
     paddle.x=Math.max(10,Math.min(190,x));
     paddle.y=Math.max(12,Math.min(248,y));
   }

@@ -41,7 +41,7 @@ export function build(){
   }
   function move(e){
     const rect=canvas.getBoundingClientRect();
-    const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+    const y=((e.touches?e.touches[0].clientY:e.clientY)-rect.top)*(canvas.height/rect.height);
     pY=Math.max(0,Math.min(220,y-PH/2));
   }
   canvas.addEventListener('mousemove', move);

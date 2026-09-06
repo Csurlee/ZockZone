@@ -47,7 +47,7 @@ export function build(){
   }
   function move(e){
     const rect=canvas.getBoundingClientRect();
-    const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+    const x=((e.touches?e.touches[0].clientX:e.clientX)-rect.left)*(canvas.width/rect.width);
     paddleX=Math.max(0,Math.min(290,x-35));
   }
   canvas.addEventListener('mousemove', move);

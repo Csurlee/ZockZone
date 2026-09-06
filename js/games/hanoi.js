@@ -33,7 +33,7 @@ export function build(){
   }
   canvas.addEventListener('click', e=>{
     const rect=canvas.getBoundingClientRect();
-    const x=e.clientX-rect.left;
+    const x=(e.clientX-rect.left)*(canvas.width/rect.width);
     const ti = x<115?0 : x<225?1:2;
     if(selected===null){
       if(towers[ti].length) selected=ti;

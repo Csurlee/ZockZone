@@ -402,8 +402,74 @@
   .lang-menu button:hover{background:rgba(255,255,255,0.08);}
   .lang-menu button.active-lang{color:var(--lime); font-weight:700;}
 
+  /* === TABLET ≤ 960px === */
+  @media (max-width: 960px){
+    header{padding:14px 4vw;}
+    .navlinks{display:none;}
+    .hero{margin:28px 4vw 20px; gap:20px;}
+    .hero-card{padding:30px; min-height:240px;}
+    .hero-card h1{font-size:34px;}
+    .chips, section.games{padding-left:4vw; padding-right:4vw;}
+    .searchbar{margin:0 10px; max-width:320px;}
+  }
+
+  /* === TABLET PORTRAIT ≤ 780px === */
   @media (max-width: 780px){
     .hero{grid-template-columns:1fr;}
-    .navlinks{display:none;}
-    .searchbar{margin:0 12px;}
+    .searchbar{margin:0 8px; max-width:240px;}
+    .account-btn{padding:8px 12px; font-size:13px;}
+  }
+
+  /* === MOBILE ≤ 600px === */
+  @media (max-width: 600px){
+    /* Header – 2 Zeilen */
+    header{flex-wrap:wrap; padding:10px 4vw; gap:6px;}
+    .brand{font-size:20px;}
+    .searchbar{order:10; flex:0 0 100%; margin:0; max-width:none; padding:8px 14px;}
+    #signupBtn{display:none;}
+    .ranking-btn{display:none;}
+    .account-btn{padding:7px 11px; font-size:12.5px;}
+    .auth-btn-group{gap:4px;}
+
+    /* Hero */
+    .hero{grid-template-columns:1fr; margin:14px 4vw 12px; gap:12px;}
+    .hero-card{min-height:180px; padding:20px;}
+    .hero-card h1{font-size:24px;}
+    .hero-card p{font-size:13px; margin-bottom:12px;}
+    .cta{padding:11px 20px; font-size:14px;}
+    .side-stats{flex-direction:row;}
+    .stat-card{padding:14px 16px;}
+    .stat-num{font-size:24px;}
+
+    /* Chips & Grid */
+    .chips{padding:0 4vw; gap:6px;}
+    .chip{padding:7px 13px; font-size:12px;}
+    section.games{padding:0 4vw;}
+    .grid{grid-template-columns:repeat(2,1fr); gap:10px;}
+    .thumb{height:100px; font-size:40px;}
+    .card-info{padding:8px 10px 12px;}
+    .card-info h3{font-size:13px;}
+    .card-info .meta{font-size:11px;}
+
+    /* Player-Overlay – Bottom-Sheet */
+    .player-overlay{padding:0; align-items:flex-end;}
+    .player-box{border-radius:20px 20px 0 0; width:100%; max-height:96vh;}
+    .player-top{padding:12px 14px;}
+    .player-body{padding:10px 12px;}
+
+    /* Canvas skalieren */
+    canvas{max-width:100%; height:auto;}
+    .canvas-wrap{width:100%;}
+
+    /* Auth */
+    .auth-box{padding:20px;}
+    .auth-overlay{padding:12px;}
+
+    /* Cookie */
+    .cookie-banner{padding:12px 14px;}
+    .cookie-btn-all,.cookie-btn-ess,.cookie-btn-info{padding:8px 12px; font-size:13px;}
+    .cookie-banner-text strong{font-size:14px;}
+    .cookie-banner-actions{gap:6px;}
+
+    footer{margin-top:36px; padding:0 4vw;}
   }

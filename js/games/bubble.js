@@ -46,7 +46,7 @@ export function build(){
   }
   canvas.addEventListener('click', e=>{
     const rect=canvas.getBoundingClientRect();
-    const x=e.clientX-rect.left, y=e.clientY-rect.top;
+    const x=(e.clientX-rect.left)*(canvas.width/rect.width), y=(e.clientY-rect.top)*(canvas.height/rect.height);
     for(let i=bubbles.length-1;i>=0;i--){
       const b=bubbles[i];
       if(Math.hypot(x-b.x,y-b.y)<b.r){

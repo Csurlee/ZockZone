@@ -58,7 +58,7 @@ export function build(){
   document.addEventListener('keydown', key);
   canvas.addEventListener('click', e=>{
     const rect=canvas.getBoundingClientRect();
-    const x=e.clientX-rect.left;
+    const x=(e.clientX-rect.left)*(canvas.width/rect.width);
     if(x<80) lane=Math.max(0,lane-1); else if(x>160) lane=Math.min(2,lane+1);
   });
   window.__restartCurrent=start;
