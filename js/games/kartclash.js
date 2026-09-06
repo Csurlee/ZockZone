@@ -141,6 +141,7 @@ export function build() {
     renderer.domElement.addEventListener('touchend',   onTouchEnd, {passive:false});
 
     updateHUD();
+    window.__restartCurrent = restart;
 
     (function loop() {
       if (!running) return;

@@ -613,6 +613,7 @@ export function build() {
   }
 
   setup();
+  window.__restartCurrent = restart;
   loop();
 
   return function cleanup() {
