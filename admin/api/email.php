@@ -27,10 +27,19 @@ function smtp_send(array $cfg, string $to, string $subject, string $body): ?stri
     $fromName = $cfg['from_name'] ?? '';
 
     if(!$host || !$from) return 'SMTP-Host oder Absender-E-Mail fehlt.';
+    if($from === 'noreply@example.com') return 'Bitte Absender-E-Mail konfigurieren (noch Platzhalter).';
+
+    $ctx = stream_context_create(['ssl' => [
+        'verify_peer'       => true,
+        'verify_peer_name'  => true,
+        'allow_self_signed' => false,
+    ]]);
 
     $scheme = ($enc === 'ssl') ? 'ssl://' : '';
-    $sock = @fsockopen($scheme . $host, $port, $errno, $errstr, 10);
-    if(!$sock) return "Verbindung fehlgeschlagen: $errstr ($errno)";
+    $sock = @stream_socket_client($scheme . $host . ':' . $port, $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $ctx);
+    if(!$sock) return "Verbindung fehlgeschlagen ($errno): $errstr";
+
+    stream_set_timeout($sock, 15);
 
     $send = fn($cmd) => fwrite($sock, $cmd . "\r\n");
     $recv = function() use ($sock) {
@@ -41,12 +50,12 @@ function smtp_send(array $cfg, string $to, string $subject, string $body): ?stri
             $resp .= $line;
             if(strlen($line) >= 4 && $line[3] === ' ') break;
         }
-        return $resp;
+        return trim($resp);
     };
 
     $code = fn($r) => (int)substr(trim($r), 0, 3);
 
-    $recv();
+    $recv(); // banner
     $send('EHLO localhost');
     $recv();
 
@@ -70,10 +79,12 @@ function smtp_send(array $cfg, string $to, string $subject, string $body): ?stri
     }
 
     $send("MAIL FROM:<$from>");
-    $recv();
+    $r = $recv();
+    if($code($r) >= 400) { fclose($sock); return "MAIL FROM abgelehnt: $r"; }
+
     $send("RCPT TO:<$to>");
     $r = $recv();
-    if($code($r) >= 400) { fclose($sock); return "RCPT fehlgeschlagen: $r"; }
+    if($code($r) >= 400) { fclose($sock); return "RCPT TO abgelehnt: $r"; }
 
     $send('DATA');
     $recv();
