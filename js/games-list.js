@@ -15,6 +15,7 @@ export const GAMES = [
   {id:'flappy', title:'Flappy Block', icon:'🟨', cat:'arcade', tag:'hot', rating:'4.9', plays:'2.1k'},
   {id:'fruitslice', title:'Frucht-Slice', icon:'🍉', cat:'arcade', tag:'hot', rating:'4.7', plays:'900'},
   {id:'hangman', title:'Galgenmännchen', icon:'🪢', cat:'puzzle', tag:'', rating:'4.5', plays:'460'},
+  {id:'kartclash', title:'Kart Clash', icon:'🏎️', cat:'arcade', tag:'new', rating:'4.9', plays:'0'},
   {id:'clicker', title:'Klicker-Fabrik', icon:'🪙', cat:'puzzle', tag:'', rating:'4.0', plays:'560'},
   {id:'mathblitz', title:'Kopfrechnen Blitz', icon:'➕', cat:'puzzle', tag:'', rating:'4.4', plays:'370'},
   {id:'maze', title:'Labyrinth', icon:'🧩', cat:'arcade', tag:'', rating:'4.5', plays:'420'},

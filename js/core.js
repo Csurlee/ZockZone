@@ -277,7 +277,8 @@ const builders = {
   match3: () => import('./games/match3.js'),
   typing: () => import('./games/typing.js'),
   slots: () => import('./games/slots.js'),
-  racer: () => import('./games/racer.js')
+  racer: () => import('./games/racer.js'),
+  kartclash: () => import('./games/kartclash.js')
 };
 
 async function loadGame(id){
