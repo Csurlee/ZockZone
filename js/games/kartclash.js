@@ -1,6 +1,6 @@
 import { playerBody, overMsg } from '../core.js';
 
-const CDN = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+const CDN = '/js/lib/three.min.js';
 const ARENA = 26;
 const COLORS = [0xC6FF3D, 0xFF6B2B, 0x4488FF, 0xFF44AA];
 const STARTS = [
