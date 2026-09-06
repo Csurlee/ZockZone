@@ -49,6 +49,14 @@ export function build() {
   infoBar.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-family:Fredoka,sans-serif;font-size:13px;color:#ccc;';
   wrap.appendChild(infoBar);
 
+  // Power bar row — below the table, always visible during aiming
+  const powerRow = document.createElement('div');
+  powerRow.style.cssText = 'padding:2px 10px 6px;display:none;';
+  powerRow.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><span style="font-family:Fredoka;font-size:11px;color:#aaa;white-space:nowrap;">⚡ Schlagkraft</span><div style="flex:1;background:rgba(255,255,255,0.12);border-radius:6px;height:10px;overflow:hidden;"><div style="height:100%;width:12%;background:linear-gradient(90deg,#00cc44 0%,#ffcc00 55%,#ff3300 100%);border-radius:6px;transition:width 0.04s;"></div></div><span style="font-family:Fredoka;font-size:11px;color:#aaa;width:32px;text-align:right;"></span></div>';
+  wrap.appendChild(powerRow);
+  const powerFill = powerRow.querySelector('div > div > div');
+  const powerLabel = powerRow.querySelector('div > span:last-child');
+
   const overEl = overMsg(wrap, '', restart);
 
   // Mode selection overlay
@@ -514,21 +522,6 @@ export function build() {
 
     ctx.restore();
 
-    // Power bar
-    const pct=power/16;
-    const bx=W-20, by=TY1+2, bh=TH-4, bw=9;
-    ctx.fillStyle='rgba(0,0,0,0.45)'; ctx.fillRect(bx,by,bw,bh);
-    const pg=ctx.createLinearGradient(0,by+bh,0,by);
-    pg.addColorStop(0,'#00cc44'); pg.addColorStop(0.55,'#ffcc00'); pg.addColorStop(1,'#ff3300');
-    ctx.fillStyle=pg;
-    ctx.fillRect(bx,by+bh*(1-pct),bw,bh*pct);
-    ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=1;
-    ctx.strokeRect(bx,by,bw,bh);
-
-    // Labels
-    ctx.fillStyle='rgba(255,255,255,0.5)';
-    ctx.font='9px Arial'; ctx.textAlign='center';
-    ctx.fillText('PWR',bx+bw/2,by+bh+10);
   }
 
   function drawFrame() {
@@ -623,6 +616,17 @@ export function build() {
 
     if (state==='aiming' && holding) {
       holdMs=Math.min(holdMs+1, 1400);
+    }
+
+    // Update DOM power bar
+    if (state==='aiming') {
+      const pwr = holding ? getPower() : 2;
+      const pct = Math.round(pwr / 16 * 100);
+      powerFill.style.width = pct + '%';
+      powerLabel.textContent = pct + '%';
+      powerRow.style.display = 'block';
+    } else {
+      powerRow.style.display = 'none';
     }
 
     drawFrame();
