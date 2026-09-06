@@ -258,6 +258,9 @@ window.zzSubmitAuth = async () => {
   if(!pw)              { errEl.textContent = t('err.fill.pw'); return; }
   if(pw.length < 6)    { errEl.textContent = t('err.pw.short'); return; }
   if(pw !== pw2)       { errEl.textContent = t('err.pw.mismatch'); return; }
+  if(!captchaToken && typeof turnstile !== 'undefined') {
+    captchaToken = turnstile.getResponse(document.getElementById('turnstileWidget')) || null;
+  }
   if(!captchaToken)    { errEl.textContent = t('err.captcha'); return; }
 
   try{
