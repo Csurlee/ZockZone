@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js';
+import { GAMES } from './games-list.js?v=20260906c';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
 
@@ -53,56 +54,6 @@ document.addEventListener('mouseout', e => {
   wrap.querySelectorAll('.cstar').forEach(s => s.classList.remove('hover'));
 });
 
-const GAMES = [
-  {id:'twenty48', title:'2048 Fusion', icon:'🔢', cat:'puzzle', tag:'', rating:'4.7', plays:'980'},
-  {id:'airhockey', title:'Air Hockey', icon:'🏒', cat:'arcade', tag:'', rating:'4.6', plays:'640'},
-  {id:'quiz', title:'Allgemeinwissen-Quiz', icon:'❓', cat:'puzzle', tag:'', rating:'4.3', plays:'610'},
-  {id:'asteroids', title:'Asteroids', icon:'☄️', cat:'arcade', tag:'', rating:'4.7', plays:'800'},
-  {id:'blackjack', title:'Blackjack 21', icon:'🂡', cat:'puzzle', tag:'new', rating:'4.7', plays:'890'},
-  {id:'breakout', title:'Breakout', icon:'🧱', cat:'arcade', tag:'', rating:'4.6', plays:'610'},
-  {id:'bubble', title:'Bubble Pop', icon:'🫧', cat:'arcade', tag:'', rating:'4.4', plays:'560'},
-  {id:'anagram', title:'Buchstabensalat', icon:'🔤', cat:'puzzle', tag:'', rating:'4.4', plays:'350'},
-  {id:'checkers', title:'Dame', icon:'⚫', cat:'2player', tag:'', rating:'4.5', plays:'380'},
-  {id:'darts', title:'Darts', icon:'🎯', cat:'reflex', tag:'', rating:'4.5', plays:'470'},
-  {id:'match3', title:'Edelstein-Tausch', icon:'💎', cat:'puzzle', tag:'', rating:'4.5', plays:'710'},
-  {id:'slots', title:'Einarmiger Bandit', icon:'🎰', cat:'arcade', tag:'', rating:'4.2', plays:'400'},
-  {id:'stroop', title:'Farb-Reflex', icon:'🌈', cat:'reflex', tag:'new', rating:'4.3', plays:'250'},
-  {id:'flappy', title:'Flappy Block', icon:'🟨', cat:'arcade', tag:'hot', rating:'4.9', plays:'2.1k'},
-  {id:'fruitslice', title:'Frucht-Slice', icon:'🍉', cat:'arcade', tag:'hot', rating:'4.7', plays:'900'},
-  {id:'hangman', title:'Galgenmännchen', icon:'🪢', cat:'puzzle', tag:'', rating:'4.5', plays:'460'},
-  {id:'clicker', title:'Klicker-Fabrik', icon:'🪙', cat:'puzzle', tag:'', rating:'4.0', plays:'560'},
-  {id:'mathblitz', title:'Kopfrechnen Blitz', icon:'➕', cat:'puzzle', tag:'', rating:'4.4', plays:'370'},
-  {id:'maze', title:'Labyrinth', icon:'🧩', cat:'arcade', tag:'', rating:'4.5', plays:'420'},
-  {id:'snakesladders', title:'Leiterspiel', icon:'🪜', cat:'2player', tag:'', rating:'4.2', plays:'330'},
-  {id:'lightsout', title:'Licht aus', icon:'💡', cat:'puzzle', tag:'', rating:'4.3', plays:'270'},
-  {id:'memory', title:'Memory Match', icon:'🃏', cat:'puzzle', tag:'', rating:'4.6', plays:'760'},
-  {id:'minesweeper', title:'Minesweeper', icon:'💣', cat:'puzzle', tag:'new', rating:'4.7', plays:'720'},
-  {id:'sudoku', title:'Mini-Sudoku', icon:'🧮', cat:'puzzle', tag:'new', rating:'4.6', plays:'480'},
-  {id:'nim', title:'Nim', icon:'🪵', cat:'2player', tag:'', rating:'4.0', plays:'180'},
-  {id:'pong', title:'Pong Duell', icon:'🏓', cat:'arcade', tag:'', rating:'4.5', plays:'430'},
-  {id:'reaction', title:'Reaktionstest', icon:'⚡', cat:'reflex', tag:'', rating:'4.3', plays:'340'},
-  {id:'reversi', title:'Reversi', icon:'⚪', cat:'2player', tag:'', rating:'4.4', plays:'340'},
-  {id:'rhythm', title:'Rhythmus-Tipper', icon:'🎵', cat:'reflex', tag:'', rating:'4.2', plays:'260'},
-  {id:'runner', title:'Runner Jump', icon:'🏃', cat:'arcade', tag:'', rating:'4.6', plays:'690'},
-  {id:'rps', title:'Schere Stein Papier', icon:'✊', cat:'reflex', tag:'', rating:'4.2', plays:'510'},
-  {id:'sliding', title:'Schiebepuzzle', icon:'🔢', cat:'puzzle', tag:'', rating:'4.2', plays:'310'},
-  {id:'battleship', title:'Schiffe versenken', icon:'🚢', cat:'puzzle', tag:'new', rating:'4.6', plays:'520'},
-  {id:'simon', title:'Simon Merk-Spiel', icon:'🎵', cat:'reflex', tag:'', rating:'4.4', plays:'390'},
-  {id:'snake', title:'Snake Reloaded', icon:'🐍', cat:'arcade', tag:'hot', rating:'4.8', plays:'1.2k'},
-  {id:'invaders', title:'Space Invaders', icon:'👾', cat:'arcade', tag:'hot', rating:'4.8', plays:'1.1k'},
-  {id:'timingbar', title:'Stopp die Leiste', icon:'⏱️', cat:'reflex', tag:'', rating:'4.1', plays:'220'},
-  {id:'tetris', title:'Tetris Mini', icon:'🟪', cat:'arcade', tag:'hot', rating:'4.9', plays:'1.5k'},
-  {id:'ttt', title:'Tic-Tac-Toe Duell', icon:'❌', cat:'2player', tag:'', rating:'4.4', plays:'510'},
-  {id:'typing', title:'Tipp-Test', icon:'⌨️', cat:'reflex', tag:'', rating:'4.3', plays:'300'},
-  {id:'racer', title:'Turbo Racer', icon:'🏎️', cat:'arcade', tag:'new', rating:'4.8', plays:'0'},
-  {id:'hanoi', title:'Türme von Hanoi', icon:'🗼', cat:'puzzle', tag:'', rating:'4.5', plays:'310'},
-  {id:'traffic', title:'Verkehr Ausweichen', icon:'🚗', cat:'arcade', tag:'', rating:'4.3', plays:'450'},
-  {id:'connect4', title:'Vier Gewinnt', icon:'🔴', cat:'2player', tag:'', rating:'4.8', plays:'880'},
-  {id:'whack', title:'Whack-a-Mole', icon:'🔨', cat:'reflex', tag:'new', rating:'4.5', plays:'640'},
-  {id:'wordle', title:'Wortraten', icon:'🔤', cat:'puzzle', tag:'new', rating:'4.6', plays:'640'},
-  {id:'dice', title:'Würfelduell', icon:'🎲', cat:'puzzle', tag:'', rating:'4.1', plays:'280'},
-  {id:'guessnumber', title:'Zahl erraten', icon:'🔢', cat:'puzzle', tag:'', rating:'4.1', plays:'290'},
-];
 
 export const grid = document.getElementById('grid');
 export const countLabel = document.getElementById('countLabel');
