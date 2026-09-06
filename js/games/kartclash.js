@@ -37,7 +37,6 @@ export function build(){
 
   const overEl=overMsg(wrap,'',()=>init());
   const msgDiv=overEl.querySelector('div');
-  overEl.hidden=true;
 
   playerBody.append(wrap,mkHint('Pfeiltasten / WASD · Leertaste = Schießen · Handy: links/rechts tippen + Feuer-Button'));
 
@@ -152,7 +151,7 @@ export function build(){
   }
 
   function init(){
-    gameOver=false; overEl.hidden=true;
+    gameOver=false; overEl.classList.remove('show');
     karts=Array.from({length:4},(_,i)=>new Kart(i));
     bullets=[]; particles=[];
     powerups=PU_SPOTS.map(s=>({
@@ -325,7 +324,7 @@ export function build(){
       msgDiv.innerHTML=won
         ?'<span style="font-size:2.2rem">🏆</span><br>Du gewinnst!'
         :'<span style="font-size:2.2rem">💀</span><br>Eliminiert!';
-      overEl.hidden=false;
+      overEl.classList.add('show');
     }
   }
 
