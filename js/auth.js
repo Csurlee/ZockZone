@@ -147,6 +147,13 @@ function renderProfileAvatarGrid(currentId){
   });
 }
 
+async function isNameTaken(name, excludeUserId = null){
+  let q = supabase.from('profiles').select('id').ilike('display_name', name).limit(1);
+  if(excludeUserId) q = q.neq('id', excludeUserId);
+  const { data } = await q;
+  return (data ?? []).length > 0;
+}
+
 window.zzSaveProfile = async () => {
   const errEl     = document.getElementById('profileError');
   const successEl = document.getElementById('profileSuccess');
@@ -162,6 +169,10 @@ window.zzSaveProfile = async () => {
   if(!email) { errEl.textContent = t('err.email.empty'); return; }
   if(pw && pw.length < 6)  { errEl.textContent = t('err.pw.short'); return; }
   if(pw && pw !== pw2)     { errEl.textContent = t('err.pw.mismatch'); return; }
+
+  if(name !== displayNameOf(currentUser)){
+    if(await isNameTaken(name, currentUser.id)){ errEl.textContent = t('err.name.taken'); return; }
+  }
 
   const updates = { data: { display_name: name, avatar: profileSelectedAvatar || currentUser.user_metadata?.avatar || '' } };
   if(email !== currentUser.email)  updates.email    = email;
@@ -268,6 +279,8 @@ window.zzSubmitAuth = async () => {
     errEl.textContent = t('err.captcha.failed');
     return;
   }
+
+  if(await isNameTaken(name)){ errEl.textContent = t('err.name.taken'); return; }
 
   pendingSignup = { email, password: pw, name };
   renderAvatarGrid();
