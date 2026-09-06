@@ -97,6 +97,7 @@ const GAMES = [
   {id:'darts', title:'Darts', icon:'🎯', cat:'reflex', tag:'', rating:'4.5', plays:'470'},
   {id:'clicker', title:'Klicker-Fabrik', icon:'🪙', cat:'puzzle', tag:'', rating:'4.0', plays:'560'},
   {id:'airhockey', title:'Air Hockey', icon:'🏒', cat:'arcade', tag:'', rating:'4.6', plays:'640'},
+  {id:'racer', title:'Turbo Racer', icon:'🏎️', cat:'arcade', tag:'new', rating:'4.8', plays:'0'},
   {id:'timingbar', title:'Stopp die Leiste', icon:'⏱️', cat:'reflex', tag:'', rating:'4.1', plays:'220'},
   {id:'match3', title:'Edelstein-Tausch', icon:'💎', cat:'puzzle', tag:'', rating:'4.5', plays:'710'},
   {id:'typing', title:'Tipp-Test', icon:'⌨️', cat:'reflex', tag:'', rating:'4.3', plays:'300'},
@@ -324,7 +325,8 @@ const builders = {
   timingbar: () => import('./games/timingbar.js'),
   match3: () => import('./games/match3.js'),
   typing: () => import('./games/typing.js'),
-  slots: () => import('./games/slots.js')
+  slots: () => import('./games/slots.js'),
+  racer: () => import('./games/racer.js')
 };
 
 async function loadGame(id){
