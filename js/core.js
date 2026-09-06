@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js';
-import { GAMES } from './games-list.js?v=20260906h';
+import { GAMES } from './games-list.js?v=20260906i';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
 
@@ -119,6 +119,7 @@ function thumbBg(id){
     whack:'linear-gradient(135deg,#B45309,#5A2A05)',
     flappy:'linear-gradient(135deg,#2563EB,#1E3A8A)',
     ttt:'linear-gradient(135deg,#DB2777,#5B0F35)',
+    billiard:'linear-gradient(135deg,#1B7A3A,#0A3D1F)',
     blackjack:'linear-gradient(135deg,#0F5132,#062919)',
     pong:'linear-gradient(135deg,#0EA5E9,#075985)',
     breakout:'linear-gradient(135deg,#F97316,#7C2D12)',
@@ -236,6 +237,7 @@ const builders = {
   whack: () => import('./games/whack.js'),
   flappy: () => import('./games/flappy.js'),
   ttt: () => import('./games/ttt.js'),
+  billiard: () => import('./games/billiard.js'),
   blackjack: () => import('./games/blackjack.js'),
   pong: () => import('./games/pong.js'),
   breakout: () => import('./games/breakout.js'),

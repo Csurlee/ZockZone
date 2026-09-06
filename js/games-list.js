@@ -3,6 +3,7 @@ export const GAMES = [
   {id:'airhockey', title:'Air Hockey', icon:'🏒', cat:'arcade', tag:'', rating:'4.6', plays:'640'},
   {id:'quiz', title:'Allgemeinwissen-Quiz', icon:'❓', cat:'puzzle', tag:'', rating:'4.3', plays:'610'},
   {id:'asteroids', title:'Asteroids', icon:'☄️', cat:'arcade', tag:'', rating:'4.7', plays:'800'},
+  {id:'billiard',  title:'Billard 8-Ball', icon:'🎱', cat:'arcade', tag:'new', rating:'4.8', plays:'0'},
   {id:'blackjack', title:'Blackjack 21', icon:'🂡', cat:'puzzle', tag:'new', rating:'4.7', plays:'890'},
   {id:'breakout', title:'Breakout', icon:'🧱', cat:'arcade', tag:'', rating:'4.6', plays:'610'},
   {id:'bubble', title:'Bubble Pop', icon:'🫧', cat:'arcade', tag:'', rating:'4.4', plays:'560'},
