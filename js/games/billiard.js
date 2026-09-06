@@ -543,8 +543,7 @@ export function build() {
   function getPos(e) {
     const r=canvas.getBoundingClientRect();
     const sx=W/r.width, sy=H/r.height;
-    const src=e.touches?e.touches[0]:e;
-    return {x:(src.clientX-r.left)*sx, y:(src.clientY-r.top)*sy};
+    return {x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy};
   }
 
   function updateAim(pos) {
@@ -553,35 +552,24 @@ export function build() {
     aimAngle=Math.atan2(pos.y-cue.y, pos.x-cue.x);
   }
 
-  canvas.addEventListener('mousemove', e => {
+  canvas.addEventListener('pointermove', e => {
     if (state!=='aiming') return;
     updateAim(getPos(e));
     if (holding) holdMs=Math.min(holdMs+2, 1400);
   });
-  canvas.addEventListener('mousedown', e => {
+  canvas.addEventListener('pointerdown', e => {
     if (state!=='aiming') return;
     e.preventDefault();
+    canvas.setPointerCapture(e.pointerId);
     updateAim(getPos(e));
     holding=true; holdMs=0;
   });
-  canvas.addEventListener('touchmove', e => {
-    e.preventDefault();
-    if (state!=='aiming') return;
-    updateAim(getPos(e));
-    if (holding) holdMs=Math.min(holdMs+3, 1400);
-  },{passive:false});
-  canvas.addEventListener('touchstart', e => {
-    e.preventDefault();
-    if (state!=='aiming') return;
-    updateAim(getPos(e));
-    holding=true; holdMs=0;
-  },{passive:false});
-  canvas.addEventListener('touchend', e => {
-    e.preventDefault();
+  canvas.addEventListener('pointerup', e => {
     if (!holding) return;
     holding=false;
     if (state==='aiming') shoot(aimAngle, getPower());
-  },{passive:false});
+  });
+  canvas.addEventListener('pointercancel', () => { holding=false; });
 
   // ─── game loop ───────────────────────────────────────────────────────────────
   function loop() {
@@ -611,18 +599,10 @@ export function build() {
   window.__restartCurrent = restart;
   loop();
 
-  function onMouseUp(e) {
-    if (!holding) return;
-    holding=false;
-    if (state==='aiming') shoot(aimAngle, getPower());
-  }
-  window.addEventListener('mouseup', onMouseUp);
-
   return function cleanup() {
     running=false;
     cancelAnimationFrame(raf);
     clearTimeout(aiTimer);
-    window.removeEventListener('mouseup', onMouseUp);
     wrap.remove();
   };
 }
