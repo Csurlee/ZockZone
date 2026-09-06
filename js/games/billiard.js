@@ -101,7 +101,7 @@ export function build() {
   };
 
   function getPower() {
-    return Math.min(2 + holdMs / 100, 16);
+    return Math.min(2 + holdMs / 60, 16);
   }
 
   // ─── setup ──────────────────────────────────────────────────────────────────
@@ -615,7 +615,7 @@ export function build() {
     }
 
     if (state==='aiming' && holding) {
-      holdMs=Math.min(holdMs+1, 1400);
+      holdMs=Math.min(holdMs+2, 1400);
     }
 
     // Update DOM power bar

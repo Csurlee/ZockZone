@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js';
-import { GAMES } from './games-list.js?v=20260906n';
+import { GAMES } from './games-list.js?v=20260906o';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
 
@@ -237,7 +237,7 @@ const builders = {
   whack: () => import('./games/whack.js'),
   flappy: () => import('./games/flappy.js'),
   ttt: () => import('./games/ttt.js'),
-  billiard: () => import('./games/billiard.js?v=20260906n'),
+  billiard: () => import('./games/billiard.js?v=20260906o'),
   blackjack: () => import('./games/blackjack.js'),
   pong: () => import('./games/pong.js'),
   breakout: () => import('./games/breakout.js'),
