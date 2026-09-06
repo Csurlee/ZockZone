@@ -89,7 +89,7 @@ export function build() {
   // Aiming
   let aimAngle = 0;
   let holding  = false;
-  let holdMs   = 0;
+  let powerPct = 0; // 0–100 %
 
   // ─── helpers ────────────────────────────────────────────────────────────────
   const cueBall    = () => balls.find(b => b.num === 0 && !b.pocketed);
@@ -101,7 +101,7 @@ export function build() {
   };
 
   function getPower() {
-    return Math.min(2 + holdMs / 60, 16);
+    return 2 + powerPct * 0.14; // 0 % → 2, 100 % → 16
   }
 
   // ─── setup ──────────────────────────────────────────────────────────────────
@@ -131,7 +131,7 @@ export function build() {
     state = 'aiming'; turn = 0;
     group = [null, null];
     keepTurn = false; scratch = false; pocketsThisTurn = [];
-    holding = false; holdMs = 0;
+    holding = false; powerPct = 0;
     aimAngle = 0;
     handoverEl.classList.remove('show');
     updateInfo();
@@ -588,14 +588,13 @@ export function build() {
   canvas.addEventListener('pointermove', e => {
     if (state!=='aiming') return;
     updateAim(getPos(e));
-    if (holding) holdMs=Math.min(holdMs+2, 1400);
   });
   canvas.addEventListener('pointerdown', e => {
     if (state!=='aiming') return;
     e.preventDefault();
     canvas.setPointerCapture(e.pointerId);
     updateAim(getPos(e));
-    holding=true; holdMs=0;
+    holding=true; powerPct=0;
   });
   canvas.addEventListener('pointerup', e => {
     if (!holding) return;
@@ -615,13 +614,12 @@ export function build() {
     }
 
     if (state==='aiming' && holding) {
-      holdMs=Math.min(holdMs+2, 1400);
+      powerPct = Math.min(powerPct + 1.5, 100);
     }
 
     // Update DOM power bar
     if (state==='aiming') {
-      const pwr = holding ? getPower() : 2;
-      const pct = Math.round(pwr / 16 * 100);
+      const pct = holding ? Math.round(powerPct) : 0;
       powerFill.style.width = pct + '%';
       powerLabel.textContent = pct + '%';
       powerRow.style.display = 'block';
