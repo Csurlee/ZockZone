@@ -1,395 +1,476 @@
-import { overMsg, mkHint, playerBody } from '../core.js';
+import { playerBody, overMsg } from '../core.js';
 
-const W = 360, H = 360, R = 10;
-
-const WALLS = [
-  {x:100,y:52,w:60,h:18},{x:200,y:52,w:60,h:18},
-  {x:100,y:290,w:60,h:18},{x:200,y:290,w:60,h:18},
-  {x:52,y:100,w:18,h:60},{x:52,y:200,w:18,h:60},
-  {x:290,y:100,w:18,h:60},{x:290,y:200,w:18,h:60},
-  {x:162,y:162,w:36,h:36},
+const CDN = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+const ARENA = 26;
+const COLORS = [0xC6FF3D, 0xFF6B2B, 0x4488FF, 0xFF44AA];
+const STARTS = [
+  { x: -16, z: -16, a:  Math.PI * 0.25 },
+  { x:  16, z: -16, a:  Math.PI * 0.75 },
+  { x: -16, z:  16, a: -Math.PI * 0.25 },
+  { x:  16, z:  16, a: -Math.PI * 0.75 },
 ];
+const PU_SPOTS = [[-18,-18],[18,-18],[-18,18],[18,18],[0,-17],[0,17],[-17,0],[17,0]];
+const PU_COLORS = { ammo:0xffee00, life:0xff3333, speed:0x00ddff };
+const PU_TYPES  = ['ammo','life','speed'];
 
-const PU_SPOTS=[{x:180,y:28},{x:180,y:332},{x:28,y:180},{x:332,y:180},
-  {x:105,y:105},{x:255,y:105},{x:255,y:255},{x:105,y:255}];
-const PU_TYPES=['🔫','💣','⚡','🛡️'];
-const COLORS=['#C6FF3D','#FF6B4A','#A78BFA','#38BDF8'];
-const NAMES=['Du','Rot','Lila','Cyan'];
-const SPAWNS=[[72,72],[288,72],[288,288],[72,288]];
-const SPAWN_ANGLES=[Math.PI*.25,Math.PI*.75,Math.PI*1.25,Math.PI*1.75];
+export function build() {
+  let running   = true;
+  let raf       = null;
+  let renderer  = null;
+  let scene, camera;
+  let karts     = [];
+  let bullets   = [];
+  let powerups  = [];
+  let obsAABBs  = [];
+  let overEl    = null;
+  let hudEl     = null;
+  let wrapEl    = null;
+  let gameOver  = false;
+  let frame     = 0;
+  const keys    = {};
+  let touchLeft = false, touchRight = false, touchFire = false;
 
-function hitWall(cx,cy,r=R+1){
-  for(const w of WALLS){
-    const nx=Math.max(w.x,Math.min(cx,w.x+w.w));
-    const ny=Math.max(w.y,Math.min(cy,w.y+w.h));
-    if(Math.hypot(cx-nx,cy-ny)<r) return true;
-  }
-  return cx<r||cx>W-r||cy<r||cy>H-r;
-}
-
-export function build(){
-  const wrap=document.createElement('div');
-  wrap.className='canvas-wrap';
-  const canvas=document.createElement('canvas');
-  canvas.width=W; canvas.height=H;
-  wrap.appendChild(canvas);
-  const ctx=canvas.getContext('2d');
-
-  const overEl=overMsg(wrap,'',()=>init());
-  const msgDiv=overEl.querySelector('div');
-
-  playerBody.append(wrap,mkHint('Pfeiltasten / WASD · Leertaste = Schießen · Handy: links/rechts tippen + Feuer-Button'));
-
-  let karts,bullets,powerups,particles,gameOver,raf;
-  const keys={};
-  let tLeft=false,tRight=false,tFire=false,prevFire=false;
-
-  /* ── Kart ── */
-  class Kart{
-    constructor(i){
-      const [sx,sy]=SPAWNS[i];
-      this.x=sx; this.y=sy; this.angle=SPAWN_ANGLES[i];
-      this.speed=0; this.color=COLORS[i]; this.name=NAMES[i];
-      this.isPlayer=i===0; this.lives=3; this.shield=0;
-      this.weapon=null; this.ammo=0; this.cooldown=0; this.boost=0;
-      this.alive=true;
-      this.aiTarget={x:W/2,y:H/2}; this.aiTimer=0; this.aiShootTimer=0;
-    }
-    draw(){
-      if(!this.alive) return;
-      ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.angle);
-      if(this.shield>0){
-        ctx.strokeStyle=`rgba(100,200,255,${0.4+0.3*Math.sin(Date.now()*.01)})`;
-        ctx.lineWidth=3;
-        ctx.beginPath(); ctx.arc(0,0,R+5,0,Math.PI*2); ctx.stroke();
-      }
-      // body
-      ctx.fillStyle=this.color;
-      ctx.beginPath(); ctx.roundRect(-R,-R*.65,R*2,R*1.3,3); ctx.fill();
-      // windshield
-      ctx.fillStyle='rgba(180,230,255,.65)';
-      ctx.fillRect(1,-R*.35,R*.8,R*.7);
-      // front dot
-      ctx.fillStyle='#fff';
-      ctx.beginPath(); ctx.arc(R*.75,0,2.2,0,Math.PI*2); ctx.fill();
-      ctx.restore();
-    }
-    move(inp){
-      const {up,down,left,right}=inp;
-      const ms=3.5+(this.boost*.8);
-      if(up)   this.speed=Math.min(this.speed+.22,ms);
-      if(down)  this.speed=Math.max(this.speed-.16,-1.5);
-      this.speed*=.91;
-      if(Math.abs(this.speed)>.05){
-        const t=.055*Math.sign(this.speed);
-        if(left)  this.angle-=t;
-        if(right) this.angle+=t;
-      }
-      const nx=this.x+Math.cos(this.angle)*this.speed;
-      const ny=this.y+Math.sin(this.angle)*this.speed;
-      if(!hitWall(nx,this.y)) this.x=nx; else this.speed*=-.35;
-      if(!hitWall(this.x,ny)) this.y=ny; else this.speed*=-.35;
-      this.x=Math.max(R+2,Math.min(W-R-2,this.x));
-      this.y=Math.max(R+2,Math.min(H-R-2,this.y));
-      if(this.cooldown>0) this.cooldown--;
-      if(this.shield>0)   this.shield--;
-      if(this.boost>0)    this.boost=Math.max(0,this.boost-.04);
-    }
-    shoot(){
-      if(this.cooldown>0||gameOver) return;
-      const isBomb=this.weapon==='💣';
-      const spread=this.weapon==='🔫'?[-0.18,0,.18]:[0];
-      spread.forEach(s=>{
-        bullets.push({x:this.x+Math.cos(this.angle)*(R+5),
-          y:this.y+Math.sin(this.angle)*(R+5),
-          angle:this.angle+s,spd:isBomb?3.5:5.5,
-          owner:this,bomb:isBomb,life:isBomb?70:90});
-      });
-      if(this.ammo>0){ this.ammo--; if(!this.ammo) this.weapon=null; }
-      this.cooldown=this.weapon==='🔫'?9:20;
-    }
-    hit(){
-      if(this.shield>0){this.shield=0; boom(this.x,this.y,'#60a5fa'); return;}
-      this.lives--;
-      boom(this.x,this.y,this.color);
-      if(this.lives<=0) this.alive=false;
-    }
-    aiUpdate(){
-      if(!this.alive) return;
-      const player=karts[0];
-      this.aiTimer--;
-      if(this.aiTimer<=0){
-        if(player.alive&&Math.random()<.65){
-          const off=(Math.random()-.5)*80;
-          this.aiTarget={x:player.x+off,y:player.y+off};
-        } else {
-          this.aiTarget={x:35+Math.random()*(W-70),y:35+Math.random()*(H-70)};
-        }
-        this.aiTimer=50+Math.random()*70;
-      }
-      const dx=this.aiTarget.x-this.x, dy=this.aiTarget.y-this.y;
-      const ta=Math.atan2(dy,dx);
-      let da=ta-this.angle;
-      while(da>Math.PI)  da-=Math.PI*2;
-      while(da<-Math.PI) da+=Math.PI*2;
-      this.move({up:true,down:false,left:da<-.12,right:da>.12});
-      this.aiShootTimer--;
-      if(player.alive&&this.aiShootTimer<=0){
-        const dist=Math.hypot(player.x-this.x,player.y-this.y);
-        const pa=Math.atan2(player.y-this.y,player.x-this.x);
-        let pda=pa-this.angle; while(pda>Math.PI) pda-=Math.PI*2; while(pda<-Math.PI) pda+=Math.PI*2;
-        if(dist<170&&Math.abs(pda)<.35){ this.shoot(); this.aiShootTimer=20+Math.random()*35; }
-      }
-    }
-  }
-
-  function boom(x,y,col){
-    for(let i=0;i<12;i++) particles.push({
-      x,y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,
-      r:2+Math.random()*3,life:25+Math.random()*15,maxLife:40,col
+  function loadThree() {
+    return new Promise(r => {
+      if (window.THREE) { r(); return; }
+      const s = document.createElement('script');
+      s.src = CDN;
+      s.onload = r;
+      document.head.appendChild(s);
     });
   }
 
-  function init(){
-    gameOver=false; overEl.classList.remove('show');
-    karts=Array.from({length:4},(_,i)=>new Kart(i));
-    bullets=[]; particles=[];
-    powerups=PU_SPOTS.map(s=>({
-      x:s.x,y:s.y,alive:true,
-      type:PU_TYPES[Math.floor(Math.random()*PU_TYPES.length)],timer:0
-    }));
+  loadThree().then(() => { if (running) init(); });
+
+  // ─── init ─────────────────────────────────────────────────────────────────
+  function init() {
+    const T = window.THREE;
+
+    wrapEl = document.createElement('div');
+    wrapEl.style.cssText = 'position:relative;width:100%;max-width:480px;margin:0 auto;';
+    playerBody.appendChild(wrapEl);
+
+    renderer = new T.WebGLRenderer({ antialias: true });
+    renderer.setSize(360, 270);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.domElement.style.cssText = 'display:block;width:100%;height:auto;touch-action:none;border-radius:8px;';
+    wrapEl.appendChild(renderer.domElement);
+
+    hudEl = document.createElement('div');
+    hudEl.style.cssText = [
+      'position:absolute;top:0;left:0;right:0;padding:7px 10px',
+      'display:flex;justify-content:space-between',
+      'color:#fff;font-family:Fredoka,sans-serif;font-size:15px;font-weight:700',
+      'text-shadow:0 1px 4px rgba(0,0,0,.9);pointer-events:none',
+    ].join(';');
+    wrapEl.appendChild(hudEl);
+
+    const fireBtn = document.createElement('button');
+    fireBtn.textContent = '🔫';
+    fireBtn.style.cssText = [
+      'position:absolute;bottom:10px;right:10px;width:50px;height:50px',
+      'border-radius:50%;background:rgba(255,255,255,.18)',
+      'border:2px solid rgba(255,255,255,.4);font-size:21px;cursor:pointer',
+    ].join(';');
+    wrapEl.appendChild(fireBtn);
+    fireBtn.addEventListener('touchstart', e => { e.preventDefault(); touchFire = true;  }, {passive:false});
+    fireBtn.addEventListener('touchend',   e => { e.preventDefault(); touchFire = false; }, {passive:false});
+
+    // Scene
+    scene = new T.Scene();
+    scene.background = new T.Color(0x150f28);
+    scene.fog = new T.Fog(0x150f28, 38, 90);
+
+    camera = new T.PerspectiveCamera(60, 360/270, 0.1, 200);
+
+    scene.add(new T.AmbientLight(0xffffff, 0.5));
+    const sun = new T.DirectionalLight(0xffffff, 0.9);
+    sun.position.set(20, 35, 10);
+    sun.castShadow = true;
+    scene.add(sun);
+
+    // Floor
+    const floor = new T.Mesh(
+      new T.PlaneGeometry(ARENA*2, ARENA*2),
+      new T.MeshLambertMaterial({ color: 0x1c1235 })
+    );
+    floor.rotation.x = -Math.PI/2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    scene.add(new T.GridHelper(ARENA*2, 13, 0x2b1d50, 0x2b1d50));
+
+    // Boundary walls (visual — kart movement clamped separately)
+    const wallMat = new T.MeshLambertMaterial({ color: 0x3d1e70 });
+    function makeWall(w, d, x, z) {
+      const m = new T.Mesh(new T.BoxGeometry(w, 3, d), wallMat);
+      m.position.set(x, 1.5, z);
+      scene.add(m);
+    }
+    makeWall(ARENA*2+6, 3, 0,  -(ARENA+1.5));
+    makeWall(ARENA*2+6, 3, 0,    ARENA+1.5);
+    makeWall(3, ARENA*2+6, -(ARENA+1.5), 0);
+    makeWall(3, ARENA*2+6,   ARENA+1.5,  0);
+
+    // Obstacles
+    const obsMat = new T.MeshLambertMaterial({ color: 0x5a1e98 });
+    for (const [ox, oz] of [[-9,0],[9,0],[0,-9],[0,9]]) {
+      const m = new T.Mesh(new T.BoxGeometry(5, 3.5, 5), obsMat);
+      m.position.set(ox, 1.75, oz);
+      m.castShadow = true;
+      scene.add(m);
+      obsAABBs.push({ minX: ox-2.5, maxX: ox+2.5, minZ: oz-2.5, maxZ: oz+2.5 });
+    }
+
+    // Power-ups
+    for (const [px, pz] of PU_SPOTS) addPowerup(px, pz);
+
+    // Karts
+    for (let i = 0; i < 4; i++) {
+      const s = STARTS[i];
+      karts.push(mkKart(i, COLORS[i], s.x, s.z, s.a));
+    }
+
+    overEl = overMsg(wrapEl, '', restart);
+
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('keyup',   onKey);
+    renderer.domElement.addEventListener('touchstart', onTouch,    {passive:false});
+    renderer.domElement.addEventListener('touchmove',  onTouch,    {passive:false});
+    renderer.domElement.addEventListener('touchend',   onTouchEnd, {passive:false});
+
+    updateHUD();
+
+    (function loop() {
+      if (!running) return;
+      raf = requestAnimationFrame(loop);
+      tick();
+      renderer.render(scene, camera);
+    })();
   }
 
-  /* ── Draw ── */
-  function drawArena(){
-    ctx.fillStyle='#12101e';
-    ctx.fillRect(0,0,W,H);
-    // grid dots
-    ctx.fillStyle='rgba(255,255,255,.04)';
-    for(let x=20;x<W;x+=30) for(let y=20;y<H;y+=30){
-      ctx.beginPath(); ctx.arc(x,y,1.5,0,Math.PI*2); ctx.fill();
+  // ─── Kart factory ─────────────────────────────────────────────────────────
+  function mkKart(idx, color, x, z, angle) {
+    const T = window.THREE;
+    const g = new T.Group();
+
+    const bMat = new T.MeshLambertMaterial({ color });
+    const body = new T.Mesh(new T.BoxGeometry(1.5, 0.44, 0.85), bMat);
+    body.position.y = 0.22;
+    body.castShadow = true;
+    g.add(body);
+
+    const cab = new T.Mesh(new T.BoxGeometry(0.65, 0.32, 0.65), bMat);
+    cab.position.set(-0.1, 0.58, 0);
+    g.add(cab);
+
+    const wMat = new T.MeshLambertMaterial({ color: 0x1a1a1a });
+    const wGeo = new T.CylinderGeometry(0.21, 0.21, 0.17, 8);
+    for (const [wx, wy, wz] of [[-0.56,0.21,0.51],[0.56,0.21,0.51],[-0.56,0.21,-0.51],[0.56,0.21,-0.51]]) {
+      const w = new T.Mesh(wGeo, wMat);
+      w.rotation.z = Math.PI/2;
+      w.position.set(wx, wy, wz);
+      g.add(w);
     }
-    // walls
-    for(const w of WALLS){
-      ctx.fillStyle='#2d1f5e';
-      ctx.fillRect(w.x,w.y,w.w,w.h);
-      ctx.strokeStyle='#7C3AED'; ctx.lineWidth=2;
-      ctx.strokeRect(w.x,w.y,w.w,w.h);
-    }
-    // border
-    ctx.strokeStyle='#4C1D95'; ctx.lineWidth=4;
-    ctx.strokeRect(2,2,W-4,H-4);
+
+    g.position.set(x, 0, z);
+    g.rotation.y = angle;
+    scene.add(g);
+
+    return {
+      idx, group: g, bMat, origColor: color,
+      lives: 3, bullets: 3, speed: 0, angle,
+      alive: true, hitTimer: 0, speedBoost: 0,
+      shootCooldown: 0, aiTimer: 0, aiTX: 0, aiTZ: 0,
+    };
   }
 
-  function drawPowerups(){
-    for(const p of powerups){
-      if(!p.alive) continue;
-      // glow ring
-      ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.arc(p.x,p.y,13+Math.sin(Date.now()*.003)*2,0,Math.PI*2); ctx.stroke();
-      ctx.font='15px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(p.type,p.x,p.y);
+  // ─── Kart movement ────────────────────────────────────────────────────────
+  function moveKart(k, steer, gas, brake) {
+    const maxSpd = 0.22 + Math.min(k.speedBoost, 3) * 0.06;
+    if (gas)        k.speed = Math.min(k.speed + 0.013, maxSpd);
+    else if (brake) k.speed = Math.max(k.speed - 0.02, -maxSpd * 0.4);
+    else            k.speed *= 0.91;
+
+    if (Math.abs(k.speed) > 0.003) k.angle += steer * 0.052 * Math.sign(k.speed);
+    k.group.rotation.y = k.angle;
+
+    const nx = k.group.position.x + Math.sin(k.angle) * k.speed;
+    const nz = k.group.position.z + Math.cos(k.angle) * k.speed;
+    const cx = Math.max(-ARENA+1, Math.min(ARENA-1, nx));
+    const cz = Math.max(-ARENA+1, Math.min(ARENA-1, nz));
+
+    const R = 0.95;
+    let blocked = false;
+    for (const b of obsAABBs) {
+      if (cx+R > b.minX && cx-R < b.maxX && cz+R > b.minZ && cz-R < b.maxZ) {
+        blocked = true; break;
+      }
     }
-    ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+    if (!blocked) {
+      k.group.position.x = cx;
+      k.group.position.z = cz;
+    } else {
+      k.speed *= -0.2;
+    }
+
+    if (k.hitTimer > 0) {
+      k.hitTimer--;
+      k.bMat.color.setHex(k.hitTimer % 6 < 3 ? 0xff2222 : k.origColor);
+      if (k.hitTimer === 0) k.bMat.color.setHex(k.origColor);
+    }
+    if (k.speedBoost > 0) k.speedBoost = Math.max(0, k.speedBoost - 0.008);
+    if (k.shootCooldown > 0) k.shootCooldown--;
   }
 
-  function drawBullets(){
-    for(const b of bullets){
-      if(b.bomb){
-        ctx.font='14px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText('💣',b.x,b.y);
-        ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-      } else {
-        const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,5);
-        g.addColorStop(0,'#fffbe0'); g.addColorStop(1,'rgba(255,200,0,0)');
-        ctx.fillStyle=g;
-        ctx.beginPath(); ctx.arc(b.x,b.y,5,0,Math.PI*2); ctx.fill();
+  function hitKart(k) {
+    if (k.hitTimer > 20) return;
+    k.lives--;
+    k.hitTimer = 45;
+    if (k.lives <= 0) {
+      k.alive = false;
+      k.group.visible = false;
+    }
+  }
+
+  // ─── AI ───────────────────────────────────────────────────────────────────
+  function aiUpdate(k, player) {
+    if (!k.alive) return;
+    k.aiTimer--;
+    if (k.aiTimer <= 0) {
+      k.aiTimer = 60 + Math.random() * 90;
+      k.aiTX = (Math.random() - 0.5) * ARENA * 1.6;
+      k.aiTZ = (Math.random() - 0.5) * ARENA * 1.6;
+    }
+
+    const dx = k.aiTX - k.group.position.x;
+    const dz = k.aiTZ - k.group.position.z;
+    let diff = Math.atan2(dx, dz) - k.angle;
+    while (diff >  Math.PI) diff -= Math.PI*2;
+    while (diff < -Math.PI) diff += Math.PI*2;
+    moveKart(k, Math.sign(diff) * Math.min(1, Math.abs(diff)*2), true, false);
+
+    if (player.alive && k.shootCooldown <= 0 && k.bullets > 0) {
+      const pdx = player.group.position.x - k.group.position.x;
+      const pdz = player.group.position.z - k.group.position.z;
+      if (pdx*pdx + pdz*pdz < 18*18) {
+        let pd = Math.atan2(pdx, pdz) - k.angle;
+        while (pd >  Math.PI) pd -= Math.PI*2;
+        while (pd < -Math.PI) pd += Math.PI*2;
+        if (Math.abs(pd) < 0.4) { fireBullet(k); k.shootCooldown = 55; }
       }
     }
   }
 
-  function drawParticles(){
-    for(const p of particles){
-      const t=p.life/p.maxLife;
-      ctx.globalAlpha=t*.9;
-      ctx.fillStyle=p.col;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r*t,0,Math.PI*2); ctx.fill();
-    }
-    ctx.globalAlpha=1;
+  // ─── Bullets ──────────────────────────────────────────────────────────────
+  function fireBullet(k) {
+    if (k.bullets <= 0) return;
+    k.bullets--;
+    if (k.idx === 0) updateHUD();
+    const T = window.THREE;
+    const mesh = new T.Mesh(
+      new T.SphereGeometry(0.19, 6, 6),
+      new T.MeshBasicMaterial({ color: k.idx === 0 ? 0xffff00 : 0xff8800 })
+    );
+    mesh.position.copy(k.group.position);
+    mesh.position.y = 0.32;
+    scene.add(mesh);
+    bullets.push({ mesh, vx: Math.sin(k.angle)*0.48, vz: Math.cos(k.angle)*0.48, life: 55, owner: k });
   }
 
-  function drawHUD(){
-    const alive=karts.filter(k=>k.alive).length;
-    karts.forEach((k,i)=>{
-      const bx=6+i*88, by=6;
-      ctx.fillStyle=k.alive?k.color:'rgba(255,255,255,.2)';
-      ctx.font='bold 9px Inter'; ctx.fillText(k.name,bx,by+10);
-      for(let h=0;h<3;h++){
-        ctx.fillStyle=h<k.lives?(k.alive?'#ef4444':'rgba(255,255,255,.15)'):'rgba(255,255,255,.1)';
-        ctx.font='11px serif'; ctx.fillText('♥',bx+h*14,by+22);
-      }
-    });
-    // player weapon
-    const p=karts[0];
-    if(p.alive&&p.weapon){
-      ctx.font='12px serif'; ctx.textAlign='right';
-      ctx.fillText(p.weapon+' ×'+p.ammo,W-6,22);
-      ctx.textAlign='left';
-    }
-    // touch fire button
-    if(navigator.maxTouchPoints>0){
-      ctx.save();
-      ctx.globalAlpha=tFire?.5:.25;
-      ctx.fillStyle='#ff6b4a';
-      ctx.beginPath(); ctx.arc(W-30,H-30,22,0,Math.PI*2); ctx.fill();
-      ctx.globalAlpha=1;
-      ctx.font='14px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('🔫',W-30,H-30);
-      ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-      ctx.restore();
-    }
-  }
-
-  /* ── Update ── */
-  function updateBullets(){
-    bullets=bullets.filter(b=>{
-      b.x+=Math.cos(b.angle)*b.spd;
-      b.y+=Math.sin(b.angle)*b.spd;
+  function tickBullets() {
+    for (let i = bullets.length-1; i >= 0; i--) {
+      const b = bullets[i];
+      b.mesh.position.x += b.vx;
+      b.mesh.position.z += b.vz;
       b.life--;
-      if(b.life<=0) return false;
-      // wall
-      for(const w of WALLS){
-        if(b.x>=w.x&&b.x<=w.x+w.w&&b.y>=w.y&&b.y<=w.y+w.h){
-          if(b.bomb){ explodeBomb(b); return false; }
-          return false;
+
+      let kill = b.life <= 0
+        || Math.abs(b.mesh.position.x) > ARENA+2
+        || Math.abs(b.mesh.position.z) > ARENA+2;
+
+      if (!kill) {
+        for (const ob of obsAABBs) {
+          if (b.mesh.position.x > ob.minX && b.mesh.position.x < ob.maxX &&
+              b.mesh.position.z > ob.minZ && b.mesh.position.z < ob.maxZ) {
+            kill = true; break;
+          }
         }
       }
-      if(b.x<2||b.x>W-2||b.y<2||b.y>H-2){
-        if(b.bomb) explodeBomb(b);
-        return false;
-      }
-      // kart hits
-      for(const k of karts){
-        if(!k.alive||k===b.owner) continue;
-        if(Math.hypot(b.x-k.x,b.y-k.y)<R+4){
-          if(b.bomb){ explodeBomb(b); return false; }
-          k.hit(); return false;
+      if (!kill) {
+        for (const k of karts) {
+          if (k === b.owner || !k.alive) continue;
+          const dx = k.group.position.x - b.mesh.position.x;
+          const dz = k.group.position.z - b.mesh.position.z;
+          if (dx*dx + dz*dz < 1.1) {
+            hitKart(k);
+            if (k.idx === 0 || b.owner.idx === 0) updateHUD();
+            kill = true; break;
+          }
         }
       }
-      return true;
-    });
+
+      if (kill) {
+        scene.remove(b.mesh);
+        b.mesh.geometry.dispose();
+        b.mesh.material.dispose();
+        bullets.splice(i, 1);
+      }
+    }
   }
 
-  function explodeBomb(b){
-    boom(b.x,b.y,'#ff9f43');
-    // extra ring
-    for(let i=0;i<20;i++) particles.push({
-      x:b.x,y:b.y,vx:(Math.random()-.5)*7,vy:(Math.random()-.5)*7,
-      r:3+Math.random()*4,life:40,maxLife:40,col:'#ff6348'
-    });
-    karts.forEach(k=>{
-      if(!k.alive||k===b.owner) return;
-      if(Math.hypot(b.x-k.x,b.y-k.y)<52) k.hit();
-    });
+  // ─── Power-ups ────────────────────────────────────────────────────────────
+  function addPowerup(x, z) {
+    const T = window.THREE;
+    const type = PU_TYPES[Math.floor(Math.random() * 3)];
+    const mesh = new T.Mesh(
+      new T.BoxGeometry(0.72, 0.72, 0.72),
+      new T.MeshLambertMaterial({ color: PU_COLORS[type] })
+    );
+    mesh.position.set(x, 0.5, z);
+    scene.add(mesh);
+    powerups.push({ mesh, type, x, z, alive: true, respawn: 0 });
   }
 
-  function updatePowerups(){
-    for(const p of powerups){
-      if(!p.alive){ if(--p.timer<=0){p.alive=true; p.type=PU_TYPES[Math.floor(Math.random()*PU_TYPES.length)];} continue; }
-      for(const k of karts){
-        if(!k.alive) continue;
-        if(Math.hypot(k.x-p.x,k.y-p.y)<R+12){
-          p.alive=false; p.timer=480;
-          if(p.type==='⚡')      k.boost=1.8;
-          else if(p.type==='🛡️') k.shield=200;
-          else { k.weapon=p.type; k.ammo=3; }
+  function tickPowerups() {
+    for (const p of powerups) {
+      if (!p.alive) {
+        if (--p.respawn <= 0) {
+          p.type = PU_TYPES[Math.floor(Math.random()*3)];
+          p.mesh.material.color.setHex(PU_COLORS[p.type]);
+          p.mesh.visible = true;
+          p.alive = true;
+        }
+        continue;
+      }
+      p.mesh.rotation.y = frame * 0.025;
+      for (const k of karts) {
+        if (!k.alive) continue;
+        const dx = k.group.position.x - p.x;
+        const dz = k.group.position.z - p.z;
+        if (dx*dx + dz*dz < 1.5) {
+          if (p.type === 'ammo')  k.bullets    = Math.min(k.bullets+3, 9);
+          if (p.type === 'life')  k.lives      = Math.min(k.lives+1,   6);
+          if (p.type === 'speed') k.speedBoost = Math.min(k.speedBoost+2, 4);
+          p.alive = false;
+          p.mesh.visible = false;
+          p.respawn = 480;
+          if (k.idx === 0) updateHUD();
           break;
         }
       }
     }
   }
 
-  function updateParticles(){
-    particles=particles.filter(p=>{
-      p.x+=p.vx; p.y+=p.vy; p.vx*=.9; p.vy*=.9; p.life--;
-      return p.life>0;
-    });
+  // ─── HUD ──────────────────────────────────────────────────────────────────
+  function updateHUD() {
+    if (!hudEl || !karts[0]) return;
+    const p = karts[0];
+    const h = '❤️'.repeat(Math.max(0, p.lives));
+    const e = karts.slice(1).filter(k=>k.alive).length;
+    hudEl.innerHTML = `<span>${h}</span><span>🔫 ${p.bullets}</span><span>👾 ${e}</span>`;
   }
 
-  function checkEnd(){
-    const alive=karts.filter(k=>k.alive);
-    if(alive.length<=1){
-      gameOver=true;
-      const won=alive[0]?.isPlayer;
-      msgDiv.innerHTML=won
-        ?'<span style="font-size:2.2rem">🏆</span><br>Du gewinnst!'
-        :'<span style="font-size:2.2rem">💀</span><br>Eliminiert!';
+  // ─── Controls ─────────────────────────────────────────────────────────────
+  function onKey(e) {
+    keys[e.code] = e.type === 'keydown';
+    if (e.type === 'keydown' && e.code === 'Space') {
+      const p = karts[0];
+      if (p?.alive && p.shootCooldown <= 0) { fireBullet(p); p.shootCooldown = 20; }
+    }
+  }
+
+  function onTouch(e) {
+    e.preventDefault();
+    const rect = renderer.domElement.getBoundingClientRect();
+    const mid = rect.left + rect.width/2;
+    touchLeft = touchRight = false;
+    for (const t of e.touches) {
+      if (t.clientX < mid) touchLeft = true;
+      else touchRight = true;
+    }
+  }
+  function onTouchEnd(e) {
+    e.preventDefault();
+    if (!e.touches.length) touchLeft = touchRight = false;
+    else onTouch(e);
+  }
+
+  // ─── Main tick ────────────────────────────────────────────────────────────
+  function tick() {
+    frame++;
+    if (gameOver) return;
+
+    const p = karts[0];
+    if (p.alive) {
+      const gas   = keys['ArrowUp']   || keys['KeyW'] || touchLeft || touchRight;
+      const brake = keys['ArrowDown'] || keys['KeyS'];
+      const left  = keys['ArrowLeft'] || keys['KeyA'] || (touchLeft  && !touchRight);
+      const right = keys['ArrowRight']|| keys['KeyD'] || (touchRight && !touchLeft);
+      moveKart(p, (right?1:0)-(left?1:0), gas, brake);
+
+      if (touchFire && p.shootCooldown <= 0 && p.bullets > 0) {
+        fireBullet(p);
+        p.shootCooldown = 20;
+      }
+    }
+
+    for (let i=1; i<karts.length; i++) aiUpdate(karts[i], p);
+    tickBullets();
+    tickPowerups();
+
+    // Third-person camera behind player
+    const d = 9, h = 5;
+    camera.position.set(
+      p.group.position.x - Math.sin(p.angle)*d,
+      p.group.position.y + h,
+      p.group.position.z - Math.cos(p.angle)*d
+    );
+    camera.lookAt(p.group.position.x, p.group.position.y+0.5, p.group.position.z);
+
+    checkEnd();
+  }
+
+  function checkEnd() {
+    if (gameOver) return;
+    const p = karts[0];
+    if (!p.alive) {
+      gameOver = true;
+      overEl.querySelector('div').textContent = '💀 Eliminiert!';
+      overEl.classList.add('show');
+    } else if (karts.slice(1).every(k=>!k.alive)) {
+      gameOver = true;
+      overEl.querySelector('div').textContent = '🏆 Du gewinnst!';
       overEl.classList.add('show');
     }
   }
 
-  /* ── Loop ── */
-  let prevShoot=false;
-  function loop(){
-    raf=requestAnimationFrame(loop);
-    const up=keys.ArrowUp||keys.w||tLeft||tRight;
-    const left=keys.ArrowLeft||keys.a||tLeft;
-    const right=keys.ArrowRight||keys.d||tRight;
-    const down=keys.ArrowDown||keys.s;
-    const fire=keys[' ']||tFire;
+  // ─── Restart ──────────────────────────────────────────────────────────────
+  function restart() {
+    overEl.classList.remove('show');
+    for (const b of bullets) { scene.remove(b.mesh); b.mesh.geometry.dispose(); b.mesh.material.dispose(); }
+    for (const p of powerups) scene.remove(p.mesh);
+    for (const k of karts) scene.remove(k.group);
+    bullets.length = powerups.length = karts.length = 0;
 
-    if(!gameOver){
-      karts[0].move({up,down,left,right});
-      if(fire&&!prevShoot) karts[0].shoot();
-      for(let i=1;i<karts.length;i++) karts[i].aiUpdate();
-      updateBullets(); updatePowerups(); updateParticles();
-      checkEnd();
+    for (let i=0; i<4; i++) {
+      const s = STARTS[i];
+      karts.push(mkKart(i, COLORS[i], s.x, s.z, s.a));
     }
-    prevShoot=fire;
-
-    drawArena(); drawParticles(); drawPowerups(); drawBullets();
-    karts.forEach(k=>k.draw());
-    drawHUD();
+    for (const [px,pz] of PU_SPOTS) addPowerup(px, pz);
+    gameOver = false;
+    frame = 0;
+    updateHUD();
   }
 
-  /* ── Input ── */
-  const onDown=e=>{ keys[e.key]=true; if([' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault(); };
-  const onUp=e=>{ keys[e.key]=false; };
-  document.addEventListener('keydown',onDown);
-  document.addEventListener('keyup',onUp);
-
-  // Touch: multi-touch — fire zone = bottom-right circle, rest = steering
-  function touchZone(e){
-    tLeft=false; tRight=false; tFire=false;
-    const rect=canvas.getBoundingClientRect();
-    const sx=W/rect.width, sy=H/rect.height;
-    for(const t of e.touches){
-      const tx=(t.clientX-rect.left)*sx;
-      const ty=(t.clientY-rect.top)*sy;
-      // fire button zone: bottom-right corner circle r=35
-      if(Math.hypot(tx-(W-30),ty-(H-30))<35){ tFire=true; continue; }
-      if(tx<W/2) tLeft=true; else tRight=true;
-    }
-  }
-  const tStart=e=>{touchZone(e); e.preventDefault();};
-  const tMove=e=>{touchZone(e); e.preventDefault();};
-  const tEnd=e=>{
-    if(e.touches.length===0){tLeft=false; tRight=false; tFire=false;}
-    else touchZone(e);
-  };
-  canvas.addEventListener('touchstart',tStart,{passive:false});
-  canvas.addEventListener('touchmove',tMove,{passive:false});
-  canvas.addEventListener('touchend',tEnd);
-
-  init(); loop();
-
-  return ()=>{
+  // ─── Cleanup ──────────────────────────────────────────────────────────────
+  return function cleanup() {
+    running = false;
     cancelAnimationFrame(raf);
-    document.removeEventListener('keydown',onDown);
-    document.removeEventListener('keyup',onUp);
-    canvas.removeEventListener('touchstart',tStart);
-    canvas.removeEventListener('touchmove',tMove);
-    canvas.removeEventListener('touchend',tEnd);
-    playerBody.innerHTML='';
+    window.removeEventListener('keydown', onKey);
+    window.removeEventListener('keyup',   onKey);
+    if (renderer) renderer.dispose();
+    if (wrapEl)   wrapEl.remove();
   };
 }

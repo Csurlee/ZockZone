@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js';
-import { GAMES } from './games-list.js?v=20260906g';
+import { GAMES } from './games-list.js?v=20260906h';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
 
