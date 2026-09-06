@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js';
-import { GAMES } from './games-list.js?v=20260906k';
+import { GAMES } from './games-list.js?v=20260906l';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
 
@@ -237,7 +237,7 @@ const builders = {
   whack: () => import('./games/whack.js'),
   flappy: () => import('./games/flappy.js'),
   ttt: () => import('./games/ttt.js'),
-  billiard: () => import('./games/billiard.js?v=20260906k'),
+  billiard: () => import('./games/billiard.js?v=20260906l'),
   blackjack: () => import('./games/blackjack.js'),
   pong: () => import('./games/pong.js'),
   breakout: () => import('./games/breakout.js'),
@@ -337,3 +337,12 @@ export function mkHint(text){
   d.textContent = text;
   return d;
 }
+
+// Window globals for game files — prevents duplicate module instances
+// (game files import '../core.js' without version; index.html uses core.js?v=...)
+window.zzPlayerBody = playerBody;
+window.zzOverMsg = overMsg;
+window.zzHud = hud;
+window.zzMkButton = mkButton;
+window.zzMkHint = mkHint;
+window.zzAddLeaderboardUI = addLeaderboardUI;

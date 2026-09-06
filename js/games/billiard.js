@@ -1,4 +1,5 @@
-import { playerBody, overMsg } from '../core.js';
+const playerBody = document.getElementById('playerBody');
+const overMsg = (...a) => window.zzOverMsg(...a);
 
 const W = 480, H = 288, RAIL = 30;
 const TX1 = RAIL, TY1 = RAIL, TX2 = W-RAIL, TY2 = H-RAIL;
