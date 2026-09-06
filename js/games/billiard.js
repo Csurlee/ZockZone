@@ -564,11 +564,6 @@ export function build() {
     updateAim(getPos(e));
     holding=true; holdMs=0;
   });
-  canvas.addEventListener('mouseup', e => {
-    if (!holding) return;
-    holding=false;
-    shoot(aimAngle, getPower());
-  });
   canvas.addEventListener('touchmove', e => {
     e.preventDefault();
     if (state!=='aiming') return;
@@ -585,7 +580,7 @@ export function build() {
     e.preventDefault();
     if (!holding) return;
     holding=false;
-    shoot(aimAngle, getPower());
+    if (state==='aiming') shoot(aimAngle, getPower());
   },{passive:false});
 
   // ─── game loop ───────────────────────────────────────────────────────────────
@@ -616,10 +611,18 @@ export function build() {
   window.__restartCurrent = restart;
   loop();
 
+  function onMouseUp(e) {
+    if (!holding) return;
+    holding=false;
+    if (state==='aiming') shoot(aimAngle, getPower());
+  }
+  window.addEventListener('mouseup', onMouseUp);
+
   return function cleanup() {
     running=false;
     cancelAnimationFrame(raf);
     clearTimeout(aiTimer);
+    window.removeEventListener('mouseup', onMouseUp);
     wrap.remove();
   };
 }
