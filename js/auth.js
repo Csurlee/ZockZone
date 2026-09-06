@@ -197,7 +197,6 @@ window.zzSaveProfile = async () => {
 };
 window.zzCloseAuth = () => {
   document.getElementById('authOverlay').classList.remove('open');
-  document.getElementById('authStep3').style.display = 'none';
   document.getElementById('authStep1').style.display = '';
   document.getElementById('authStep2').style.display = 'none';
 };
@@ -217,7 +216,6 @@ window.zzSwitchTab = (mode) => {
   document.getElementById('authSubmitBtn').textContent = isSignup ? t('auth.btn.next') : t('auth.btn.login');
   document.getElementById('authStep1').style.display = '';
   document.getElementById('authStep2').style.display = 'none';
-  document.getElementById('authStep3').style.display = 'none';
   captchaToken = null;
   if(!isSignup && typeof turnstile !== 'undefined') turnstile.reset('#turnstileWidget');
 };
@@ -312,17 +310,8 @@ window.zzConfirmSignup = async () => {
       options: { data: { display_name: pendingSignup.name, avatar: selectedAvatar } }
     });
     if(error) throw error;
-    if(data.session) {
-      // Auto-confirm aktiv: direkt einloggen
-      if(data.user) await ensureProfile(data.user);
-      window.zzCloseAuth();
-    } else {
-      // E-Mail-Bestätigung erforderlich
-      if(data.user) await ensureProfile(data.user);
-      document.getElementById('authStep2').style.display = 'none';
-      document.getElementById('authStep3').style.display = '';
-      document.getElementById('authConfirmEmail').textContent = pendingSignup.email;
-    }
+    if(data.user) await ensureProfile(data.user);
+    window.zzCloseAuth();
   } catch(e){
     errEl.textContent = translateAuthError(e.message);
     window.zzBackToStep1();

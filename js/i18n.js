@@ -40,9 +40,6 @@ const TRANSLATIONS = {
     'auth.btn.back': '← Zurück',
     'auth.btn.create': 'Konto erstellen',
     'auth.avatar.label': 'Wähle deinen Avatar',
-    'auth.confirm.title': 'Fast geschafft!',
-    'auth.confirm.desc': 'Wir haben dir eine Bestätigungs-E-Mail geschickt. Klicke auf den Link darin, um dein Konto zu aktivieren.',
-    'auth.confirm.close': 'Fenster schließen',
 
     'err.fill.email.pw': 'Bitte E-Mail und Passwort ausfüllen.',
     'err.fill.name': 'Bitte einen Anzeigenamen eingeben.',
@@ -169,9 +166,6 @@ const TRANSLATIONS = {
     'auth.btn.back': '← Back',
     'auth.btn.create': 'Create account',
     'auth.avatar.label': 'Choose your avatar',
-    'auth.confirm.title': 'Almost there!',
-    'auth.confirm.desc': 'We sent you a confirmation email. Click the link inside to activate your account.',
-    'auth.confirm.close': 'Close window',
 
     'err.fill.email.pw': 'Please fill in email and password.',
     'err.fill.name': 'Please enter a display name.',
