@@ -51,9 +51,26 @@ export function build() {
 
   const overEl = overMsg(wrap, '', restart);
 
+  // Mode selection overlay
+  const modeEl = document.createElement('div');
+  modeEl.className = 'game-overmsg show';
+  modeEl.innerHTML = `
+    <div style="font-size:19px;font-weight:700;margin-bottom:16px;">🎱 Billard 8-Ball</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button id="zz-bil-ai" style="padding:11px 22px;font-size:15px;font-family:Fredoka,sans-serif;background:#2d6a4f;border:none;border-radius:10px;color:#fff;cursor:pointer;font-weight:600;">🤖 vs KI</button>
+      <button id="zz-bil-pvp" style="padding:11px 22px;font-size:15px;font-family:Fredoka,sans-serif;background:#1a3a6b;border:none;border-radius:10px;color:#fff;cursor:pointer;font-weight:600;">👥 2 Spieler</button>
+    </div>`;
+  wrap.appendChild(modeEl);
+
+  // Pass-device overlay for 2P
+  const handoverEl = document.createElement('div');
+  handoverEl.className = 'game-overmsg';
+  wrap.appendChild(handoverEl);
+
   let balls = [];
-  let state = 'aiming'; // aiming | rolling | ai-thinking | gameover
-  let turn  = 0; // 0=player, 1=AI
+  let state = 'aiming'; // aiming | rolling | ai-thinking | handover | gameover
+  let turn  = 0; // 0=player1, 1=player2/AI
+  let mode  = 'ai'; // 'ai' | 'pvp'
   let group = [null, null]; // null | 'solid' | 'stripe' per player
   let keepTurn = false;
   let scratch  = false;
@@ -108,7 +125,9 @@ export function build() {
     keepTurn = false; scratch = false; pocketsThisTurn = [];
     holding = false; holdMs = 0;
     aimAngle = 0;
+    handoverEl.classList.remove('show');
     updateInfo();
+    if (mode === 'pvp') showHandover(0);
   }
 
   // ─── physics ────────────────────────────────────────────────────────────────
@@ -211,9 +230,11 @@ export function build() {
     keepTurn = false;
     pocketsThisTurn = [];
 
-    if (turn === 1) {
+    if (turn === 1 && mode === 'ai') {
       state = 'ai-thinking';
       aiTimer = setTimeout(aiShot, 900 + Math.random()*600);
+    } else if (mode === 'pvp') {
+      showHandover(turn);
     } else {
       state = 'aiming';
     }
@@ -225,6 +246,20 @@ export function build() {
     clearTimeout(aiTimer);
     overEl.querySelector('div').textContent = msg;
     overEl.classList.add('show');
+  }
+
+  function showHandover(who) {
+    state = 'handover';
+    const name = who === 0 ? 'Spieler 1 🟡' : 'Spieler 2 🔵';
+    handoverEl.innerHTML = `
+      <div style="font-size:17px;font-weight:700;margin-bottom:6px;">${name} ist dran</div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:12px;">Gerät weitergeben, dann tippen</div>
+      <button style="padding:10px 24px;font-family:Fredoka,sans-serif;font-size:14px;font-weight:600;background:#2d6a4f;border:none;border-radius:10px;color:#fff;cursor:pointer;">▶ Spielen</button>`;
+    handoverEl.querySelector('button').onclick = () => {
+      handoverEl.classList.remove('show');
+      state = 'aiming';
+    };
+    handoverEl.classList.add('show');
   }
 
   // ─── shoot ──────────────────────────────────────────────────────────────────
@@ -519,7 +554,7 @@ export function build() {
       ctx.fillStyle='#fff';
       ctx.font='bold 15px Fredoka,sans-serif';
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText('KI denkt...', W/2, H/2);
+      ctx.fillText('🤖 KI denkt…', W/2, H/2);
     }
   }
 
@@ -528,15 +563,19 @@ export function build() {
     const g=group[who];
     if (!g) return '–';
     if (g==='solid') return '🟡 Voll (1-7)';
-    return '🔴 Halb (9-15)';
+    return '🔵 Halb (9-15)';
+  }
+  function playerName(who) {
+    if (mode==='pvp') return who===0 ? '👤 Sp. 1' : '👤 Sp. 2';
+    return who===0 ? '👤 Du' : '🤖 KI';
   }
   function updateInfo() {
-    const mine=myPool(0).length, ai=myPool(1).length;
+    const p0=myPool(0).length, p1=myPool(1).length;
     const eight=balls.find(b=>b.num===8&&!b.pocketed)?'⚫ im Spiel':'⚫ eingelocht';
     infoBar.innerHTML=`
-      <span style="color:${turn===0?'#C6FF3D':'#aaa'}">👤 ${groupLabel(0)} (${mine})</span>
+      <span style="color:${turn===0?'#C6FF3D':'#aaa'}">${playerName(0)} ${groupLabel(0)} (${p0})</span>
       <span style="color:#aaa;font-size:11px;">${eight}</span>
-      <span style="color:${turn===1?'#C6FF3D':'#aaa'}">🤖 ${groupLabel(1)} (${ai})</span>
+      <span style="color:${turn===1?'#C6FF3D':'#aaa'}">${playerName(1)} ${groupLabel(1)} (${p1})</span>
     `;
   }
 
@@ -589,14 +628,29 @@ export function build() {
     drawFrame();
   }
 
-  // ─── restart ─────────────────────────────────────────────────────────────────
+  // ─── restart / mode select ────────────────────────────────────────────────────
   function restart() {
     overEl.classList.remove('show');
+    handoverEl.classList.remove('show');
     clearTimeout(aiTimer);
-    setup();
+    // Go back to mode selection
+    modeEl.classList.add('show');
+    state = 'aiming'; // will be properly set after mode chosen
+    balls = []; // clear so drawFrame shows empty table during mode select
   }
 
-  setup();
+  // Wire up mode buttons (defined after all functions)
+  modeEl.querySelector('#zz-bil-ai').onclick = () => {
+    mode = 'ai';
+    modeEl.classList.remove('show');
+    setup();
+  };
+  modeEl.querySelector('#zz-bil-pvp').onclick = () => {
+    mode = 'pvp';
+    modeEl.classList.remove('show');
+    setup();
+  };
+
   window.__restartCurrent = restart;
   loop();
 
