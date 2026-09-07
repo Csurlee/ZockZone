@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { t } from './i18n.js';
 
 const SUPABASE_URL = 'https://supabase.hackthelab.uk';
 const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
@@ -165,18 +166,18 @@ function appendMsg(msg){
   let addFriendBtn = '';
   if(currentUser && !isOwn && !isFriend && !sentSet.has(msg.user_id)) {
     addFriendBtn = `<button class="chat-add-friend-btn" id="chatFriend-${msg.user_id}"
-      title="Als Freund hinzufügen"
+      title="${t('chat.friend.add.title')}"
       onclick="zzChatAddFriend('${msg.user_id}',this)">+</button>`;
   } else if(currentUser && !isOwn && sentSet.has(msg.user_id)) {
-    addFriendBtn = `<button class="chat-add-friend-btn sent" disabled title="Anfrage gesendet">⏳</button>`;
+    addFriendBtn = `<button class="chat-add-friend-btn sent" disabled title="${t('chat.friend.sent.label')}">⏳</button>`;
   }
 
   // Mod action buttons — only for mods/admins viewing other users' messages
   const modBtns = (isMod() && !isOwn)
     ? `<div class="chat-mod-btns">
-        <button class="chat-mod-btn" title="Stummschalten"
+        <button class="chat-mod-btn" title="${t('chat.mod.mute.title')}"
                 onclick="zzChatMuteUser('${msg.user_id}','${esc(msg.username)}',this)">🔇</button>
-        <button class="chat-mod-btn chat-del-btn" title="Löschen"
+        <button class="chat-mod-btn chat-del-btn" title="${t('chat.mod.del.title')}"
                 onclick="zzChatDeleteMsg('${msg.id}',this)">🗑</button>
        </div>`
     : '';
@@ -254,7 +255,7 @@ function updateBadge(){
 window.zzChatDeleteMsg = async (id, btn) => {
   btn.disabled = true;
   const { error } = await sb.from('chat_messages').delete().eq('id', id);
-  if(error){ btn.disabled = false; showChatNotice('Fehler beim Löschen.', true); }
+  if(error){ btn.disabled = false; showChatNotice(t('chat.del.error'), true); }
 };
 
 // Simple inline mute popup
@@ -263,21 +264,21 @@ window.zzChatMuteUser = (userId, username, btn) => {
   document.getElementById('chatMutePopup')?.remove();
 
   const opts = [
-    {v:10,  l:'10 Minuten'},
-    {v:60,  l:'1 Stunde'},
-    {v:360, l:'6 Stunden'},
-    {v:1440,l:'24 Stunden'},
-    {v:10080,l:'7 Tage'},
+    {v:10,   k:'chat.mute.10min'},
+    {v:60,   k:'chat.mute.1h'},
+    {v:360,  k:'chat.mute.6h'},
+    {v:1440, k:'chat.mute.24h'},
+    {v:10080,k:'chat.mute.7d'},
   ];
   const pop = document.createElement('div');
   pop.id = 'chatMutePopup';
   pop.className = 'chat-mute-popup';
   pop.innerHTML =
-    `<div class="chat-mute-popup-title">🔇 ${esc(username)} stummschalten</div>` +
+    `<div class="chat-mute-popup-title">${t('chat.mute.title', esc(username))}</div>` +
     opts.map(o =>
-      `<button class="chat-mute-dur-btn" data-v="${o.v}">${o.l}</button>`
+      `<button class="chat-mute-dur-btn" data-v="${o.v}" data-k="${o.k}">${t(o.k)}</button>`
     ).join('') +
-    `<button class="chat-mute-cancel">Abbrechen</button>`;
+    `<button class="chat-mute-cancel">${t('chat.mute.cancel')}</button>`;
 
   pop.querySelector('.chat-mute-cancel').onclick = () => pop.remove();
   pop.querySelectorAll('.chat-mute-dur-btn').forEach(b => {
@@ -287,9 +288,9 @@ window.zzChatMuteUser = (userId, username, btn) => {
       await sb.from('chat_muted_users').upsert({
         user_id: userId,
         muted_until: new Date(Date.now() + minutes * 60000).toISOString(),
-        reason: `Von ${currentRole} stummgeschaltet`
+        reason: t('chat.mute.reason', currentRole)
       }, {onConflict: 'user_id'});
-      showChatNotice(`🔇 ${username} für ${b.textContent} stummgeschaltet.`);
+      showChatNotice(t('chat.mute.done', username, t(b.dataset.k)));
     };
   });
 
@@ -306,13 +307,13 @@ window.zzChatAddFriend = async (userId, btn) => {
   });
   if(error) {
     btn.disabled = false;
-    showChatNotice('Freundschaftsanfrage konnte nicht gesendet werden.', true);
+    showChatNotice(t('chat.friend.error'), true);
   } else {
     btn.textContent = '⏳';
     btn.classList.add('sent');
-    btn.title = 'Anfrage gesendet';
+    btn.title = t('chat.friend.sent.label');
     sentSet.add(userId);
-    showChatNotice('Freundschaftsanfrage gesendet!');
+    showChatNotice(t('chat.friend.added'));
   }
 };
 
@@ -342,12 +343,12 @@ window.zzSendChat = async () => {
   if(!msg) return;
 
   if(isRateLimited()){
-    showChatNotice('⏳ Zu viele Nachrichten — bitte kurz warten.', true);
+    showChatNotice(t('chat.notice.ratelimit'), true);
     return;
   }
   const muted = await checkMuted();
   if(muted){
-    showChatNotice('🔇 Du bist stummgeschaltet.', true);
+    showChatNotice(t('chat.notice.muted'), true);
     return;
   }
 
@@ -362,7 +363,7 @@ window.zzSendChat = async () => {
     avatar: meta.avatar || '',
     message: msg
   });
-  if(error) showChatNotice('🔇 Nachricht konnte nicht gesendet werden.', true);
+  if(error) showChatNotice(t('chat.notice.send.error'), true);
 };
 
 $('chatInput')?.addEventListener('keydown', e => {

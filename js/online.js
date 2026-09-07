@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { sfx } from './sfx.js';
+import { t } from './i18n.js';
 
 const SUPABASE_URL     = 'https://supabase.hackthelab.uk';
 const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
@@ -102,10 +103,10 @@ async function loadFriends() {
   const listEl = $('friendsList');
   if(listEl) {
     if(!accepted.length && !sent.length) {
-      listEl.innerHTML = '<div class="friend-empty">Noch keine Freunde. Suche nach Spielern oben!</div>';
+      listEl.innerHTML = `<div class="friend-empty">${t('online.friends.none')}</div>`;
       return;
     }
-    let html = accepted.length ? `<div class="friend-section-title">👥 Freunde</div>` : '';
+    let html = accepted.length ? `<div class="friend-section-title">${t('online.friends.section')}</div>` : '';
     if(accepted.length) {
       const ids = accepted.map(f => f.requester_id===currentUser.id ? f.addressee_id : f.requester_id);
       const { data: profiles } = await sb.from('profiles').select('id,display_name,avatar,last_seen').in('id', ids);
@@ -117,13 +118,13 @@ async function loadFriends() {
         return `<div class="friend-item">
           <span class="friend-status-dot ${online?'online':'offline'}"></span>
           ${avatarOf(p.avatar)} <span class="friend-name">${esc(p.display_name||'?')}</span>
-          ${online ? `<button class="friend-btn invite" onclick="zzInviteFriend('${fid}','${esc(p.display_name||'?')}')">🎮 Einladen</button>` : '<span class="friend-offline-label">offline</span>'}
-          <button class="friend-btn remove" onclick="zzRemoveFriend('${f.id}')" title="Freundschaft entfernen">🗑</button>
+          ${online ? `<button class="friend-btn invite" onclick="zzInviteFriend('${fid}','${esc(p.display_name||'?')}')">${t('online.friends.invite')}</button>` : `<span class="friend-offline-label">${t('online.friends.offline')}</span>`}
+          <button class="friend-btn remove" onclick="zzRemoveFriend('${f.id}')" title="${t('online.friends.remove.title')}">🗑</button>
         </div>`;
       }).join('');
     }
     if(sent.length) {
-      html += `<div class="friend-section-title" style="margin-top:12px">⏳ Gesendete Anfragen</div>`;
+      html += `<div class="friend-section-title" style="margin-top:12px">${t('online.friends.section.sent')}</div>`;
       const ids = sent.map(f => f.addressee_id);
       const { data: profiles } = await sb.from('profiles').select('id,display_name').in('id', ids);
       const map = Object.fromEntries((profiles||[]).map(p=>[p.id,p]));
@@ -131,8 +132,8 @@ async function loadFriends() {
         const p = map[f.addressee_id] || {};
         return `<div class="friend-item pending">
           👤 <span>${esc(p.display_name||'?')}</span>
-          <span class="friend-pending-label">ausstehend</span>
-          <button class="friend-btn remove" onclick="zzRemoveFriend('${f.id}')" title="Anfrage zurückziehen">✕</button>
+          <span class="friend-pending-label">${t('online.friends.pending.label')}</span>
+          <button class="friend-btn remove" onclick="zzRemoveFriend('${f.id}')" title="${t('online.friends.remove.title')}">✕</button>
         </div>`;
       }).join('');
     }
@@ -164,14 +165,14 @@ window.zzSearchUsers = async function() {
 
   const resEl = $('friendSearchResults');
   if(!resEl) return;
-  if(!data?.length) { resEl.innerHTML = '<div class="friend-empty">Kein Spieler gefunden.</div>'; return; }
+  if(!data?.length) { resEl.innerHTML = `<div class="friend-empty">${t('online.friends.notfound')}</div>`; return; }
 
   resEl.innerHTML = data.map(p => {
     const online = p.last_seen && (Date.now() - new Date(p.last_seen).getTime()) < ONLINE_THRESHOLD_MS;
     let btn = '';
-    if(friendIds.has(p.id))       btn = '<span class="friend-already">✔ Freund</span>';
-    else if(pendingFrom.has(p.id)) btn = '<span class="friend-pending-label">Anfrage gesendet</span>';
-    else                           btn = `<button class="friend-btn accept" onclick="zzSendRequest('${p.id}')">+ Freund</button>`;
+    if(friendIds.has(p.id))       btn = `<span class="friend-already">${t('online.friends.already')}</span>`;
+    else if(pendingFrom.has(p.id)) btn = `<span class="friend-pending-label">${t('online.friends.pending')}</span>`;
+    else                           btn = `<button class="friend-btn accept" onclick="zzSendRequest('${p.id}')">${t('online.friends.add')}</button>`;
     return `<div class="friend-item">
       <span class="friend-status-dot ${online?'online':'offline'}"></span>
       ${avatarOf(p.avatar)} <span>${esc(p.display_name||p.id)}</span>
@@ -182,8 +183,8 @@ window.zzSearchUsers = async function() {
 
 window.zzSendRequest = async function(addresseeId) {
   const { error } = await sb.from('friendships').insert({ requester_id: currentUser.id, addressee_id: addresseeId });
-  if(error) { toast(error.code==='23505' ? 'Anfrage bereits gesendet!' : 'Fehler: '+error.message); return; }
-  toast('Freundschaftsanfrage gesendet!');
+  if(error) { toast(error.code==='23505' ? t('online.toast.request.dup') : t('err.prefix')+error.message); return; }
+  toast(t('online.toast.request.sent'));
   sfx.blip();
   $('friendSearchResults').innerHTML = '';
   $('friendSearchInput').value = '';
@@ -220,7 +221,7 @@ async function createRoomAndInvite(friendId, friendName) {
     host_name:   meta.display_name || 'Spieler',
     host_avatar: meta.avatar || '',
   }).select().single();
-  if(error) { toast('Fehler: '+error.message); return; }
+  if(error) { toast(t('err.prefix')+error.message); return; }
   myRoom  = data;
   isHost  = true;
 
@@ -240,7 +241,7 @@ async function createRoomAndInvite(friendId, friendName) {
     }
   });
 
-  toast(`Einladung an ${friendName} gesendet!`);
+  toast(t('online.toast.invite.sent', friendName));
   sfx.blip();
   openLobby();
 }
@@ -267,9 +268,9 @@ function showInviteToast(payload) {
       'border-radius:12px;z-index:9999;font-size:14px;font-family:Inter,sans-serif;text-align:center;min-width:240px;';
     document.body.appendChild(el);
   }
-  el.innerHTML = `🎮 <b>${name}</b> lädt dich ein!<br>
-    <button onclick="zzJoinInvite('${code}')" style="margin-top:8px;background:#C6FF3D;color:#000;border:none;border-radius:6px;padding:6px 18px;cursor:pointer;font-weight:600;">Annehmen</button>
-    <button onclick="document.getElementById('_inviteToast').style.display='none'" style="margin-top:8px;margin-left:8px;background:transparent;color:#888;border:1px solid #555;border-radius:6px;padding:6px 12px;cursor:pointer;">Ablehnen</button>`;
+  el.innerHTML = `${t('online.invite.text', name)}<br>
+    <button onclick="zzJoinInvite('${code}')" style="margin-top:8px;background:#C6FF3D;color:#000;border:none;border-radius:6px;padding:6px 18px;cursor:pointer;font-weight:600;">${t('online.invite.accept')}</button>
+    <button onclick="document.getElementById('_inviteToast').style.display='none'" style="margin-top:8px;margin-left:8px;background:transparent;color:#888;border:1px solid #555;border-radius:6px;padding:6px 12px;cursor:pointer;">${t('online.invite.decline')}</button>`;
   el.style.display = 'block';
   sfx.blip();
 }
@@ -292,7 +293,7 @@ function updateLobbyUI() {
   if(guestEl) {
     guestEl.innerHTML = myRoom.guest_name
       ? avatarOf(myRoom.guest_avatar) + ' ' + esc(myRoom.guest_name)
-      : '<span class="lobby-waiting">Warte auf Spieler…</span>';
+      : `<span class="lobby-waiting">${t('online.status.waiting.player')}</span>`;
   }
   const pickBtn = $('lobbyPickGame');
   if(pickBtn) {
@@ -301,9 +302,9 @@ function updateLobbyUI() {
   }
   const statusEl = $('lobbyStatus');
   if(statusEl) {
-    if(myRoom.guest_id && isHost)   statusEl.textContent = 'Wähle ein Spiel aus!';
-    else if(myRoom.guest_id)        statusEl.textContent = 'Warte auf den Gastgeber…';
-    else                            statusEl.textContent = 'Teile den Code mit einem Freund!';
+    if(myRoom.guest_id && isHost)   statusEl.textContent = t('online.status.pick.game');
+    else if(myRoom.guest_id)        statusEl.textContent = t('online.status.wait.host');
+    else                            statusEl.textContent = t('online.status.share.code');
   }
   // Chat nur zeigen wenn beide da sind
   const chatEl = $('lobbyChatArea');
@@ -321,7 +322,7 @@ async function createRoom() {
     host_name:   meta.display_name || currentUser.email?.split('@')[0] || 'Spieler',
     host_avatar: meta.avatar || '',
   }).select().single();
-  if(error) { toast('Fehler: '+error.message); return; }
+  if(error) { toast(t('err.prefix')+error.message); return; }
   myRoom = data;
   isHost = true;
   sfx.blip();
@@ -331,19 +332,19 @@ async function createRoom() {
 async function joinRoom(code) {
   if(!currentUser) { window.zzOpenAuth?.(); return; }
   code = code.toUpperCase().trim();
-  if(code.length !== 6) { toast('Bitte einen 6-stelligen Code eingeben!'); return; }
+  if(code.length !== 6) { toast(t('online.err.code.length')); return; }
   const meta = currentUser.user_metadata || {};
   const { data: room } = await sb.from('online_rooms').select('*').eq('code', code).maybeSingle();
-  if(!room)                          { toast('Raum nicht gefunden!'); return; }
-  if(room.guest_id)                  { toast('Raum ist bereits voll!'); return; }
-  if(room.host_id === currentUser.id){ toast('Das ist dein eigener Raum!'); return; }
+  if(!room)                          { toast(t('online.err.room.notfound')); return; }
+  if(room.guest_id)                  { toast(t('online.err.room.full')); return; }
+  if(room.host_id === currentUser.id){ toast(t('online.err.room.own')); return; }
   const { data, error } = await sb.from('online_rooms').update({
     guest_id:     currentUser.id,
     guest_name:   meta.display_name || currentUser.email?.split('@')[0] || 'Spieler',
     guest_avatar: meta.avatar || '',
     status:       'ready',
   }).eq('code', code).select().single();
-  if(error) { toast('Fehler beim Beitreten!'); return; }
+  if(error) { toast(t('online.err.join')); return; }
   myRoom = data;
   isHost = false;
   sfx.blip();
@@ -382,7 +383,7 @@ function subscribeRoom() {
         startGame(updated.selected_game || 'pong');
       }
       if(!updated.guest_id && isHost && myRoom.status !== 'playing') {
-        toast('Spieler hat den Raum verlassen.');
+        toast(t('online.toast.player.left'));
         $('lobbyChatArea').hidden = true;
       }
     })
@@ -391,7 +392,7 @@ function subscribeRoom() {
       filter:`id=eq.${myRoom.id}`
     }, () => {
       if(!isHost) {
-        toast('Gastgeber hat den Raum verlassen.');
+        toast(t('online.toast.host.left'));
         cleanup();
         $('onlineOverlay').classList.remove('open');
       }
@@ -434,7 +435,7 @@ window.zzSendRoomMsg = async function() {
     username: meta.display_name || 'Spieler',
     message:  text,
   });
-  if(error) toast('Nachricht konnte nicht gesendet werden.');
+  if(error) toast(t('online.err.msg.send'));
 };
 
 // ===== SPIEL AUSWÄHLEN =====
@@ -575,7 +576,7 @@ function startBilliardOnline(canvas) {
       const shooterWins=!scratch&&cleared;
       const winner=shooterWins?(turn===0?'host':'guest'):(turn===0?'guest':'host');
       gchan.send({type:'broadcast',event:'bil-end',payload:{winner}});
-      showEnd((winner==='host'?myRoom.host_name:myRoom.guest_name)+' gewinnt! 🏆');
+      showEnd(t('online.billiard.wins', winner==='host'?myRoom.host_name:myRoom.guest_name));
       return;
     }
     if(scratch){scratch=false;keepTurn=false;const cue=balls.find(b=>b.num===0);if(cue){cue.pocketed=false;cue.x=TX1+TW*.27;cue.y=TY1+TH/2;cue.vx=0;cue.vy=0;}}
@@ -672,7 +673,7 @@ function startBilliardOnline(canvas) {
     if(state==='waiting'||state==='opponent-turn'){
       ctx.fillStyle='rgba(0,0,0,0.28)';ctx.fillRect(TX1,TY1,TW,TH);
       ctx.fillStyle='rgba(255,255,255,0.75)';ctx.font='bold 14px Fredoka,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(state==='waiting'?'⏳ Warte auf Gegner…':'⏳ Gegner zielt…',W/2,H/2);
+      ctx.fillText(state==='waiting'?t('online.billiard.waiting'):t('online.billiard.opponent'),W/2,H/2);
     }
   }
 
@@ -729,7 +730,7 @@ function startBilliardOnline(canvas) {
     })
     .on('broadcast',{event:'bil-info'},({payload})=>applyInfo(payload))
     .on('broadcast',{event:'bil-end'},({payload})=>{
-      if(!isHost)showEnd((payload.winner==='host'?myRoom.host_name:myRoom.guest_name)+' gewinnt! 🏆');
+      if(!isHost)showEnd(t('online.billiard.wins', payload.winner==='host'?myRoom.host_name:myRoom.guest_name));
     })
     .subscribe(status=>{
       if(status!=='SUBSCRIBED')return;
@@ -828,7 +829,7 @@ function startGame(gameName) {
       if(scores.host >= 5 || scores.guest >= 5) {
         const win = scores.host >= 5;
         gchan.send({type:'broadcast',event:'end',payload:{winner:win?'host':'guest'}});
-        showResult((win ? hostName : guestName) + ' gewinnt! 🎉');
+        showResult(t('online.pong.wins', win ? hostName : guestName));
         sfx.win();
         gchan.unsubscribe();
         return;
@@ -857,7 +858,7 @@ function startGame(gameName) {
         cancelAnimationFrame(loopId);
         const won = payload.winner === 'guest';
         const el  = $('onlineResult');
-        if(el) { el.textContent = (won ? guestName : hostName) + ' gewinnt! 🎉'; el.hidden = false; }
+        if(el) { el.textContent = t('online.pong.wins', won ? guestName : hostName); el.hidden = false; }
         sfx.win();
       })
       .subscribe(() => renderLoop());
