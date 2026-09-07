@@ -244,6 +244,7 @@ function renderUsers(users) {
 
       const pwBtn = document.createElement('button');
       pwBtn.className = 'btn btn-sm';
+      pwBtn.style.whiteSpace = 'nowrap';
       pwBtn.textContent = 'PW ändern';
       pwBtn.addEventListener('click', () => openPwModal(u.id));
       tdActions.appendChild(pwBtn);
