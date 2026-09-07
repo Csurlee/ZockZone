@@ -2,3 +2,5 @@
 admin/includes/config.php
 node_modules/
 .env
+ZOCKZONE_HANDOFF.md
+ZOCKZONE_HANDOFF_EN.md
