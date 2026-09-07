@@ -17,6 +17,8 @@ let currentUser   = null;
 let currentRole   = 'user';
 let staffMap      = new Map(); // userId → role  ('moderator' | 'admin')
 let privacySet    = new Set(); // userIds die hide_from_ranking=true haben
+let friendSet     = new Set(); // userId von akzeptierten Freunden
+let sentSet       = new Set(); // userId zu denen Anfrage gesendet wurde
 let realtimeChannel = null;
 let isOpen        = false;
 let unread        = 0;
@@ -73,6 +75,19 @@ async function loadPrivacySet() {
 function maskName(name) {
   if(!name) return '???';
   return name.slice(0, 3) + '****';
+}
+
+async function loadFriendSet() {
+  if(!currentUser) return;
+  const { data } = await sb.from('friendships')
+    .select('requester_id,addressee_id,status')
+    .or(`requester_id.eq.${currentUser.id},addressee_id.eq.${currentUser.id}`);
+  friendSet.clear(); sentSet.clear();
+  for(const f of (data||[])) {
+    const other = f.requester_id === currentUser.id ? f.addressee_id : f.requester_id;
+    if(f.status === 'accepted') friendSet.add(other);
+    if(f.status === 'pending' && f.requester_id === currentUser.id) sentSet.add(other);
+  }
 }
 
 async function loadBannedWords() {
@@ -142,6 +157,20 @@ function appendMsg(msg){
       avBadge +
     `</div>`;
 
+  // Stern für Freunde
+  const isFriend = !isOwn && friendSet.has(msg.user_id);
+  const starBadge = isFriend ? `<span class="chat-friend-star" title="Freund">⭐</span>` : '';
+
+  // Freund hinzufügen Button (nur für eingeloggte User, fremde Nachrichten, noch kein Freund/Anfrage)
+  let addFriendBtn = '';
+  if(currentUser && !isOwn && !isFriend && !sentSet.has(msg.user_id)) {
+    addFriendBtn = `<button class="chat-add-friend-btn" id="chatFriend-${msg.user_id}"
+      title="Als Freund hinzufügen"
+      onclick="zzChatAddFriend('${msg.user_id}',this)">+</button>`;
+  } else if(currentUser && !isOwn && sentSet.has(msg.user_id)) {
+    addFriendBtn = `<button class="chat-add-friend-btn sent" disabled title="Anfrage gesendet">⏳</button>`;
+  }
+
   // Mod action buttons — only for mods/admins viewing other users' messages
   const modBtns = (isMod() && !isOwn)
     ? `<div class="chat-mod-btns">
@@ -159,9 +188,11 @@ function appendMsg(msg){
     avWrap +
     `<div class="chat-body">` +
       `<span class="chat-name">${esc(displayName)}</span>` +
+      starBadge +
       `<span class="chat-time">${timeAgo(msg.created_at)}</span>` +
       `<p class="chat-text">${esc(msg.message)}</p>` +
     `</div>` +
+    addFriendBtn +
     modBtns;
   const list = $('chatMessages');
   list.appendChild(el);
@@ -266,6 +297,25 @@ window.zzChatMuteUser = (userId, username, btn) => {
   btn.parentElement.appendChild(pop);
 };
 
+// Freund aus Chat hinzufügen
+window.zzChatAddFriend = async (userId, btn) => {
+  btn.disabled = true;
+  const { error } = await sb.from('friendships').insert({
+    requester_id: currentUser.id,
+    addressee_id: userId,
+  });
+  if(error) {
+    btn.disabled = false;
+    showChatNotice('Freundschaftsanfrage konnte nicht gesendet werden.', true);
+  } else {
+    btn.textContent = '⏳';
+    btn.classList.add('sent');
+    btn.title = 'Anfrage gesendet';
+    sentSet.add(userId);
+    showChatNotice('Freundschaftsanfrage gesendet!');
+  }
+};
+
 // Close mute popup on click outside
 document.addEventListener('click', e => {
   const pop = document.getElementById('chatMutePopup');
@@ -343,7 +393,7 @@ async function onAuthChanged(){
   if(!btn) return;
   if(currentUser){
     btn.hidden = false;
-    await Promise.all([loadProfile(), loadBannedWords(), loadStaffMap(), loadPrivacySet()]);
+    await Promise.all([loadProfile(), loadBannedWords(), loadStaffMap(), loadPrivacySet(), loadFriendSet()]);
     subscribeRealtime();
     loadMessages();
     loadBotStatus();

@@ -610,6 +610,24 @@
 .chat-mod-btn:hover{ border-color:#FFA500; color:#FFA500; }
 .chat-del-btn:hover{ border-color:var(--orange); color:var(--orange); }
 
+/* Freund-Stern im Chat */
+.chat-friend-star{
+  font-size:11px; margin-left:3px; vertical-align:middle;
+  opacity:.85; cursor:default;
+}
+
+/* Freund hinzufügen Button im Chat */
+.chat-add-friend-btn{
+  background:transparent; border:1px solid rgba(198,255,61,.35);
+  border-radius:6px; padding:2px 7px; font-size:12px; font-weight:700;
+  color:#C6FF3D; cursor:pointer; flex-shrink:0;
+  align-self:flex-start; margin-left:auto;
+  transition:background .15s, border-color .15s;
+  line-height:1.6;
+}
+.chat-add-friend-btn:hover{ background:rgba(198,255,61,.12); border-color:#C6FF3D; }
+.chat-add-friend-btn.sent{ color:#8B7DB5; border-color:#3D2F70; cursor:default; }
+
 /* Mute popup */
 .chat-mute-popup{
   position:absolute; right:0; top:28px; z-index:200;
