@@ -65,8 +65,8 @@ async function checkModeration(text, retry = true) {
     });
 
     if(res.status === 429 && retry) {
-      // Rate limit — einmal nach 2s nochmal versuchen
-      await new Promise(r => setTimeout(r, 2000));
+      console.warn('⚠  OpenAI Rate-Limit (429) — warte 3s und versuche nochmal…');
+      await new Promise(r => setTimeout(r, 3000));
       return checkModeration(text, false);
     }
 
@@ -103,6 +103,16 @@ async function checkModeration(text, retry = true) {
 }
 
 // ===== LOKALER WORT-FILTER (Fallback wenn OpenAI nicht verfügbar) =====
+
+// Basis-Wortliste (immer aktiv, unabhängig von der DB)
+const BASE_BANNED_WORDS = [
+  'fuck', 'shit', 'asshole', 'bitch', 'cunt', 'nigger', 'nigga',
+  'faggot', 'fag', 'retard', 'whore', 'slut',
+  'wichser', 'scheiße', 'scheiss', 'arschloch', 'hurensohn',
+  'fotze', 'wichse', 'spast', 'idiot', 'nutte',
+  'kys', 'kill yourself',
+];
+
 let bannedWords = [];
 let bannedWordsLoaded = 0;
 
@@ -111,12 +121,16 @@ async function loadBannedWords() {
   if(error) { console.warn('⚠  Verbotene Wörter konnten nicht geladen werden:', error.message); return; }
   bannedWords = (data || []).map(r => r.word.toLowerCase());
   bannedWordsLoaded = Date.now();
-  if(bannedWords.length) console.log(`📋 ${bannedWords.length} verbotene Wörter geladen`);
+  console.log(`📋 ${bannedWords.length} DB-Wörter + ${BASE_BANNED_WORDS.length} Basis-Wörter im Filter`);
 }
 
 function checkBannedWords(text) {
-  if(!bannedWords.length) return null;
   const lower = text.toLowerCase();
+  // Zuerst Basis-Liste prüfen
+  for(const word of BASE_BANNED_WORDS) {
+    if(lower.includes(word)) return word;
+  }
+  // Dann DB-Liste prüfen
   for(const word of bannedWords) {
     if(lower.includes(word)) return word;
   }
