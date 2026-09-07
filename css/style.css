@@ -599,8 +599,19 @@
 .chat-mod-btns{
   display:flex; gap:4px; align-items:flex-start;
   margin-left:auto; flex-shrink:0;
+  opacity:0; pointer-events:none;
+  transition:opacity .15s;
 }
 .chat-msg{ position:relative; }
+.chat-msg:hover .chat-mod-btns,
+.chat-msg:hover .chat-add-friend-btn{
+  opacity:1; pointer-events:auto;
+}
+/* Touch devices: always show action buttons */
+@media (hover: none){
+  .chat-mod-btns,
+  .chat-add-friend-btn{ opacity:1; pointer-events:auto; }
+}
 .chat-mod-btn{
   background:transparent; border:1px solid rgba(255,255,255,.1);
   border-radius:5px; padding:3px 6px; font-size:12px; cursor:pointer;
@@ -622,7 +633,8 @@
   border-radius:6px; padding:2px 7px; font-size:12px; font-weight:700;
   color:#C6FF3D; cursor:pointer; flex-shrink:0;
   align-self:flex-start; margin-left:auto;
-  transition:background .15s, border-color .15s;
+  opacity:0; pointer-events:none;
+  transition:background .15s, border-color .15s, opacity .15s;
   line-height:1.6;
 }
 .chat-add-friend-btn:hover{ background:rgba(198,255,61,.12); border-color:#C6FF3D; }
