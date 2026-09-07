@@ -567,12 +567,21 @@
   padding:4px 8px; margin:2px 0; font-style:italic;
 }
 .chat-notice-err{ color:#FF6B4A; }
-.chat-role-badge{
-  display:inline-block; background:rgba(124,58,237,.25);
-  color:#A78BFA; font-size:10px; font-weight:700;
-  padding:1px 5px; border-radius:4px;
-  margin-left:4px; vertical-align:middle; letter-spacing:.3px;
+.chat-av-wrap{
+  position:relative; flex-shrink:0;
+  width:28px; height:28px; /* matches .chat-av size */
 }
+.chat-av-wrap .chat-av{
+  display:block; line-height:28px;
+}
+.chat-av-badge{
+  position:absolute; bottom:-4px; right:-6px;
+  font-size:11px; line-height:1;
+  background:#14101F; border-radius:50%;
+  padding:1px; border:1px solid #14101F;
+}
+.chat-av-badge--moderator{ filter:drop-shadow(0 0 3px rgba(167,139,250,.8)); }
+.chat-av-badge--admin    { filter:drop-shadow(0 0 4px rgba(198,255,61,.9)); }
 .chat-mod-btns{
   display:flex; gap:4px; align-items:flex-start;
   margin-left:auto; flex-shrink:0; opacity:0;

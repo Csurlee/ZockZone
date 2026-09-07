@@ -9,11 +9,13 @@ const AVATAR_MAP = {
   dice:'🎲', joker:'🃏', puzzle:'🧩', lightning:'⚡',
   ghost:'👻', trophy:'🏆'
 };
-const ROLE_BADGE = { moderator:'🛡 MOD', admin:'⚡ ADMIN' };
+// icon shown next to avatar, visible to everyone
+const ROLE_ICON  = { moderator:'🛡', admin:'⚡' };
+const ROLE_LABEL = { moderator:'MOD', admin:'ADMIN' };
 
 let currentUser   = null;
 let currentRole   = 'user';
-let staffIds      = new Set();   // user IDs with mod/admin role (for badges)
+let staffMap      = new Map(); // userId → role  ('moderator' | 'admin')
 let realtimeChannel = null;
 let isOpen        = false;
 let unread        = 0;
@@ -31,10 +33,10 @@ async function loadProfile() {
   currentRole = data?.role || 'user';
 }
 
-async function loadStaffIds() {
+async function loadStaffMap() {
   const { data } = await sb.from('profiles')
-    .select('id').in('role',['moderator','admin']);
-  staffIds = new Set((data||[]).map(p=>p.id));
+    .select('id,role').in('role',['moderator','admin']);
+  staffMap = new Map((data||[]).map(p=>[p.id, p.role]));
 }
 
 async function loadBannedWords() {
@@ -84,18 +86,30 @@ function timeAgo(iso){
 
 function appendMsg(msg){
   if($('chatMsg-' + msg.id)) return;
-  const isStaff = staffIds.has(msg.user_id);
-  const badge   = isStaff ? `<span class="chat-role-badge">${msg.user_id === currentUser?.id ? ROLE_BADGE[currentRole]||'' : staffIds.has(msg.user_id) ? '🛡' : ''}</span>` : '';
-  // Reload staffIds on each msg to catch newly assigned mods
-  const badgeLabel = isStaff
-    ? `<span class="chat-role-badge">${staffIds.has(msg.user_id)?'🛡':''}</span>`
-    : '';
 
-  const isOwn     = msg.user_id === currentUser?.id;
-  const modBtns   = (isMod() && !isOwn)
+  const role    = staffMap.get(msg.user_id) || null;
+  const isOwn   = msg.user_id === currentUser?.id;
+  const isOwner = isOwn && currentRole !== 'user';
+  // Use own live role for own messages (in case map not loaded yet)
+  const effectiveRole = isOwn && currentRole !== 'user' ? currentRole : role;
+
+  // Avatar with role-badge overlay (visible to everyone)
+  const avBadge = effectiveRole
+    ? `<span class="chat-av-badge chat-av-badge--${effectiveRole}" title="${ROLE_LABEL[effectiveRole]}">${ROLE_ICON[effectiveRole]}</span>`
+    : '';
+  const avWrap =
+    `<div class="chat-av-wrap">` +
+      `<span class="chat-av">${avatarOf(msg.avatar)}</span>` +
+      avBadge +
+    `</div>`;
+
+  // Mod action buttons — only for mods/admins viewing other users' messages
+  const modBtns = (isMod() && !isOwn)
     ? `<div class="chat-mod-btns">
-        <button class="chat-mod-btn" title="Stummschalten" onclick="zzChatMuteUser('${msg.user_id}','${esc(msg.username)}',this)">🔇</button>
-        <button class="chat-mod-btn chat-del-btn" title="Löschen" onclick="zzChatDeleteMsg('${msg.id}',this)">🗑</button>
+        <button class="chat-mod-btn" title="Stummschalten"
+                onclick="zzChatMuteUser('${msg.user_id}','${esc(msg.username)}',this)">🔇</button>
+        <button class="chat-mod-btn chat-del-btn" title="Löschen"
+                onclick="zzChatDeleteMsg('${msg.id}',this)">🗑</button>
        </div>`
     : '';
 
@@ -103,10 +117,9 @@ function appendMsg(msg){
   el.className = 'chat-msg';
   el.id = 'chatMsg-' + msg.id;
   el.innerHTML =
-    `<span class="chat-av">${avatarOf(msg.avatar)}</span>` +
+    avWrap +
     `<div class="chat-body">` +
       `<span class="chat-name">${esc(msg.username)}</span>` +
-      (isStaff ? `<span class="chat-role-badge">${ROLE_BADGE[currentRole] && isOwn ? ROLE_BADGE[currentRole] : '🛡 MOD'}</span>` : '') +
       `<span class="chat-time">${timeAgo(msg.created_at)}</span>` +
       `<p class="chat-text">${esc(msg.message)}</p>` +
     `</div>` +
@@ -114,13 +127,6 @@ function appendMsg(msg){
   const list = $('chatMessages');
   list.appendChild(el);
   list.scrollTop = list.scrollHeight;
-}
-
-function appendMsgRefresh(msg) {
-  // Re-render with updated staffIds
-  const el = $('chatMsg-' + msg.id);
-  if(el) el.remove();
-  appendMsg(msg);
 }
 
 function removeMsg(id){
@@ -279,7 +285,7 @@ async function onAuthChanged(){
   if(!btn) return;
   if(currentUser){
     btn.hidden = false;
-    await Promise.all([loadProfile(), loadBannedWords(), loadStaffIds()]);
+    await Promise.all([loadProfile(), loadBannedWords(), loadStaffMap()]);
     subscribeRealtime();
     loadMessages();
     // Show own role badge in FAB
@@ -289,7 +295,7 @@ async function onAuthChanged(){
     if($('chatPanel')) $('chatPanel').hidden = true;
     isOpen = false;
     currentRole = 'user';
-    staffIds.clear();
+    staffMap.clear();
   }
 }
 
