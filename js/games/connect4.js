@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -30,13 +31,13 @@ export function build(){
       gridDiv.appendChild(cell);
     }
   }
-  function drop(c){
+  function drop(c){ sfx.drop();
     for(let r=ROWS-1;r>=0;r--){
       if(!board[r][c]){
         board[r][c]=turn;
         render();
         if(checkWin(r,c)){
-          over.querySelector('div').textContent=`Spieler ${turn} gewinnt! 🎉`;
+          sfx.win(); over.querySelector('div').textContent=`Spieler ${turn} gewinnt! 🎉`;
           over.classList.add('show');
           return;
         }

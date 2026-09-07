@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -26,8 +27,8 @@ export function build(){
     board.forEach(row=>row.forEach(c=>{ if(c){ if(c.p==='r') red++; else blue++; } }));
     document.getElementById('chkRed').textContent=red;
     document.getElementById('chkBlue').textContent=blue;
-    if(red===0){ over.querySelector('div').textContent='Blau gewinnt! 🎉'; over.classList.add('show'); }
-    else if(blue===0){ over.querySelector('div').textContent='Rot gewinnt! 🎉'; over.classList.add('show'); }
+    if(red===0){ over.querySelector('div').textContent='Blau gewinnt! 🎉'; sfx.win(); over.classList.add('show'); }
+    else if(blue===0){ over.querySelector('div').textContent='Rot gewinnt! 🎉'; sfx.win(); over.classList.add('show'); }
   }
   function legalMovesFor(r,c){
     const piece=board[r][c]; if(!piece) return [];

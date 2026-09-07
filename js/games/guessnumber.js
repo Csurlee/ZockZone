@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -27,12 +28,12 @@ export function build(){
     if(isNaN(g)) return;
     tries++; document.getElementById('gnTries').textContent=tries;
     if(g===target){
-      msgEl.textContent='Richtig! 🎉';
+      sfx.win(); msgEl.textContent='Richtig! 🎉';
       input.disabled=true; submitBtn.disabled=true;
       over.querySelector('div').textContent=`Erraten in ${tries} Versuchen!`;
       over.classList.add('show');
-    } else if(g<target){ msgEl.textContent='Höher! ⬆️'; }
-    else { msgEl.textContent='Niedriger! ⬇️'; }
+    } sfx.blip(); } else if(g<target){ msgEl.textContent='Höher! ⬆️'; }
+    sfx.blip(); } else { msgEl.textContent='Niedriger! ⬇️'; }
     input.value='';
   }
   submitBtn.onclick=submit;

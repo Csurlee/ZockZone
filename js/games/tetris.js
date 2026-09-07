@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -49,7 +50,7 @@ export function build(){
     }
     return false;
   }
-  function merge(){
+  function merge(){ sfx.tetLand();
     cur.forEach((row,y)=>row.forEach((v,x)=>{ if(v && curY+y>=0) grid[curY+y][curX+x]=curColor; }));
   }
   function clearLines(){
@@ -59,13 +60,13 @@ export function build(){
         grid.splice(y,1); grid.unshift(Array(COLS).fill(0)); cleared++; y++;
       }
     }
-    if(cleared){
+    if(cleared){ sfx.tetClear();
       score += cleared*100; document.getElementById('tetScore').textContent=score;
       level = 1+Math.floor(score/500); document.getElementById('tetLevel').textContent=level;
       dropInterval=Math.max(150,600-level*40);
     }
   }
-  function rotate(){
+  function rotate(){ sfx.tetRotate();
     const rotated=cur[0].map((_,i)=>cur.map(row=>row[i]).reverse());
     if(!collide(rotated,curX,curY)) cur=rotated;
   }

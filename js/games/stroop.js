@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -28,7 +29,7 @@ export function build(){
     if(timerId) clearInterval(timerId);
     timerId=setInterval(()=>{
       timeLeft--; document.getElementById('strTime').textContent=timeLeft;
-      if(timeLeft<=0){ clearInterval(timerId); over.querySelector('div').textContent='Zeit um! Punkte: '+score; over.classList.add('show'); }
+      if(timeLeft<=0){ clearInterval(timerId); over.querySelector('div').textContent='Zeit um! Punkte: '+score; sfx.win(); over.classList.add('show'); }
     },1000);
   }
   function nextWord(){
@@ -38,9 +39,9 @@ export function build(){
     wordEl.style.color=color[1];
     correctColor=color[1];
   }
-  function check(hexc){
+  function check(hexc){ if(hexc!==correctColor) sfx.wrong();
     if(timeLeft<=0) return;
-    if(hexc===correctColor){ score++; document.getElementById('strScore').textContent=score; }
+    if(hexc===correctColor){ sfx.correct(); score++; document.getElementById('strScore').textContent=score; }
     nextWord();
   }
   window.__restartCurrent=start;

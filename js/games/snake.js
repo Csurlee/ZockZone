@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
 export function build(){
@@ -31,13 +32,13 @@ export function build(){
     if(!alive) return;
     dir = nextDir;
     const head = {x:snake[0].x+dir.x, y:snake[0].y+dir.y};
-    if(head.x<0||head.y<0||head.x>=cols||head.y>=cols||snake.some(s=>s.x===head.x&&s.y===head.y)){
+    sfx.lose(); if(head.x<0||head.y<0||head.x>=cols||head.y>=cols||snake.some(s=>s.x===head.x&&s.y===head.y)){
       alive=false; clearInterval(loopId); over.classList.add('show');
       if(window.zzSaveHighScore) window.zzSaveHighScore('snake','Snake Reloaded',score);
       return;
     }
     snake.unshift(head);
-    if(head.x===food.x && head.y===food.y){ score++; document.getElementById('snakeScore').textContent=score; food=randFood(); }
+    if(head.x===food.x && head.y===food.y){ sfx.eat(); score++; document.getElementById('snakeScore').textContent=score; food=randFood(); }
     else snake.pop();
     draw();
   }

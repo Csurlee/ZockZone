@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -35,7 +36,7 @@ export function build(){
     render();
     if(sticks<=0){
       over.querySelector('div').textContent=`Spieler ${turn} nimmt das letzte Stäbchen und verliert! Spieler ${turn===1?2:1} gewinnt! 🎉`;
-      over.classList.add('show');
+      sfx.win(); over.classList.add('show');
       return;
     }
     turn = turn===1?2:1;

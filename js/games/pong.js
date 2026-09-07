@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -21,15 +22,15 @@ export function build(){
   function loop(){
     ball.x+=ball.vx; ball.y+=ball.vy;
     if(ball.y<0||ball.y>280) ball.vy*=-1;
-    if(ball.x<20 && ball.y>pY && ball.y<pY+PH){ ball.vx=Math.abs(ball.vx)*1.03; ball.x=20; }
-    if(ball.x>380 && ball.y>cY && ball.y<cY+PH){ ball.vx=-Math.abs(ball.vx)*1.03; ball.x=380; }
-    if(ball.x<0){ cScore++; document.getElementById('pongC').textContent=cScore; reset(); }
-    if(ball.x>400){ pScore++; document.getElementById('pongP').textContent=pScore; reset(); }
+    if(ball.x<20 && ball.y>pY && ball.y<pY+PH){ ball.vx=Math.abs(ball.vx)*1.03; ball.x=20; sfx.bounce(); }
+    if(ball.x>380 && ball.y>cY && ball.y<cY+PH){ ball.vx=-Math.abs(ball.vx)*1.03; ball.x=380; sfx.bounce(); }
+    if(ball.x<0){ cScore++; sfx.score(); document.getElementById('pongC').textContent=cScore; reset(); }
+    if(ball.x>400){ pScore++; sfx.score(); document.getElementById('pongP').textContent=pScore; reset(); }
     const cCenter=cY+PH/2;
     if(cCenter < ball.y-8) cY+=3.2; else if(cCenter>ball.y+8) cY-=3.2;
     cY=Math.max(0,Math.min(220,cY));
     draw();
-    if(pScore>=5 || cScore>=5){ over.querySelector('div').textContent = pScore>=5?'Du gewinnst! 🎉':'CPU gewinnt.'; over.classList.add('show'); return; }
+    if(pScore>=5 || cScore>=5){ over.querySelector('div').textContent = (pScore>=5?(sfx.win()):sfx.lose(), pScore>=5?'Du gewinnst! 🎉':'CPU gewinnt.'); over.classList.add('show'); return; }
     loopId=requestAnimationFrame(loop);
   }
   function reset(){ ball={x:200,y:140,vx:(Math.random()<0.5?4:-4),vy:(Math.random()*4-2)}; }

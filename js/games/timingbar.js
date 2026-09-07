@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -45,7 +46,7 @@ export function build(){
     if(round>=8){
       stopBtn.disabled=true;
       over.querySelector('div').textContent='Fertig! Punkte: '+score;
-      over.classList.add('show');
+      sfx.win(); over.classList.add('show');
     } else nextRoundTimeoutId=setTimeout(nextRound, 600);
   };
   window.__restartCurrent=start;

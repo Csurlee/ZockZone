@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -49,10 +50,10 @@ export function build(){
   function shoot(r,c){
     if(grid[r][c]===2||grid[r][c]===3) return;
     shots++; document.getElementById('bsShots').textContent=shots;
-    if(grid[r][c]===1){ grid[r][c]=2; hits++; document.getElementById('bsHits').textContent=hits+'/'+shipCells; }
-    else grid[r][c]=3;
+    if(grid[r][c]===1){ grid[r][c]=2; sfx.explosion(); hits++; document.getElementById('bsHits').textContent=hits+'/'+shipCells; }
+    else sfx.miss(); grid[r][c]=3;
     render();
-    if(hits===shipCells){
+    if(hits===shipCells){ sfx.win();
       over.querySelector('div').textContent=`Alle Schiffe versenkt! 🎉 (${shots} Schüsse)`;
       over.classList.add('show');
     }

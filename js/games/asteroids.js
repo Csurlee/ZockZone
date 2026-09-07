@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -50,7 +51,7 @@ export function build(){
         lives--; document.getElementById('astLives').textContent=lives;
         ship.x=180; ship.y=180; ship.vx=0; ship.vy=0;
         r.dead=true;
-        if(lives<=0){ over.querySelector('div').textContent='Zerstört! Punkte: '+score; over.classList.add('show'); }
+        if(lives<=0){ over.querySelector('div').textContent='Zerstört! Punkte: '+score; sfx.win(); over.classList.add('show'); }
       }
     });
     rocks=rocks.filter(r=>!r.dead);

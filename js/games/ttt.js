@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -32,10 +33,10 @@ export function build(){
   const WIN = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
   function play(i){
     if(!active || board[i]) return;
-    board[i]=turn;
+    sfx.place(); board[i]=turn;
     const win = WIN.find(([a,b,c])=>board[a] && board[a]===board[b] && board[a]===board[c]);
     render();
-    if(win){
+    if(win){ sfx.win();
       active=false;
       over.querySelector('div').textContent = `Spieler ${turn} gewinnt! 🎉`;
       over.classList.add('show');

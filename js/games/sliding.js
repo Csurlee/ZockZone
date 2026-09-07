@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -39,7 +40,7 @@ export function build(){
     const blank=tiles.indexOf(0);
     const r=Math.floor(i/4), c=i%4, br=Math.floor(blank/4), bc=blank%4;
     if(Math.abs(r-br)+Math.abs(c-bc)===1){
-      [tiles[i],tiles[blank]]=[tiles[blank],tiles[i]];
+      sfx.blip(); [tiles[i],tiles[blank]]=[tiles[blank],tiles[i]];
       moves++; document.getElementById('slideMoves').textContent=moves;
       render();
       if(tiles.slice(0,15).every((v,idx)=>v===idx+1)){

@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -32,17 +33,17 @@ export function build(){
   }
   function flip(i){
     if(flipped.length===2 || flipped.includes(i) || matched.includes(i)) return;
-    flipped.push(i); render();
+    sfx.cardFlip(); flipped.push(i); render();
     if(flipped.length===2){
       moves++; document.getElementById('memMoves').textContent=moves;
       const [a,b] = flipped;
       if(cards[a]===cards[b]){
-        matched.push(a,b); flipped=[];
+        sfx.match(); matched.push(a,b); flipped=[];
         document.getElementById('memPairs').textContent = (matched.length/2)+'/8';
         render();
-        if(matched.length===cards.length) over.classList.add('show');
+        if(matched.length===cards.length){ sfx.win(); over.classList.add('show'); }
       } else {
-        setTimeout(()=>{ flipped=[]; render(); }, 700);
+        sfx.blip(); setTimeout(()=>{ flipped=[]; render(); }, 700);
       }
     }
   }

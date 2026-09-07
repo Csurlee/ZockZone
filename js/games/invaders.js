@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
 export function build(){
@@ -33,7 +34,7 @@ export function build(){
     bullets.forEach(b=>{
       enemies.forEach(en=>{
         if(en.alive && Math.abs(b.x-en.x-10)<12 && Math.abs(b.y-en.y-8)<10){
-          en.alive=false; b.dead=true; score+=10; document.getElementById('invScore').textContent=score;
+          en.alive=false; b.dead=true; sfx.explosion(); score+=10; document.getElementById('invScore').textContent=score;
         }
       });
     });
@@ -43,7 +44,7 @@ export function build(){
       for(let r=0;r<4;r++)for(let c=0;c<7;c++) enemies.push({x:30+c*40,y:30+r*30,alive:true});
     }
     if(lives<=0){
-      over.querySelector('div').textContent='Invasion erfolgreich (gegen dich)! Punkte: '+score;
+      sfx.lose(); over.querySelector('div').textContent='Invasion erfolgreich (gegen dich)! Punkte: '+score;
       over.classList.add('show');
       if(window.zzSaveHighScore) window.zzSaveHighScore('invaders','Space Invaders',score);
       draw();
@@ -60,7 +61,7 @@ export function build(){
     bullets.forEach(b=> ctx.fillRect(b.x-2,b.y-8,4,8));
     ctx.fillStyle='#C6FF3D'; ctx.fillRect(playerX,355,20,16);
   }
-  function shoot(){ bullets.push({x:playerX+10,y:355}); }
+  function shoot(){ sfx.laser(); bullets.push({x:playerX+10,y:355}); }
   function key(e,down){
     keys[e.key]=down;
     if(e.code==='Space' && down){ e.preventDefault(); shoot(); }

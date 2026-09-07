@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -23,7 +24,7 @@ export function build(){
     over.classList.remove('show');
     rollBtn.disabled=false;
   }
-  rollBtn.onclick=()=>{
+  rollBtn.onclick=()=>{ sfx.dice();
     round++;
     const pRoll=1+Math.floor(Math.random()*6), cRoll=1+Math.floor(Math.random()*6);
     pDie.textContent=FACES[pRoll-1]; cDie.textContent=FACES[cRoll-1];

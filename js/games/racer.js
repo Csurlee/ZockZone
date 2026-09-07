@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { overMsg, mkHint, playerBody } from '../core.js';
 
 const W = 360, H = 360, TW = 46, NLAPS = 3;

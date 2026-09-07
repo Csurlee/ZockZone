@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -40,7 +41,7 @@ export function build(){
     alive=false;
     if(score>best){ best=score; document.getElementById('trfBest').textContent=best; }
     over.querySelector('div').textContent='Crash! Punkte: '+score;
-    over.classList.add('show');
+    sfx.win(); over.classList.add('show');
   }
   function draw(){
     ctx.fillStyle='#1F2937'; ctx.fillRect(0,0,240,400);

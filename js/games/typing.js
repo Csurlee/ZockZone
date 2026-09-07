@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -27,7 +28,7 @@ export function build(){
     over.classList.remove('show');
     input.focus();
   }
-  input.addEventListener('input', ()=>{
+  input.addEventListener('input', ()=>{ sfx.type();
     if(done) return;
     if(!startTime) startTime=performance.now();
     const val=input.value;
@@ -35,7 +36,7 @@ export function build(){
     for(let i=0;i<val.length;i++) if(val[i]!==text[i]) errors++;
     document.getElementById('typErr').textContent=errors;
     if(val.length>=text.length){
-      done=true; input.disabled=true;
+      done=true; sfx.win(); input.disabled=true;
       const minutes=(performance.now()-startTime)/60000;
       const wpm=Math.round((text.split(' ').length)/Math.max(minutes,0.01));
       document.getElementById('typWpm').textContent=wpm;

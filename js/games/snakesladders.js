@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -44,9 +45,9 @@ export function build(){
   function finish(msg){
     rollBtn.disabled=true;
     over.querySelector('div').textContent=msg;
-    over.classList.add('show');
+    sfx.win(); over.classList.add('show');
   }
-  rollBtn.onclick=()=>{
+  rollBtn.onclick=()=>{ sfx.dice();
     const roll=1+Math.floor(Math.random()*6);
     dieEl.textContent=FACES[roll-1];
     pPos=Math.min(30,pPos+roll); afterMove('p');

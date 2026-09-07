@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -45,7 +46,7 @@ export function build(){
   }
   function submit(){
     if(input.disabled) return;
-    if(parseInt(input.value)===answer){ score++; document.getElementById('mathScore').textContent=score; }
+    if(parseInt(input.value)===answer){ sfx.correct(); score++; document.getElementById('mathScore').textContent=score; }
     nextQ();
   }
   submitBtn.onclick=submit;

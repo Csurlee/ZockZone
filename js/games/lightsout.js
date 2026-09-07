@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -30,11 +31,11 @@ export function build(){
     for(let r=0;r<N;r++)for(let c=0;c<N;c++){
       const cell=document.createElement('div');
       cell.style.cssText=`width:56px;height:56px;border-radius:10px;cursor:pointer;background:${grid[r][c]?'#FDE68A':'#241D3B'};box-shadow:${grid[r][c]?'0 0 16px #FDE68A':'none'};`;
-      cell.onclick=(()=>{ const rr=r, cc=c; return ()=>{
+      cell.onclick=(()=>{ const rr=r, cc=c; return ()=>{ sfx.click();
         toggle(rr,cc,true); render();
         if(grid.every(row=>row.every(v=>!v))){
           over.querySelector('div').textContent=`Gelöst in ${moves} Zügen! 🎉`;
-          over.classList.add('show');
+          sfx.win(); over.classList.add('show');
         }
       };})();
       gridDiv.appendChild(cell);

@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -50,7 +51,7 @@ export function build(){
       const it=items[i];
       if(Math.hypot(x-it.x,y-it.y)<24){
         if(it.bomb){ lives--; document.getElementById('frtLives').textContent=Math.max(0,lives); }
-        else{ score++; document.getElementById('frtScore').textContent=score; }
+        sfx.eat(); } else{ score++; sfx.pop2(); document.getElementById('frtScore').textContent=score; }
         items.splice(i,1);
         break;
       }

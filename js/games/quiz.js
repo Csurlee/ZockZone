@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -39,13 +40,13 @@ export function build(){
       const b=mkButton(opt,'var(--card)','#fff');
       b.style.textAlign='left';
       b.onclick=()=>{
-        if(i===item.c){ score++; document.getElementById('quizScore').textContent=score; b.style.background='#16A34A'; }
+        if(i===item.c){ sfx.correct(); score++; document.getElementById('quizScore').textContent=score; b.style.background='#16A34A'; }
         else{ b.style.background='#DC2626'; }
         Array.from(optDiv.children).forEach(c=>c.disabled=true);
         setTimeout(()=>{
           idx++;
           if(idx>=order.length){
-            over.querySelector('div').textContent=`Fertig! ${score}/${order.length} richtig.`;
+            sfx.win(); over.querySelector('div').textContent=`Fertig! ${score}/${order.length} richtig.`;
             over.classList.add('show');
           } else showQ();
         }, 700);

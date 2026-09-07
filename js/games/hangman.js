@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -38,7 +39,7 @@ export function build(){
       kbDiv.appendChild(b);
     });
   }
-  function guess(l){
+  function guess(l){ sfx.blip();
     guessed.add(l);
     if(!word.includes(l)){
       errors++;
@@ -52,7 +53,7 @@ export function build(){
       }
     }
     renderWord(); renderKb();
-    if(word.split('').every(l=>guessed.has(l))){
+    sfx.win(); if(word.split('')'').every(l=>guessed.has(l))){
       over.querySelector('div').textContent='Richtig erraten! 🎉';
       over.classList.add('show');
     }

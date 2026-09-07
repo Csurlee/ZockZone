@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -25,13 +26,13 @@ export function build(){
     if(puck.y<12||puck.y>248) puck.vy*=-1;
     [paddle,cpu].forEach(p=>{
       const d=Math.hypot(puck.x-p.x, puck.y-p.y);
-      if(d<28){
+      if(d<28){ sfx.puckHit();
         const ang=Math.atan2(puck.y-p.y, puck.x-p.x);
         puck.vx=Math.cos(ang)*6; puck.vy=Math.sin(ang)*6;
       }
     });
-    if(puck.x<0){ cScore++; document.getElementById('ahC').textContent=cScore; resetPuck(-1); }
-    if(puck.x>400){ pScore++; document.getElementById('ahP').textContent=pScore; resetPuck(1); }
+    if(puck.x<0){ cScore++; sfx.score(); document.getElementById('ahC').textContent=cScore; resetPuck(-1); }
+    if(puck.x>400){ pScore++; sfx.score(); document.getElementById('ahP').textContent=pScore; resetPuck(1); }
     const dy=puck.y-cpu.y;
     if(puck.x>200){
       cpu.y+=Math.sign(dy)*Math.min(Math.abs(dy),3);
@@ -42,7 +43,7 @@ export function build(){
     }
     cpu.x=Math.max(210,Math.min(390,cpu.x)); cpu.y=Math.max(12,Math.min(248,cpu.y));
     draw();
-    if(pScore>=7||cScore>=7){ over.querySelector('div').textContent = pScore>=7?'Du gewinnst! 🎉':'CPU gewinnt.'; over.classList.add('show'); return; }
+    if(pScore>=7||cScore>=7){ over.querySelector('div').textContent = (pScore>=7?sfx.win():sfx.lose(), pScore>=7?'Du gewinnst! 🎉':'CPU gewinnt.'); over.classList.add('show'); return; }
     loopId=requestAnimationFrame(loop);
   }
   function draw(){

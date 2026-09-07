@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -33,14 +34,14 @@ export function build(){
   tapBtn.onclick=()=>{
     round++;
     const dist=Math.abs(pos+10-160);
-    if(dist<25){ score+=Math.max(1,10-Math.floor(dist/3)); combo++; }
+    if(dist<25){ sfx.beatHit(); score+=Math.max(1,10-Math.floor(dist/3)); combo++; }
     else combo=0;
     document.getElementById('rhyScore').textContent=score;
     document.getElementById('rhyCombo').textContent=combo;
     if(round>=20){
       cancelAnimationFrame(loopId);
       over.querySelector('div').textContent='Fertig! Punkte: '+score;
-      over.classList.add('show');
+      sfx.win(); over.classList.add('show');
     }
   };
   window.__restartCurrent=start;

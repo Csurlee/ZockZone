@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { playerBody, overMsg } from '../core.js';
 
 const CDN = '/js/lib/three.min.js';

@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -46,7 +47,7 @@ export function build(){
       draw();
       if(towers[2].length===N){
         over.querySelector('div').textContent=`Geschafft in ${moves} Zügen! (Minimum: ${Math.pow(2,N)-1})`;
-        over.classList.add('show');
+        sfx.win(); over.classList.add('show');
       }
       return;
     }

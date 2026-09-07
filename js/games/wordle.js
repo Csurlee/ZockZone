@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -41,7 +42,7 @@ export function build(){
   }
   function submit(){
     const guess=input.value.toUpperCase();
-    if(guess.length!==5) return;
+    if(guess.length!==5){ sfx.wrong(); return; }
     tries++;
     document.getElementById('wrdTry').textContent=tries+'/6';
     const wLetters=word.split('');
@@ -57,7 +58,7 @@ export function build(){
       if(idx!==-1){ states[i]='near'; remaining[idx]=null; }
     });
     const result=guessLetters.map((l,i)=>({l, state: states[i]}));
-    guesses.push(result);
+    sfx.blip(); guesses.push(result);
     render();
     input.value='';
     if(guess===word){

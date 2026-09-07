@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, mkHint, playerBody } from '../core.js';
 
 export function build(){

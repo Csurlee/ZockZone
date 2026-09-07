@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -22,20 +23,20 @@ export function build(){
   }
   function loop(){
     ball.x+=ball.vx; ball.y+=ball.vy;
-    if(ball.x<6||ball.x>354) ball.vx*=-1;
+    if(ball.x<6||ball.x>354){ sfx.ballBounce(); ball.vx*=-1; }
     if(ball.y<6) ball.vy*=-1;
-    if(ball.y>400 && ball.y<412 && ball.x>paddleX && ball.x<paddleX+70){ ball.vy=-Math.abs(ball.vy); }
+    if(ball.y>400 && ball.y<412 && ball.x>paddleX && ball.x<paddleX+70){ sfx.bounce(); ball.vy=-Math.abs(ball.vy); }
     else if(ball.y>420){
       lives--; document.getElementById('brkLives').textContent=lives;
-      if(lives<=0){ over.querySelector('div').textContent='Game Over! Punkte: '+score; over.classList.add('show'); return; }
+      if(lives<=0){ sfx.lose(); over.querySelector('div').textContent='Game Over! Punkte: '+score; over.classList.add('show'); return; }
       ball={x:180,y:380,vx:3,vy:-3};
     }
     bricks.forEach(b=>{
       if(b.alive && ball.x>b.x && ball.x<b.x+BW && ball.y>b.y && ball.y<b.y+BH){
-        b.alive=false; ball.vy*=-1; score+=10; document.getElementById('brkScore').textContent=score;
+        b.alive=false; sfx.hit(); ball.vy*=-1; score+=10; document.getElementById('brkScore').textContent=score;
       }
     });
-    if(bricks.every(b=>!b.alive)){ over.querySelector('div').textContent='Gewonnen! 🎉'; over.classList.add('show'); return; }
+    if(bricks.every(b=>!b.alive)){ sfx.win(); over.querySelector('div').textContent='Gewonnen! 🎉'; over.classList.add('show'); return; }
     draw();
     loopId=requestAnimationFrame(loop);
   }

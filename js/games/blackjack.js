@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -110,7 +111,7 @@ export function build(){
     }
     bank -= 10; bet = 10; round++;
     updateHud();
-    playerHand = [draw(), draw()];
+    sfx.shuffle(); playerHand = [draw(), draw()];
     dealerHand = [draw(), draw()];
     phase = 'player';
     renderCards(true);
@@ -159,13 +160,13 @@ export function build(){
     dealBtn.textContent = 'Nächste Runde (Einsatz 10)';
     const pVal = cardValue(playerHand), dVal = cardValue(dealerHand);
     let msg;
-    if(reason==='blackjack'){ bank += 25; msg = 'Blackjack! Du gewinnst 25€ 🎉'; }
+    if(reason==='blackjack'){ sfx.bigWin(); bank += 25; msg = 'Blackjack! Du gewinnst 25€ 🎉'; }
     else if(reason==='push21'){ bank += 10; msg = `Beide haben Blackjack (21)! Unentschieden – Einsatz zurück.`; }
-    else if(reason==='bust'){ msg = `Überkauft (${pVal})! Verloren.`; }
-    else if(dVal>21){ bank += 20; msg = `Dealer überkauft (${dVal})! Du gewinnst 20€.`; }
-    else if(pVal>dVal){ bank += 20; msg = `Du gewinnst! ${pVal} gegen ${dVal}.`; }
+    sfx.fail(); else if(reason==='bust'){ msg = `Überkauft (${pVal})! Verloren.`; }
+    else if(dVal>21){ sfx.win(); bank += 20; msg = `Dealer überkauft (${dVal})! Du gewinnst 20€.`; }
+    else if(pVal>dVal){ sfx.coin(); bank += 20; msg = `Du gewinnst! ${pVal} gegen ${dVal}.`; }
     else if(pVal===dVal){ bank += 10; msg = `Unentschieden (${pVal}). Einsatz zurück.`; }
-    else{ msg = `Dealer gewinnt. ${dVal} gegen ${pVal}.`; }
+    sfx.lose(); } else{ msg = `Dealer gewinnt. ${dVal} gegen ${pVal}.`; }
     updateHud();
     over.querySelector('div').textContent = msg;
     over.classList.add('show');

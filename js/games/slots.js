@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -23,7 +24,7 @@ export function build(){
     reelsEl.innerHTML='';
     reels.forEach(s=>{ const d=document.createElement('div'); d.textContent=s; reelsEl.appendChild(d); });
   }
-  spinBtn.onclick=()=>{
+  spinBtn.onclick=()=>{ sfx.slotSpin(); sfx.slotSpin(); sfx.slotSpin();
     if(coins<10){
       over.querySelector('div').textContent='Guthaben leer! 💸';
       over.classList.add('show');
@@ -32,8 +33,8 @@ export function build(){
     coins-=10;
     reels=reels.map(()=>SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)]);
     render();
-    if(reels[0]===reels[1] && reels[1]===reels[2]) coins+=PAYOUT[reels[0]];
-    else if(reels[0]===reels[1] || reels[1]===reels[2] || reels[0]===reels[2]) coins+=10;
+    if(reels[0]===reels[1] && reels[1]===reels[2]){ sfx.jackpot(); coins+=PAYOUT[reels[0]];
+    } else if(reels[0]===reels[1] || reels[1]===reels[2] || reels[0]===reels[2]){ sfx.coin(); coins+=10; } else { sfx.fail(); }
     document.getElementById('slCoins').textContent=coins;
   };
   window.__restartCurrent=start;

@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -70,7 +71,7 @@ export function build(){
     else if(!legalMoves(turn).length){
       let b=0,w=0; board.forEach(row=>row.forEach(v=>{ if(v==='b')b++; if(v==='w')w++; }));
       over.querySelector('div').textContent = b>w?'Schwarz gewinnt! 🎉' : w>b?'Weiß gewinnt! 🎉':'Unentschieden!';
-      over.classList.add('show');
+      sfx.win(); over.classList.add('show');
       return;
     }
     statusEl.textContent = (turn==='b'?'Schwarz':'Weiß')+' ist dran'+(legalMoves(turn).length?'':' (kein Zug möglich, ausgesetzt)');

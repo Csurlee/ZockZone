@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -33,7 +34,7 @@ export function build(){
     if(lives<=0){
       clearInterval(spawnId);
       over.querySelector('div').textContent='Game Over! Punkte: '+score;
-      over.classList.add('show');
+      sfx.win(); over.classList.add('show');
       draw();
       return;
     }

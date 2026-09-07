@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -35,7 +36,7 @@ export function build(){
         clearInterval(timerId);
         input.disabled=true; submitBtn.disabled=true;
         over.querySelector('div').textContent='Zeit um! Punkte: '+score;
-        over.classList.add('show');
+        sfx.win(); over.classList.add('show');
       }
     },1000);
   }

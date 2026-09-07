@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -18,14 +19,14 @@ export function build(){
     document.getElementById('clkPerClick').textContent=1;
     updateUpgradeBtn();
   }
-  bigBtn.onclick=()=>{
+  bigBtn.onclick=()=>{ sfx.clickerHit();
     coins+=perClick;
     document.getElementById('clkCoins').textContent=coins;
     bigBtn.style.transform='scale(0.9)';
     setTimeout(()=>bigBtn.style.transform='scale(1)',80);
   };
   upgradeBtn.onclick=()=>{
-    if(coins>=upgradeCost){
+    if(coins>=upgradeCost){ sfx.upgrade();
       coins-=upgradeCost; perClick++; upgradeCost=Math.floor(upgradeCost*1.6);
       document.getElementById('clkCoins').textContent=coins;
       document.getElementById('clkPerClick').textContent=perClick;

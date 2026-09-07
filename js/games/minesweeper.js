@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
 export function build(){
@@ -43,7 +44,7 @@ export function build(){
   }
   function reveal(r,c){
     if(r<0||r>=SIZE||c<0||c>=SIZE||revealed[r][c]||flagged[r][c]) return;
-    revealed[r][c]=true;
+    sfx.click(); revealed[r][c]=true;
     if(board[r][c]===0){
       for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++) reveal(r+dr,c+dc);
     }
@@ -54,7 +55,7 @@ export function build(){
     for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++) if(flagged[r][c]) flagCount++;
     for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
       const cell=document.createElement('div');
-      const isMine = revealed[r][c] && board[r][c]===-1;
+      const isMine = revealed[r][c] && board[r][c]===-1; if(isMine) sfx.explosion();
       const colorMap=['#fff','#93C5FD','#86EFAC','#FDE68A','#FCA5A5','#C4B5FD','#67E8F9','#fff','#fff'];
       cell.style.cssText=`width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;cursor:pointer;border-radius:4px;background:${revealed[r][c]?(isMine?'#DC2626':'#241D3B'):'#3a2f5c'};color:${colorMap[board[r][c]]||'#fff'};`;
       if(flagged[r][c] && !revealed[r][c]) cell.textContent='🚩';

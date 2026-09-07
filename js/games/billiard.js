@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 const playerBody = document.getElementById('playerBody');
 const overMsg = (...a) => window.zzOverMsg(...a);
 

@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
 export function build(){
@@ -20,7 +21,7 @@ export function build(){
     if(loopId) cancelAnimationFrame(loopId);
     loop();
   }
-  function flap(){ if(alive) bird.vy = -7.5; }
+  function flap(){ if(alive){ sfx.flap(); bird.vy = -7.5; } }
   function loop(){
     if(!alive) return;
     frame++;
@@ -32,7 +33,7 @@ export function build(){
     pipes.forEach(p=>p.x -= 2.6);
     pipes = pipes.filter(p=>p.x>-50);
     pipes.forEach(p=>{
-      if(!p.passed && p.x+24<bird.x){ p.passed=true; score++; document.getElementById('flapScore').textContent=score; }
+      if(!p.passed && p.x+24<bird.x){ p.passed=true; sfx.coin(); score++; document.getElementById('flapScore').textContent=score; }
       if(bird.x+14>p.x && bird.x-14<p.x+48){
         if(bird.y-14<p.gapY-70 || bird.y+14>p.gapY+70){ die(); }
       }
@@ -41,7 +42,7 @@ export function build(){
     draw();
     loopId = requestAnimationFrame(loop);
   }
-  function die(){
+  function die(){ sfx.fail();
     if(!alive) return;
     alive=false;
     if(score>best){best=score; document.getElementById('flapBest').textContent=best;}

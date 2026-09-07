@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
 export function build(){
@@ -19,7 +20,7 @@ export function build(){
     if(loopId) cancelAnimationFrame(loopId);
     loop();
   }
-  function jump(){ if(!player.jumping && alive){ player.vy=-9; player.jumping=true; } }
+  function jump(){ if(!player.jumping && alive){ sfx.whoosh(); player.vy=-9; player.jumping=true; } }
   function loop(){
     frame++;
     player.vy+=0.5; player.y+=player.vy;
@@ -28,13 +29,13 @@ export function build(){
     obstacles.forEach(o=>o.x-=speed);
     obstacles=obstacles.filter(o=>o.x>-20);
     obstacles.forEach(o=>{
-      if(!o.passed && o.x+o.w<40){ o.passed=true; score++; document.getElementById('runScore').textContent=score; speed=4+score*0.08; }
+      if(!o.passed && o.x+o.w<40){ o.passed=true; sfx.score(); score++; document.getElementById('runScore').textContent=score; speed=4+score*0.08; }
       if(40+18>o.x && 40-18<o.x+o.w && player.y+15>200-o.h){ die(); }
     });
     draw();
     if(alive) loopId=requestAnimationFrame(loop);
   }
-  function die(){
+  function die(){ sfx.fail();
     alive=false;
     if(score>best){ best=score; document.getElementById('runBest').textContent=best; }
     over.querySelector('div').textContent='Getroffen! Punkte: '+score;

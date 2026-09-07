@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
 export function build(){
@@ -39,7 +40,7 @@ export function build(){
   function slide(row){
     const arr = row.filter(v=>v!==0);
     for(let i=0;i<arr.length-1;i++){
-      if(arr[i]===arr[i+1]){ arr[i]*=2; score+=arr[i]; arr.splice(i+1,1); }
+      if(arr[i]===arr[i+1]){ sfx.coin(); arr[i]*=2; score+=arr[i]; arr.splice(i+1,1); }
     }
     while(arr.length<4) arr.push(0);
     return arr;
@@ -59,7 +60,7 @@ export function build(){
       document.getElementById('g48Score').textContent=score;
       if(score>best){best=score; document.getElementById('g48Best').textContent=best;}
       render();
-      if(isGameOver()){ over.classList.add('show'); if(window.zzSaveHighScore) window.zzSaveHighScore('twenty48','2048 Fusion',score); }
+      sfx.lose(); if(isGameOver()){ over.classList.add('show'); if(window.zzSaveHighScore) window.zzSaveHighScore('twenty48','2048 Fusion',score); }
     }
   }
   function isGameOver(){

@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -44,7 +45,7 @@ export function build(){
     let correct=0;
     for(let r=0;r<6;r++)for(let c=0;c<6;c++) if(puzzle[r][c]===solution[r][c]) correct++;
     document.getElementById('sudCorrect').textContent=correct+'/36';
-    if(correct===36){ over.querySelector('div').textContent='Gelöst! 🎉'; over.classList.add('show'); }
+    if(correct===36){ over.querySelector('div').textContent='Gelöst! 🎉'; sfx.win(); over.classList.add('show'); }
   }
   function render(){
     gridDiv.innerHTML='';

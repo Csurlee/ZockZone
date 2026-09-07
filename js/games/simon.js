@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -32,7 +33,7 @@ export function build(){
   function playSeq(i){
     if(i>=seq.length){ accepting=true; return; }
     const idx=seq[i];
-    cells[idx].style.opacity='1';
+    const simonSounds=[sfx.simonA,sfx.simonB,sfx.simonC,sfx.simonD]; simonSounds[idx](); cells[idx].style.opacity='1';
     setTimeout(()=>{
       cells[idx].style.opacity='0.55';
       setTimeout(()=>playSeq(i+1), 220);
@@ -40,7 +41,7 @@ export function build(){
   }
   cells.forEach((cell,idx)=>{
     cell.onclick=()=>{
-      if(!accepting) return;
+      if(!accepting) return; [sfx.simonA,sfx.simonB,sfx.simonC,sfx.simonD][idx]();
       cell.style.opacity='1'; setTimeout(()=>cell.style.opacity='0.55',150);
       userSeq.push(idx);
       const pos=userSeq.length-1;

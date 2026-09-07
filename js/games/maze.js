@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -62,7 +63,7 @@ export function build(){
         clearInterval(timerId);
         over.querySelector('div').textContent='Level '+level+' geschafft! 🎉';
         over.classList.add('show');
-        levelTimeoutId=setTimeout(()=>{ over.classList.remove('show'); start(level+1); }, 1200);
+        sfx.win(); levelTimeoutId=setTimeout(()=>{ over.classList.remove('show'); start(level+1); }, 1200);
       }
     }
   }

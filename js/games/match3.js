@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -81,7 +82,7 @@ export function build(){
     render();
     if(moves<=0){
       over.querySelector('div').textContent='Fertig! Punkte: '+score;
-      over.classList.add('show');
+      sfx.win(); over.classList.add('show');
     }
   }
   window.__restartCurrent=start;

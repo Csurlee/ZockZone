@@ -1,3 +1,4 @@
+import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
 export function build(){
@@ -36,7 +37,7 @@ export function build(){
       cell.style.cssText=`width:100px;height:90px;border-radius:12px 12px 40px 40px;display:flex;align-items:flex-end;justify-content:center;font-size:38px;cursor:pointer;background:#3B2A1A;overflow:hidden;border:1px solid rgba(255,255,255,0.08);`;
       cell.textContent = i===activeIdx ? '🐹' : '';
       cell.onclick = ()=>{
-        if(i===activeIdx){ score++; document.getElementById('whackScore').textContent=score; activeIdx=-1; render(); }
+        if(i===activeIdx){ sfx.hit(); score++; document.getElementById('whackScore').textContent=score; activeIdx=-1; render(); }
       };
       gridDiv.appendChild(cell);
     }
