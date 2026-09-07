@@ -21,7 +21,6 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
 const SUPABASE_ANON_KEY   = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
 const OPENAI_API_KEY      = process.env.OPENAI_API_KEY      || '';
 const MUTE_MINUTES        = parseInt(process.env.MUTE_MINUTES || '60');
-const BOT_USER_ID         = process.env.BOT_USER_ID         || '';
 const VIOLATION_LIMIT     = parseInt(process.env.VIOLATION_LIMIT     || '3');
 const VIOLATION_WINDOW_H  = parseInt(process.env.VIOLATION_WINDOW_HOURS || '24');
 const LOG_DIR             = process.env.LOG_DIR || '/var/log/zockzone-chat';
@@ -277,8 +276,7 @@ async function cleanupUsers() {
 
 // ===== NACHRICHT PRÜFEN =====
 async function handleMessage(msg, table = 'chat_messages') {
-  if(BOT_USER_ID && msg.user_id === BOT_USER_ID) return;
-  const text = msg.message?.trim();
+const text = msg.message?.trim();
   if(!text) return;
 
   // Verbotene Wörter alle 5 Min. neu laden
