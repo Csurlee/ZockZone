@@ -40,6 +40,9 @@ const TRANSLATIONS = {
     'auth.btn.back': '← Zurück',
     'auth.btn.create': 'Konto erstellen',
     'auth.avatar.label': 'Wähle deinen Avatar',
+    'auth.otp.title': 'E-Mail gesendet',
+    'auth.otp.submit': 'Bestätigen',
+    'auth.otp.resend': 'Code erneut senden',
 
     'err.fill.email.pw': 'Bitte E-Mail und Passwort ausfüllen.',
     'err.fill.name': 'Bitte einen Anzeigenamen eingeben.',
@@ -168,6 +171,9 @@ const TRANSLATIONS = {
     'auth.btn.back': '← Back',
     'auth.btn.create': 'Create account',
     'auth.avatar.label': 'Choose your avatar',
+    'auth.otp.title': 'Email sent',
+    'auth.otp.submit': 'Confirm',
+    'auth.otp.resend': 'Resend code',
 
     'err.fill.email.pw': 'Please fill in email and password.',
     'err.fill.name': 'Please enter a display name.',
