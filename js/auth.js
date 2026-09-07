@@ -202,8 +202,6 @@ window.zzCloseAuth = () => {
   document.getElementById('authOverlay').classList.remove('open');
   document.getElementById('authStep1').style.display = '';
   document.getElementById('authStep2').style.display = 'none';
-  document.getElementById('authStep3').style.display = 'none';
-  document.querySelectorAll('.otp-digit').forEach(d => { d.value = ''; d.classList.remove('filled'); });
 };
 window.zzSwitchTab = (mode) => {
   authMode = mode;
@@ -311,7 +309,6 @@ window.zzConfirmSignup = async () => {
   const errEl = document.getElementById('authError');
   errEl.textContent = '';
   if(!selectedAvatar){ errEl.textContent = t('err.avatar'); return; }
-  const submitBtn = document.getElementById('otpSubmitBtn');
   try{
     const { data, error } = await supabase.auth.signUp({
       email: pendingSignup.email,
@@ -320,95 +317,18 @@ window.zzConfirmSignup = async () => {
     });
     if(error) throw error;
     if(data.user) await ensureProfile(data.user);
+    window.zzCloseAuth();
     if(data.user && !data.session){
-      // E-Mail-Bestätigung nötig → Step 3 zeigen
-      document.getElementById('authStep2').style.display = 'none';
-      document.getElementById('authStep3').style.display = '';
-      const hint = document.getElementById('otpHintText');
-      hint.textContent = getLang() === 'en'
-        ? `Enter the 6-digit code we sent to ${pendingSignup.email}`
-        : `Gib den 6-stelligen Code ein den wir an ${pendingSignup.email} geschickt haben`;
-      setTimeout(() => document.querySelector('.otp-digit')?.focus(), 100);
-    } else {
-      window.zzCloseAuth();
+      const msg = getLang() === 'en'
+        ? '📧 Almost there! We sent you a confirmation email. Please click the link to activate your account.'
+        : '📧 Fast geschafft! Bestätigungs-E-Mail gesendet. Bitte klicke auf den Link darin, um dein Konto zu aktivieren.';
+      showToast(msg, 10000);
     }
   } catch(e){
     errEl.textContent = translateAuthError(e.message);
     window.zzBackToStep1();
   }
 };
-
-window.zzVerifyCode = async () => {
-  const errEl = document.getElementById('authError');
-  errEl.textContent = '';
-  const digits = document.querySelectorAll('.otp-digit');
-  const code = Array.from(digits).map(d => d.value.trim()).join('');
-  if(code.length !== 6){
-    errEl.textContent = getLang() === 'en' ? 'Please enter the 6-digit code.' : 'Bitte gib den 6-stelligen Code ein.';
-    return;
-  }
-  try{
-    const { error } = await supabase.auth.verifyOtp({
-      email: pendingSignup.email,
-      token: code,
-      type: 'email'
-    });
-    if(error) throw error;
-    window.zzCloseAuth();
-    const msg = getLang() === 'en'
-      ? '✅ Email confirmed! You are now logged in.'
-      : '✅ E-Mail bestätigt! Du bist jetzt eingeloggt.';
-    showToast(msg, 6000);
-  } catch(e){
-    const bad = e.message?.toLowerCase() || '';
-    errEl.textContent = (bad.includes('expired') || bad.includes('invalid') || bad.includes('otp'))
-      ? (getLang() === 'en' ? '⚠️ Code invalid or expired. Please try again.' : '⚠️ Code ungültig oder abgelaufen. Bitte erneut versuchen.')
-      : translateAuthError(e.message);
-    digits.forEach(d => { d.value = ''; d.classList.remove('filled'); });
-    setTimeout(() => document.querySelector('.otp-digit')?.focus(), 50);
-  }
-};
-
-window.zzResendCode = async () => {
-  if(!pendingSignup?.email) return;
-  const errEl = document.getElementById('authError');
-  errEl.textContent = '';
-  try{
-    const { error } = await supabase.auth.resend({ type: 'signup', email: pendingSignup.email });
-    if(error) throw error;
-    showToast(getLang() === 'en' ? '📧 Code resent!' : '📧 Code erneut gesendet!', 3000);
-  } catch(e){
-    errEl.textContent = translateAuthError(e.message);
-  }
-};
-
-// OTP-Input Auto-Advance
-document.addEventListener('input', (e) => {
-  if(!e.target.classList.contains('otp-digit')) return;
-  const inputs = Array.from(document.querySelectorAll('.otp-digit'));
-  const idx = inputs.indexOf(e.target);
-  if(e.target.value.length > 1) e.target.value = e.target.value.replace(/\D/g,'').slice(-1);
-  e.target.classList.toggle('filled', !!e.target.value);
-  if(e.target.value && idx < 5) inputs[idx + 1].focus();
-});
-document.addEventListener('keydown', (e) => {
-  if(!e.target.classList.contains('otp-digit')) return;
-  const inputs = Array.from(document.querySelectorAll('.otp-digit'));
-  const idx = inputs.indexOf(e.target);
-  if(e.key === 'Backspace' && !e.target.value && idx > 0) inputs[idx - 1].focus();
-  if(e.key === 'Enter') window.zzVerifyCode();
-});
-document.addEventListener('paste', (e) => {
-  if(!e.target.classList.contains('otp-digit')) return;
-  e.preventDefault();
-  const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
-  const inputs = Array.from(document.querySelectorAll('.otp-digit'));
-  pasted.split('').forEach((ch, i) => {
-    if(inputs[i]){ inputs[i].value = ch; inputs[i].classList.add('filled'); }
-  });
-  const next = inputs[Math.min(pasted.length, 5)];
-  if(next) next.focus();
-});
 
 window.zzLogOut = () => supabase.auth.signOut();
 
