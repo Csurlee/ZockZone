@@ -155,8 +155,16 @@ async function loadUsers() {
 
     const tdStatus = document.createElement('td');
     const badge = document.createElement('span');
-    badge.className = u.active ? 'badge badge-ok' : 'badge badge-off';
-    badge.textContent = u.active ? 'Aktiv' : 'Deaktiviert';
+    if (!u.active) {
+      badge.className = 'badge badge-off';
+      badge.textContent = 'Deaktiviert';
+    } else if (!u.confirmed) {
+      badge.className = 'badge badge-warn';
+      badge.textContent = 'Unbestätigt';
+    } else {
+      badge.className = 'badge badge-ok';
+      badge.textContent = 'Aktiv';
+    }
     tdStatus.appendChild(badge);
     tr.appendChild(tdStatus);
 

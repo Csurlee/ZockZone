@@ -34,6 +34,7 @@ if ($method === 'GET') {
             'avatar' => $meta['avatar'] ?? '',
             'created_at' => $u['created_at'] ?? '',
             'active' => !$isBanned,
+            'confirmed' => !empty($u['email_confirmed_at']),
             'score_count' => $countByUser[$u['id']] ?? 0,
             'role' => $p['role'] ?? 'user',
         ];
