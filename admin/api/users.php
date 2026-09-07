@@ -104,11 +104,21 @@ if ($method === 'PUT') {
 }
 
 if ($method === 'PATCH') {
-    // Activate/deactivate: ban indefinitely via GoTrue, mirror into profiles.active.
     $input = json_decode(file_get_contents('php://input'), true) ?? [];
     $id = $input['id'] ?? '';
+    if ($id === '') { http_response_code(400); echo json_encode(['error' => 'id fehlt']); exit; }
+
+    // Confirm user without email
+    if (isset($input['confirm']) && $input['confirm'] === true) {
+        [$status, $data] = sb_request('PUT', '/auth/v1/admin/users/' . rawurlencode($id), ['email_confirm' => true]);
+        http_response_code($status < 300 ? 200 : $status);
+        echo json_encode(['ok' => $status < 300, 'detail' => $data]);
+        exit;
+    }
+
+    // Activate/deactivate: ban indefinitely via GoTrue, mirror into profiles.active.
     $active = $input['active'] ?? null;
-    if ($id === '' || $active === null) { http_response_code(400); echo json_encode(['error' => 'id/active fehlt']); exit; }
+    if ($active === null) { http_response_code(400); echo json_encode(['error' => 'active fehlt']); exit; }
     $banDuration = $active ? 'none' : '876000h'; // ~100 years == effectively permanent
     [$status, $data] = sb_request('PUT', '/auth/v1/admin/users/' . rawurlencode($id), ['ban_duration' => $banDuration]);
     if ($status < 300) {

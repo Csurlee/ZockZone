@@ -35,6 +35,18 @@ require __DIR__ . '/includes/layout_top.php';
   background: var(--bg-alt); color: var(--text); border: 1px solid rgba(255,255,255,0.12);
   border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif;
 }
+.pw-modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 9999; align-items: center; justify-content: center;
+}
+.pw-modal-overlay.open { display: flex; }
+.pw-modal {
+  background: var(--card); border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.1);
+  padding: 24px; width: 340px; max-width: 90vw;
+}
+.pw-modal h3 { margin-bottom: 16px; font-size: 15px; color: var(--text); }
+.pw-modal-error { color: var(--orange); font-size: 12px; min-height: 16px; margin-bottom: 8px; }
+.pw-modal-actions { display: flex; gap: 10px; margin-top: 4px; }
 </style>
 
 <div class="toolbar">
@@ -56,6 +68,19 @@ require __DIR__ . '/includes/layout_top.php';
       <button type="button" class="btn" onclick="document.getElementById('createPanel').classList.remove('open')">Abbrechen</button>
     </div>
   </form>
+</div>
+
+<!-- Passwort-Modal -->
+<div class="pw-modal-overlay" id="pwModalOverlay" onclick="if(event.target===this) closePwModal()">
+  <div class="pw-modal">
+    <h3>Passwort ändern</h3>
+    <input class="create-field" type="password" id="pwModalInput" placeholder="Neues Passwort (min. 6 Zeichen)">
+    <div class="pw-modal-error" id="pwModalError"></div>
+    <div class="pw-modal-actions">
+      <button class="btn btn-primary" onclick="submitPwModal()">Speichern</button>
+      <button class="btn" onclick="closePwModal()">Abbrechen</button>
+    </div>
+  </div>
 </div>
 
 <table class="data-table" id="usersTable">
@@ -172,6 +197,21 @@ async function loadUsers() {
     tdActions.className = 'actions';
 
     if (u.role !== 'admin') {
+      // Confirm button for unconfirmed users
+      if (!u.confirmed) {
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'btn btn-sm btn-primary';
+        confirmBtn.textContent = 'Bestätigen';
+        confirmBtn.addEventListener('click', () => confirmUser(u.id));
+        tdActions.appendChild(confirmBtn);
+      }
+
+      const pwBtn = document.createElement('button');
+      pwBtn.className = 'btn btn-sm';
+      pwBtn.textContent = 'PW ändern';
+      pwBtn.addEventListener('click', () => openPwModal(u.id));
+      tdActions.appendChild(pwBtn);
+
       const toggleBtn = document.createElement('button');
       toggleBtn.className = 'btn btn-sm';
       toggleBtn.textContent = u.active ? 'Deaktivieren' : 'Aktivieren';
@@ -193,6 +233,39 @@ async function loadUsers() {
     tr.appendChild(tdActions);
     tbody.appendChild(tr);
   });
+}
+
+let pwModalUserId = null;
+
+function openPwModal(id) {
+  pwModalUserId = id;
+  document.getElementById('pwModalInput').value = '';
+  document.getElementById('pwModalError').textContent = '';
+  document.getElementById('pwModalOverlay').classList.add('open');
+  document.getElementById('pwModalInput').focus();
+}
+
+function closePwModal() {
+  pwModalUserId = null;
+  document.getElementById('pwModalOverlay').classList.remove('open');
+}
+
+async function submitPwModal() {
+  const pw = document.getElementById('pwModalInput').value;
+  const errEl = document.getElementById('pwModalError');
+  errEl.textContent = '';
+  if (!pw || pw.length < 6) { errEl.textContent = 'Mindestens 6 Zeichen erforderlich.'; return; }
+  const res = await apiCall('PUT', 'api/users.php', { id: pwModalUserId, password: pw });
+  if (res && res.ok) {
+    closePwModal();
+  } else {
+    errEl.textContent = res?.detail?.message || res?.error || 'Fehler beim Speichern.';
+  }
+}
+
+async function confirmUser(id) {
+  await apiCall('PATCH', 'api/users.php', { id, confirm: true });
+  loadUsers();
 }
 
 async function toggleActive(id, active) {
