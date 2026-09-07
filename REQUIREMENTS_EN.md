@@ -170,17 +170,17 @@ sudo ufw enable
 
 | Path | Owner | Permissions | Purpose |
 |---|---|---|---|
-| `/var/www/zockzone/` | `csurlee:www-data` | `755` | Webroot (Apache) |
-| `/var/log/zockzone-chat/` | `csurlee:www-data` | `775` | Chat log files |
-| `/home/csurlee/zockzone/bot/.env` | `csurlee` | `600` | Bot credentials |
-| `/var/www/zockzone/admin/includes/config.php` | `csurlee:www-data` | `640` | Admin credentials |
+| `/var/www/zockzone/` | `[LINUX_USER]:www-data` | `755` | Webroot (Apache) |
+| `/var/log/zockzone-chat/` | `[LINUX_USER]:www-data` | `775` | Chat log files |
+| `/home/[LINUX_USER]/zockzone/bot/.env` | `[LINUX_USER]` | `600` | Bot credentials |
+| `/var/www/zockzone/admin/includes/config.php` | `[LINUX_USER]:www-data` | `640` | Admin credentials |
 
 ```bash
 sudo mkdir -p /var/www/zockzone /var/log/zockzone-chat
-sudo chown csurlee:www-data /var/www/zockzone /var/log/zockzone-chat
+sudo chown [LINUX_USER]:www-data /var/www/zockzone /var/log/zockzone-chat
 sudo chmod 755 /var/www/zockzone
 sudo chmod 775 /var/log/zockzone-chat
-chmod 600 /home/csurlee/zockzone/bot/.env
+chmod 600 /home/[LINUX_USER]/zockzone/bot/.env
 ```
 
 ---

@@ -227,8 +227,8 @@ Set similar policies for all other tables.
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/zockzone.git /home/csurlee/zockzone
-cd /home/csurlee/zockzone
+git clone https://github.com/your-username/zockzone.git /home/[LINUX_USER]/zockzone
+cd /home/[LINUX_USER]/zockzone
 
 # Create admin configuration
 cp admin/includes/config.php.example admin/includes/config.php
@@ -240,7 +240,7 @@ php -r "echo password_hash('YOUR_PASSWORD', PASSWORD_DEFAULT);"
 
 # Create webroot and set permissions
 sudo mkdir -p /var/www/zockzone
-sudo chown -R csurlee:www-data /var/www/zockzone
+sudo chown -R [LINUX_USER]:www-data /var/www/zockzone
 sudo chmod 755 /var/www/zockzone
 
 # Deploy
@@ -279,18 +279,18 @@ For HTTPS: Let's Encrypt via `certbot --apache`.
 
 ```bash
 sudo mkdir -p /var/log/zockzone-chat
-sudo chown csurlee:www-data /var/log/zockzone-chat
+sudo chown [LINUX_USER]:www-data /var/log/zockzone-chat
 sudo chmod 775 /var/log/zockzone-chat
 ```
 
-Both the bot (runs as `csurlee`) and PHP/Apache (runs as `www-data`) need read and write access.
+Both the bot (runs as `[LINUX_USER]`) and PHP/Apache (runs as `www-data`) need read and write access.
 
 ---
 
 ### 5. Set Up and Start the Bot
 
 ```bash
-cd /home/csurlee/zockzone/bot
+cd /home/[LINUX_USER]/zockzone/bot
 
 # Install dependencies
 npm install

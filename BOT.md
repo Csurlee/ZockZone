@@ -227,8 +227,8 @@ CREATE POLICY "Eingeloggte können schreiben" ON chat_messages FOR INSERT
 
 ```bash
 # Repository klonen
-git clone https://github.com/dein-username/zockzone.git /home/csurlee/zockzone
-cd /home/csurlee/zockzone
+git clone https://github.com/dein-username/zockzone.git /home/[LINUX_USER]/zockzone
+cd /home/[LINUX_USER]/zockzone
 
 # Admin-Konfiguration anlegen
 cp admin/includes/config.php.example admin/includes/config.php
@@ -240,7 +240,7 @@ php -r "echo password_hash('DEIN_PASSWORT', PASSWORD_DEFAULT);"
 
 # Webroot anlegen und Rechte setzen
 sudo mkdir -p /var/www/zockzone
-sudo chown -R csurlee:www-data /var/www/zockzone
+sudo chown -R [LINUX_USER]:www-data /var/www/zockzone
 sudo chmod 755 /var/www/zockzone
 
 # Deployen
@@ -280,18 +280,18 @@ Für HTTPS: Let's Encrypt via `certbot --apache`.
 
 ```bash
 sudo mkdir -p /var/log/zockzone-chat
-sudo chown csurlee:www-data /var/log/zockzone-chat
+sudo chown [LINUX_USER]:www-data /var/log/zockzone-chat
 sudo chmod 775 /var/log/zockzone-chat
 ```
 
-Sowohl der Bot (läuft als `csurlee`) als auch PHP/Apache (läuft als `www-data`) brauchen Lese- und Schreibzugriff.
+Sowohl der Bot (läuft als `[LINUX_USER]`) als auch PHP/Apache (läuft als `www-data`) brauchen Lese- und Schreibzugriff.
 
 ---
 
 ### 5. Bot einrichten und starten
 
 ```bash
-cd /home/csurlee/zockzone/bot
+cd /home/[LINUX_USER]/zockzone/bot
 
 # Abhängigkeiten installieren
 npm install

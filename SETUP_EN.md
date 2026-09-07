@@ -29,8 +29,8 @@ sudo apt install -y nodejs
 ## Step 1 — Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/zockzone.git /home/csurlee/zockzone
-cd /home/csurlee/zockzone
+git clone https://github.com/your-username/zockzone.git /home/[LINUX_USER]/zockzone
+cd /home/[LINUX_USER]/zockzone
 ```
 
 ---
@@ -88,7 +88,7 @@ ALTER PUBLICATION supabase_realtime ADD TABLE profiles;
 ## Step 4 — Configure the Admin Panel
 
 ```bash
-cd /home/csurlee/zockzone/admin/includes
+cd /home/[LINUX_USER]/zockzone/admin/includes
 
 # Create the configuration file (never committed)
 cp config.php.example config.php
@@ -117,7 +117,7 @@ Copy the output hash into `config.php` under `ADMIN_PASSWORD_HASH`.
 ```bash
 # Create webroot
 sudo mkdir -p /var/www/zockzone
-sudo chown csurlee:www-data /var/www/zockzone
+sudo chown [LINUX_USER]:www-data /var/www/zockzone
 sudo chmod 755 /var/www/zockzone
 
 # Create Apache virtual host
@@ -144,7 +144,7 @@ sudo a2enmod rewrite
 sudo systemctl reload apache2
 
 # Copy files to webroot
-cd /home/csurlee/zockzone
+cd /home/[LINUX_USER]/zockzone
 bash deploy.sh
 ```
 
@@ -202,7 +202,7 @@ bash deploy.sh
 
 ```bash
 sudo mkdir -p /var/log/zockzone-chat
-sudo chown csurlee:www-data /var/log/zockzone-chat
+sudo chown [LINUX_USER]:www-data /var/log/zockzone-chat
 sudo chmod 775 /var/log/zockzone-chat
 ```
 
@@ -211,7 +211,7 @@ sudo chmod 775 /var/log/zockzone-chat
 ## Step 10 — Set Up and Start the Bot
 
 ```bash
-cd /home/csurlee/zockzone/bot
+cd /home/[LINUX_USER]/zockzone/bot
 
 # Install dependencies
 npm install
