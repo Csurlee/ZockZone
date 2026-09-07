@@ -1,0 +1,16 @@
+[Unit]
+Description=ZockZone Chat Moderator Bot
+After=network.target
+
+[Service]
+Type=simple
+User=csurlee
+WorkingDirectory=/home/csurlee/zockzone/bot
+ExecStart=/usr/bin/node chat-moderator.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

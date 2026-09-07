@@ -1,2 +1,4 @@
 .claude/
 admin/includes/config.php
+node_modules/
+.env
