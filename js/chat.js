@@ -352,7 +352,7 @@ async function onAuthChanged(){
     const sb2 = document.getElementById('chatSoundBtn');
     if(sb2) sb2.textContent = soundEnabled ? '🔔' : '🔕';
     // Show own role badge in FAB
-    if(isMod()) btn.title = ROLE_BADGE[currentRole] || '';
+    if(isMod()) btn.title = ROLE_LABEL[currentRole] || '';
   } else {
     btn.hidden = true;
     if($('chatPanel')) $('chatPanel').hidden = true;
