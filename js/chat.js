@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { t } from './i18n.js';
+import { t, getLang } from './i18n.js';
 
 const SUPABASE_URL = 'https://supabase.hackthelab.uk';
 const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
@@ -395,6 +395,13 @@ async function loadBotStatus() {
 }
 
 // ===== AUTH =====
+async function syncLangToProfile() {
+  if(!currentUser) return;
+  try {
+    await sb.from('profiles').update({ lang: getLang() }).eq('id', currentUser.id);
+  } catch {}
+}
+
 async function onAuthChanged(){
   const { data } = await sb.auth.getUser();
   currentUser = data?.user || null;
@@ -403,6 +410,7 @@ async function onAuthChanged(){
   if(currentUser){
     btn.hidden = false;
     await Promise.all([loadProfile(), loadBannedWords(), loadStaffMap(), loadPrivacySet(), loadFriendSet()]);
+    syncLangToProfile();
     subscribeRealtime();
     loadMessages();
     loadBotStatus();

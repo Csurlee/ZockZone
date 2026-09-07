@@ -21,6 +21,7 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
 const SUPABASE_ANON_KEY   = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
 const OPENAI_API_KEY      = process.env.OPENAI_API_KEY      || '';
 const MUTE_MINUTES        = parseInt(process.env.MUTE_MINUTES || '60');
+const BOT_USER_ID         = process.env.BOT_USER_ID         || '';
 
 if(!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !OPENAI_API_KEY) {
   console.error('❌  .env fehlt oder unvollständig — bitte .env.example kopieren und ausfüllen.');
@@ -137,6 +138,27 @@ function checkBannedWords(text) {
   return null;
 }
 
+// ===== BOT-WARNUNG =====
+const WARN_MSGS = {
+  de: (u) => `🤖 @${u} — deine Nachricht wurde von unserem Moderations-Bot entfernt. Bitte achte auf einen respektvollen Umgangston. Dieser Chat wird moderiert.`,
+  en: (u) => `🤖 @${u} — your message was removed by our moderation bot. Please keep a respectful tone. This chat is moderated.`,
+};
+
+async function sendBotWarning(userId, username, table = 'chat_messages') {
+  if(!BOT_USER_ID) return;
+  const { data } = await sbAdmin.from('profiles').select('lang').eq('id', userId).maybeSingle();
+  const lang = data?.lang && WARN_MSGS[data.lang] ? data.lang : 'de';
+  const message = WARN_MSGS[lang](username);
+  const { error } = await sbAdmin.from(table).insert({
+    user_id: BOT_USER_ID,
+    username: '🤖 ModBot',
+    avatar: 'ghost',
+    message
+  });
+  if(error) console.warn('  ⚠  Bot-Warnung konnte nicht gesendet werden:', error.message);
+  else      console.log (`  💬 Bot-Warnung gesendet [${lang}] an ${username}`);
+}
+
 // ===== AKTIONEN =====
 async function deleteMessage(msgId, reason, table = 'chat_messages') {
   const { error } = await sbAdmin.from(table).delete().eq('id', msgId);
@@ -176,6 +198,7 @@ async function handleMessage(msg, table = 'chat_messages') {
     console.log(`   🚨 Flagged: ${cats}`);
 
     await deleteMessage(msg.id, reason, table);
+    await sendBotWarning(msg.user_id, msg.username, table);
     if(result.flaggedCats.some(c => MUTE_CATEGORIES.has(c))) {
       await muteUser(msg.user_id, msg.username, MUTE_MINUTES, `Auto-Mute: ${reason}`);
     }
@@ -185,6 +208,7 @@ async function handleMessage(msg, table = 'chat_messages') {
     if(found) {
       console.log(`   🚨 Verbotenes Wort gefunden: "${found}" (lokaler Filter)`);
       await deleteMessage(msg.id, `verbotenes Wort: ${found}`, table);
+      await sendBotWarning(msg.user_id, msg.username, table);
     } else {
       console.log(`   ⚠  OpenAI nicht verfügbar, lokaler Filter: OK`);
     }
