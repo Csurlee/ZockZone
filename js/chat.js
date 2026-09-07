@@ -277,6 +277,22 @@ $('chatInput')?.addEventListener('keydown', e => {
   if(e.key === 'Enter') window.zzSendChat();
 });
 
+// ===== BOT STATUS =====
+async function loadBotStatus() {
+  const el = document.getElementById('chatBotStatus');
+  if(!el) return;
+  try {
+    const { data } = await sb.from('chat_bot_status').select('is_online,last_seen').eq('id',1).maybeSingle();
+    if(!data) { el.textContent = ''; return; }
+    const online = data.is_online;
+    const ago    = data.last_seen ? Math.floor((Date.now() - new Date(data.last_seen)) / 60000) : null;
+    const stale  = ago !== null && ago > 2;
+    el.textContent = online && !stale ? '🤖 online' : '🤖 offline';
+    el.style.color  = online && !stale ? '#4ade80' : '#888';
+    el.title        = data.last_seen ? `Bot zuletzt aktiv: ${new Date(data.last_seen).toLocaleTimeString('de-DE')}` : 'Bot Status';
+  } catch { el.textContent = ''; }
+}
+
 // ===== AUTH =====
 async function onAuthChanged(){
   const { data } = await sb.auth.getUser();
@@ -288,6 +304,8 @@ async function onAuthChanged(){
     await Promise.all([loadProfile(), loadBannedWords(), loadStaffMap()]);
     subscribeRealtime();
     loadMessages();
+    loadBotStatus();
+    setInterval(loadBotStatus, 30_000);
     // Show own role badge in FAB
     if(isMod()) btn.title = ROLE_BADGE[currentRole] || '';
   } else {

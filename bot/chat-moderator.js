@@ -146,6 +146,25 @@ async function handleMessage(msg) {
   }
 }
 
+// ===== BOT STATUS =====
+let heartbeatTimer = null;
+
+async function setOnline(online) {
+  await sbAdmin.from('chat_bot_status').upsert({
+    id: 1, is_online: online, last_seen: new Date().toISOString()
+  });
+  console.log(online ? '🟢 Status: Online' : '🔴 Status: Offline');
+}
+
+function startHeartbeat() {
+  clearInterval(heartbeatTimer);
+  heartbeatTimer = setInterval(async () => {
+    await sbAdmin.from('chat_bot_status')
+      .update({ last_seen: new Date().toISOString() })
+      .eq('id', 1);
+  }, 30_000);
+}
+
 // ===== REALTIME =====
 function connect() {
   console.log('🤖 ZockZone Chat-Moderator gestartet (OpenAI Moderation API)');
@@ -158,14 +177,29 @@ function connect() {
     }, ({ new: msg }) => {
       handleMessage(msg).catch(e => console.error('Fehler:', e));
     })
-    .subscribe(status => {
-      if(status === 'SUBSCRIBED')   console.log('✅ Verbunden — überwache Chat in Echtzeit…\n');
-      if(status === 'CLOSED')       { console.log('🔌 Verbindung getrennt, reconnect in 5s…'); setTimeout(connect, 5000); }
+    .subscribe(async status => {
+      if(status === 'SUBSCRIBED') {
+        console.log('✅ Verbunden — überwache Chat in Echtzeit…\n');
+        await setOnline(true);
+        startHeartbeat();
+      }
+      if(status === 'CLOSED') {
+        clearInterval(heartbeatTimer);
+        await setOnline(false);
+        console.log('🔌 Verbindung getrennt, reconnect in 5s…');
+        setTimeout(connect, 5000);
+      }
       if(status === 'CHANNEL_ERROR') console.error('❌ Channel-Fehler');
     });
 
-  process.on('SIGINT',  () => { channel.unsubscribe(); process.exit(0); });
-  process.on('SIGTERM', () => { channel.unsubscribe(); process.exit(0); });
+  async function shutdown() {
+    clearInterval(heartbeatTimer);
+    await setOnline(false);
+    channel.unsubscribe();
+    process.exit(0);
+  }
+  process.on('SIGINT',  shutdown);
+  process.on('SIGTERM', shutdown);
 }
 
 connect();

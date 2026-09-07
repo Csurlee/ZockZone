@@ -94,6 +94,13 @@ require __DIR__ . '/includes/layout_top.php';
 
 <p class="admin-hint">Chat-Nachrichten moderieren, verbotene Wörter verwalten und Nutzer stummschalten.</p>
 
+<!-- Bot Status Banner -->
+<div id="botStatusBanner" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:12px 18px;margin-bottom:16px;">
+  <span id="botDot" style="width:10px;height:10px;border-radius:50%;background:#888;flex-shrink:0;transition:background .4s;"></span>
+  <span id="botStatusText" style="font-size:13px;color:var(--text);">🤖 Chat-Moderator Bot — lade…</span>
+  <span id="botLastSeen" style="font-size:11px;color:var(--text-dim);margin-left:auto;"></span>
+</div>
+
 <div class="mod-grid">
 
   <!-- Left: Chat messages -->
@@ -393,15 +400,46 @@ function showModMsg(text, type){
   setTimeout(()=>el.style.display='none', 3000);
 }
 
+async function loadBotStatus() {
+  const SUPABASE_URL     = '<?= SUPABASE_URL ?>';
+  const SUPABASE_ANON    = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
+  try {
+    const res  = await fetch(`${SUPABASE_URL}/rest/v1/chat_bot_status?id=eq.1&select=is_online,last_seen`, {
+      headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }
+    });
+    const data = await res.json();
+    const row  = data?.[0];
+    const dot  = document.getElementById('botDot');
+    const txt  = document.getElementById('botStatusText');
+    const seen = document.getElementById('botLastSeen');
+    if(!row){ txt.textContent = '🤖 Bot — kein Status gefunden'; return; }
+    const online = row.is_online;
+    const ago    = row.last_seen ? Math.floor((Date.now() - new Date(row.last_seen)) / 60000) : null;
+    const stale  = ago !== null && ago > 2;
+    const active = online && !stale;
+    dot.style.background    = active ? '#4ade80' : '#ef4444';
+    dot.style.boxShadow     = active ? '0 0 6px #4ade80' : 'none';
+    txt.textContent         = active ? '🤖 Chat-Moderator Bot — Online' : '🤖 Chat-Moderator Bot — Offline';
+    txt.style.color         = active ? '#4ade80' : '#ef4444';
+    seen.textContent        = row.last_seen
+      ? 'Zuletzt aktiv: ' + new Date(row.last_seen).toLocaleString('de-DE', {timeStyle:'medium',dateStyle:'short'})
+      : '';
+  } catch(e) {
+    document.getElementById('botStatusText').textContent = '🤖 Bot — Fehler beim Laden';
+  }
+}
+
 loadMessages();
 loadWords();
 loadMutes();
 loadModerators();
+loadBotStatus();
 
 setInterval(() => {
   loadMessages();
   loadMutes();
   loadModerators();
+  loadBotStatus();
 }, 5000);
 </script>
 
