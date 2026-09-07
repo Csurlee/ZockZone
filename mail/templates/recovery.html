@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passwort zurücksetzen – ZockZone</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:0;background-color:#14101F;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#14101F;min-height:100vh;">
+  <tr>
+    <td align="center" style="padding:40px 16px;">
+
+      <!-- Container -->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+
+        <!-- Logo/Brand -->
+        <tr>
+          <td align="center" style="padding-bottom:28px;">
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="vertical-align:middle;padding-right:10px;">
+                  <div style="width:14px;height:14px;background:#C6FF3D;border-radius:4px;transform:rotate(20deg);display:inline-block;box-shadow:0 0 16px rgba(198,255,61,0.8);"></div>
+                </td>
+                <td style="vertical-align:middle;">
+                  <span style="font-size:28px;font-weight:700;color:#F3F1FA;letter-spacing:-0.5px;font-family:'Fredoka','Trebuchet MS',Arial,sans-serif;">ZockZone</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Card -->
+        <tr>
+          <td style="background:#241D3B;border-radius:18px;border:1px solid rgba(255,255,255,0.08);padding:40px 36px;">
+
+            <!-- Icon -->
+            <div style="text-align:center;margin-bottom:24px;">
+              <div style="display:inline-block;background:rgba(255,107,74,0.15);border-radius:50%;width:64px;height:64px;line-height:64px;font-size:30px;text-align:center;">
+                🔑
+              </div>
+            </div>
+
+            <!-- Headline -->
+            <h1 style="margin:0 0 12px;text-align:center;font-size:24px;font-weight:700;color:#F3F1FA;letter-spacing:-0.3px;font-family:'Fredoka','Trebuchet MS',Arial,sans-serif;">
+              Passwort zurücksetzen
+            </h1>
+
+            <!-- Text -->
+            <p style="margin:0 0 8px;text-align:center;font-size:15px;color:#9C93B8;line-height:1.6;">
+              Hey <strong style="color:#F3F1FA;">{{ .Email }}</strong>,
+            </p>
+            <p style="margin:0 0 32px;text-align:center;font-size:15px;color:#9C93B8;line-height:1.6;">
+              du hast eine Passwort-Zurücksetzung für dein ZockZone-Konto angefordert. Klicke auf den Button, um ein neues Passwort zu vergeben.
+            </p>
+
+            <!-- CTA Button -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center">
+                  <a href="{{ .ConfirmationURL }}"
+                     style="display:inline-block;background:#7C3AED;color:#F3F1FA;text-decoration:none;font-weight:700;font-size:15px;padding:14px 36px;border-radius:12px;letter-spacing:0.2px;font-family:'Fredoka','Trebuchet MS',Arial,sans-serif;">
+                    🔐 Passwort zurücksetzen
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Divider -->
+            <div style="border-top:1px solid rgba(255,255,255,0.08);margin:32px 0;"></div>
+
+            <!-- Fallback link -->
+            <p style="margin:0 0 8px;font-size:13px;color:#9C93B8;text-align:center;line-height:1.5;">
+              Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:
+            </p>
+            <p style="margin:0;font-size:12px;color:#7C3AED;text-align:center;word-break:break-all;line-height:1.5;">
+              {{ .ConfirmationURL }}
+            </p>
+
+            <!-- Security note -->
+            <p style="margin:24px 0 0;font-size:12px;color:#9C93B8;text-align:center;">
+              ⏱ Dieser Link ist 24 Stunden gültig. Falls du kein neues Passwort angefordert hast, ignoriere diese E-Mail.
+            </p>
+
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding-top:28px;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#9C93B8;">
+              Du hast kein neues Passwort angefordert? Dann ist dein Konto sicher — ignoriere einfach diese E-Mail.
+            </p>
+            <p style="margin:8px 0 0;font-size:12px;color:#9C93B8;">
+              &copy; 2026 ZockZone &mdash; <a href="https://zockzone.hackthelab.uk" style="color:#7C3AED;text-decoration:none;">zockzone.hackthelab.uk</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

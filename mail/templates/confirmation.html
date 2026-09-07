@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Mail bestätigen – ZockZone</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:0;background-color:#14101F;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#14101F;min-height:100vh;">
+  <tr>
+    <td align="center" style="padding:40px 16px;">
+
+      <!-- Container -->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+
+        <!-- Logo/Brand -->
+        <tr>
+          <td align="center" style="padding-bottom:28px;">
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="vertical-align:middle;padding-right:10px;">
+                  <div style="width:14px;height:14px;background:#C6FF3D;border-radius:4px;transform:rotate(20deg);display:inline-block;box-shadow:0 0 16px rgba(198,255,61,0.8);"></div>
+                </td>
+                <td style="vertical-align:middle;">
+                  <span style="font-size:28px;font-weight:700;color:#F3F1FA;letter-spacing:-0.5px;font-family:'Fredoka','Trebuchet MS',Arial,sans-serif;">ZockZone</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Card -->
+        <tr>
+          <td style="background:#241D3B;border-radius:18px;border:1px solid rgba(255,255,255,0.08);padding:40px 36px;">
+
+            <!-- Icon -->
+            <div style="text-align:center;margin-bottom:24px;">
+              <div style="display:inline-block;background:rgba(124,58,237,0.2);border-radius:50%;width:64px;height:64px;line-height:64px;font-size:30px;text-align:center;">
+                🎮
+              </div>
+            </div>
+
+            <!-- Headline -->
+            <h1 style="margin:0 0 12px;text-align:center;font-size:24px;font-weight:700;color:#F3F1FA;letter-spacing:-0.3px;font-family:'Fredoka','Trebuchet MS',Arial,sans-serif;">
+              Fast geschafft!
+            </h1>
+
+            <!-- Text -->
+            <p style="margin:0 0 8px;text-align:center;font-size:15px;color:#9C93B8;line-height:1.6;">
+              Hey <strong style="color:#F3F1FA;">{{ .Email }}</strong>,
+            </p>
+            <p style="margin:0 0 28px;text-align:center;font-size:15px;color:#9C93B8;line-height:1.6;">
+              willkommen bei ZockZone! Gib diesen Code in der App ein, um dein Konto zu aktivieren:
+            </p>
+
+            <!-- OTP Code Box -->
+            <div style="text-align:center;margin-bottom:28px;">
+              <div style="display:inline-block;background:#1D1730;border:2px solid #7C3AED;border-radius:14px;padding:18px 36px;">
+                <span style="font-size:36px;font-weight:700;letter-spacing:10px;color:#C6FF3D;font-family:'Fredoka','Courier New',monospace;">{{ .Token }}</span>
+              </div>
+              <p style="margin:10px 0 0;font-size:12px;color:#9C93B8;">Dieser Code ist 24 Stunden gültig.</p>
+            </div>
+
+            <!-- Divider -->
+            <div style="border-top:1px solid rgba(255,255,255,0.08);margin:8px 0 24px;"></div>
+
+            <!-- Fallback link -->
+            <p style="margin:0 0 8px;font-size:13px;color:#9C93B8;text-align:center;line-height:1.5;">
+              Oder aktiviere dein Konto direkt per Link:
+            </p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
+              <tr>
+                <td align="center">
+                  <a href="{{ .ConfirmationURL }}"
+                     style="display:inline-block;background:rgba(124,58,237,0.2);color:#A78BFA;text-decoration:none;font-size:13px;padding:10px 24px;border-radius:10px;border:1px solid rgba(124,58,237,0.4);">
+                    ✅ Konto per Link aktivieren
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding-top:28px;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#9C93B8;">
+              Du hast dich nicht bei ZockZone registriert? Ignoriere diese E-Mail einfach.
+            </p>
+            <p style="margin:8px 0 0;font-size:12px;color:#9C93B8;">
+              &copy; 2026 ZockZone &mdash; <a href="https://zockzone.hackthelab.uk" style="color:#7C3AED;text-decoration:none;">zockzone.hackthelab.uk</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
