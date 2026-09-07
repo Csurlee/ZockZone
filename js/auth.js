@@ -2,6 +2,9 @@
 const SUPABASE_URL = 'https://supabase.hackthelab.uk';
 const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
 
+// Hash vor Supabase-Init lesen — Supabase löscht ihn beim Start
+const _initHash = window.location.hash;
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t, getLang } from './i18n.js?v=20260907a';
 
@@ -437,8 +440,7 @@ supabase.auth.onAuthStateChange((event, session) => {
   if(event === 'SIGNED_IN' && user){
     ensureProfile(user);
     if(!user.user_metadata?.avatar) fetchAndCacheProfileAvatar(user);
-    const hash = window.location.hash;
-    if(hash.includes('type=signup') || hash.includes('type=email_change')){
+    if(_initHash.includes('type=signup') || _initHash.includes('type=email_change')){
       history.replaceState(null, '', window.location.pathname + window.location.search);
       const msg = getLang() === 'en'
         ? '✅ Email confirmed! You are now logged in.'
