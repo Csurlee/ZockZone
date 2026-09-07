@@ -21,6 +21,7 @@
     <a href="visitors.php" class="<?= $activeNav==='visitors'?'active':'' ?>">Besucher</a>
     <a href="email.php" class="<?= $activeNav==='email'?'active':'' ?>">E-Mail</a>
     <a href="broadcast.php" class="<?= $activeNav==='broadcast'?'active':'' ?>">Broadcast</a>
+    <a href="moderation.php" class="<?= $activeNav==='moderation'?'active':'' ?>">Moderation</a>
     <div class="admin-user-info">
       <span class="admin-user-email"><?= htmlspecialchars($_SESSION['zz_admin_email'] ?? '') ?></span>
       <span class="admin-user-role"><?= htmlspecialchars(ucfirst($_SESSION['zz_admin_role'] ?? '')) ?></span>
