@@ -218,24 +218,61 @@ async function checkAndBan(userId, username) {
   console.log(`  📊 Verstöße in den letzten ${VIOLATION_WINDOW_H}h: ${count}/${VIOLATION_LIMIT}`);
 
   if(count >= VIOLATION_LIMIT) {
-    // Supabase-Account sperren (kann sich nicht mehr einloggen)
-    const { error } = await sbAdmin.auth.admin.updateUserById(userId, {
-      ban_duration: '876000h' // ~100 Jahre = permanent
-    });
+    // Account endgültig löschen
+    const { error } = await sbAdmin.auth.admin.deleteUser(userId);
     if(error) {
-      console.error('  ✗ Ban fehlgeschlagen:', error.message);
+      console.error('  ✗ Account-Löschung fehlgeschlagen:', error.message);
+      // Fallback: sperren
+      await sbAdmin.auth.admin.updateUserById(userId, { ban_duration: '876000h' });
     } else {
-      console.log(`  🚫 ${username} GEBANNT nach ${count} Verstößen`);
-      // Auch aus Chat dauerhaft muten
-      await sbAdmin.from('chat_muted_users').upsert({
-        user_id: userId,
-        muted_until: new Date(Date.now() + 876_000 * 3_600_000).toISOString(),
-        reason: `Auto-Ban: ${count} Verstöße in ${VIOLATION_WINDOW_H}h`
-      }, { onConflict: 'user_id' });
+      console.log(`  🗑  ${username} (${userId}) GELÖSCHT nach ${count} Verstößen`);
+      writeLog(`[${logTime()}] [SYSTEM] User GELÖSCHT: ${username} (${userId.slice(0,8)}) — ${count} Verstöße in ${VIOLATION_WINDOW_H}h`);
     }
     return true;
   }
   return false;
+}
+
+// ===== CLEANUP: inaktive + gesperrte User nach 90 Tagen löschen =====
+const INACTIVE_DAYS = 90;
+
+async function cleanupUsers() {
+  const cutoff = new Date(Date.now() - INACTIVE_DAYS * 86_400_000).toISOString();
+  let deleted = 0, page = 1;
+
+  console.log(`🧹 Cleanup: prüfe inaktive/gesperrte User (>${INACTIVE_DAYS} Tage)…`);
+
+  while(true) {
+    const { data, error } = await sbAdmin.auth.admin.listUsers({ page, perPage: 100 });
+    if(error) { console.warn('  ⚠  listUsers Fehler:', error.message); break; }
+    const users = data?.users || [];
+    if(!users.length) break;
+
+    for(const u of users) {
+      if(!u.created_at || new Date(u.created_at) > new Date(cutoff)) continue;
+
+      // Nie eingeloggt (spam/verlassene Accounts)
+      const neverLoggedIn = !u.last_sign_in_at;
+      // Permanent gesperrt (banned_until weit in der Zukunft, > 1 Jahr)
+      const permaBanned = u.banned_until &&
+        new Date(u.banned_until) > new Date(Date.now() + 365 * 86_400_000);
+
+      if(neverLoggedIn || permaBanned) {
+        const reason = neverLoggedIn ? `inaktiv >${INACTIVE_DAYS}d` : `permanent gesperrt`;
+        const { error: delErr } = await sbAdmin.auth.admin.deleteUser(u.id);
+        if(!delErr) {
+          deleted++;
+          console.log(`  🗑  ${u.email} gelöscht (${reason})`);
+          writeLog(`[${logTime()}] [SYSTEM] Cleanup: ${u.email} (${u.id.slice(0,8)}) gelöscht — ${reason}`);
+        }
+      }
+    }
+
+    if(users.length < 100) break;
+    page++;
+  }
+
+  console.log(`✅ Cleanup: ${deleted} User gelöscht.`);
 }
 
 // ===== NACHRICHT PRÜFEN =====
@@ -310,6 +347,8 @@ function startHeartbeat() {
 // ===== REALTIME =====
 function connect() {
   rotateLogs();
+  cleanupUsers();
+  setInterval(cleanupUsers, 24 * 3_600_000); // täglich
   console.log('🤖 ZockZone Chat-Moderator gestartet (OpenAI Moderation API)');
   console.log(`   Supabase: ${SUPABASE_URL}`);
   console.log('');
