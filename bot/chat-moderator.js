@@ -53,7 +53,7 @@ const MUTE_CATEGORIES = new Set([
   'self-harm/intent',
 ]);
 
-async function checkModeration(text) {
+async function checkModeration(text, retry = true) {
   try {
     const res = await fetch('https://api.openai.com/v1/moderations', {
       method:  'POST',
@@ -61,8 +61,14 @@ async function checkModeration(text) {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type':  'application/json',
       },
-      body: JSON.stringify({ input: text }),
+      body: JSON.stringify({ model: 'omni-moderation-latest', input: text }),
     });
+
+    if(res.status === 429 && retry) {
+      // Rate limit — einmal nach 2s nochmal versuchen
+      await new Promise(r => setTimeout(r, 2000));
+      return checkModeration(text, false);
+    }
 
     if(!res.ok) {
       const err = await res.json().catch(() => ({}));
