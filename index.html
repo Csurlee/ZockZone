@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260907f">
+<link rel="stylesheet" href="css/style.css?v=20260907g">
 </head>
 <body>
 
@@ -16,6 +16,7 @@
     🔍 <input id="searchInput" data-i18n-placeholder="search.placeholder" placeholder="Spiele suchen…">
   </div>
   <button class="account-btn ranking-btn" onclick="zzOpenRanking()" data-i18n="header.ranking">🏆 Rangliste</button>
+  <button class="account-btn online-header-btn" onclick="zzOpenOnline()">🎮 Online</button>
   <div class="auth-btn-group">
     <button class="account-btn" id="accountBtn" onclick="zzToggleAccount()">👤 Login</button>
     <button class="account-btn signup-btn" id="signupBtn" onclick="zzOpenSignup()" data-i18n="header.register">Registrieren</button>
@@ -294,6 +295,65 @@
   </div>
 </div>
 
+<!-- Online Mode Overlay -->
+<div class="online-overlay" id="onlineOverlay">
+  <div class="online-box">
+
+    <!-- MENÜ: Raum erstellen oder beitreten -->
+    <div id="onlineMenu">
+      <button class="online-close-btn" onclick="zzCloseOnline()">✕</button>
+      <div class="online-title">🎮 ZockZone Online</div>
+      <p class="online-subtitle">Spiele gegen einen Freund!</p>
+      <div class="online-menu-btns">
+        <button class="online-create-btn" onclick="zzCreateRoom()">🟢 Online Raum erstellen</button>
+        <button class="online-join-btn"   onclick="zzShowJoinCode()">🔑 Raum-Code eingeben</button>
+      </div>
+      <div id="joinCodeWrap" hidden style="margin-top:16px">
+        <input id="joinCodeInput" class="online-code-field" type="text"
+               placeholder="Code eingeben" maxlength="6" style="text-transform:uppercase"
+               onkeydown="if(event.key==='Enter') zzJoinRoom()">
+        <button class="online-create-btn" onclick="zzJoinRoom()" style="margin-top:10px;width:100%">Beitreten →</button>
+      </div>
+    </div>
+
+    <!-- LOBBY: Warte + Spielauswahl -->
+    <div id="onlineLobby" hidden>
+      <button class="online-close-btn" onclick="zzCloseOnline()">✕</button>
+      <div class="online-title">🎮 ZockZone Online</div>
+      <div class="lobby-code-label">Raum-Code</div>
+      <div class="lobby-code-display" id="lobbyCode">------</div>
+      <div class="lobby-players-row">
+        <div class="lobby-player-card">
+          <div class="lobby-role">👑 Gastgeber</div>
+          <div class="lobby-pname" id="lobbyHostName">-</div>
+        </div>
+        <div class="lobby-vs-badge">VS</div>
+        <div class="lobby-player-card">
+          <div class="lobby-role">⚔️ Herausforderer</div>
+          <div class="lobby-pname" id="lobbyGuestName"><span class="lobby-waiting">Warte…</span></div>
+        </div>
+      </div>
+      <div class="lobby-status-text" id="lobbyStatus"></div>
+      <button class="online-create-btn" id="lobbyPickGame" hidden onclick="zzPickGame()">🎮 Spiel aussuchen</button>
+      <div id="gamePicker" class="game-picker" hidden>
+        <div class="game-picker-label">Spiel wählen:</div>
+        <button class="game-pick-btn" onclick="zzStartGame('pong')">🏓 Pong</button>
+      </div>
+      <button class="online-leave-btn" onclick="zzLeaveRoom()">Raum verlassen</button>
+    </div>
+
+    <!-- SPIEL: Canvas -->
+    <div id="onlineGame" hidden style="text-align:center;position:relative">
+      <button class="online-close-btn" onclick="zzCloseOnline()">✕</button>
+      <div id="onlineScore" class="online-score-display"></div>
+      <canvas id="onlineCanvas" class="online-canvas"></canvas>
+      <div id="onlineResult" class="online-result-banner" hidden></div>
+      <button class="online-leave-btn" onclick="zzLeaveRoom()" style="margin-top:12px">Beenden</button>
+    </div>
+
+  </div>
+</div>
+
 <!-- Chat -->
 <div id="chatBtn" class="chat-fab" hidden onclick="zzToggleChat()">
   💬<span id="chatBadge" class="chat-badge" hidden></span>
@@ -316,5 +376,6 @@
 <script type="module" src="js/auth.js?v=20260908a"></script>
 <script type="module" src="js/core.js?v=20260906p"></script>
 <script type="module" src="js/chat.js?v=20260907a"></script>
+<script type="module" src="js/online.js?v=20260907a"></script>
 </body>
 </html>

@@ -566,3 +566,137 @@
   .chat-panel{right:8px; bottom:76px; width:calc(100vw - 16px); height:360px;}
   .chat-fab{right:16px; bottom:16px;}
 }
+
+/* ===== ONLINE MODE ===== */
+.online-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.65); backdrop-filter:blur(8px);
+  z-index:800;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .25s;
+}
+.online-overlay.open{ opacity:1; pointer-events:all; }
+.online-box{
+  background:#14101F; border:1px solid #2D2545; border-radius:20px;
+  padding:28px 24px; width:min(460px,95vw);
+  max-height:90vh; overflow-y:auto; position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+.online-close-btn{
+  position:absolute; top:14px; right:14px;
+  background:transparent; border:none; color:#888;
+  font-size:18px; cursor:pointer; line-height:1; padding:4px;
+}
+.online-close-btn:hover{ color:#fff; }
+.online-title{
+  font-family:Fredoka,sans-serif; font-size:22px;
+  color:#C6FF3D; text-align:center; margin-bottom:4px;
+}
+.online-subtitle{
+  text-align:center; color:#8B7DB5; font-size:14px;
+  margin:0 0 24px; font-family:Inter,sans-serif;
+}
+.online-menu-btns{ display:flex; flex-direction:column; gap:12px; }
+.online-create-btn{
+  background:#7C3AED; color:#fff; border:none; border-radius:12px;
+  padding:14px 20px; font-size:15px; font-family:Fredoka,sans-serif;
+  cursor:pointer; width:100%; transition:background .15s,transform .1s;
+}
+.online-create-btn:hover{ background:#6D28D9; transform:translateY(-1px); }
+.online-create-btn:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
+.online-join-btn{
+  background:transparent; color:#A78BFA;
+  border:2px solid #7C3AED; border-radius:12px;
+  padding:14px 20px; font-size:15px; font-family:Fredoka,sans-serif;
+  cursor:pointer; width:100%; transition:background .15s;
+}
+.online-join-btn:hover{ background:rgba(124,58,237,.15); }
+.online-code-field{
+  width:100%; box-sizing:border-box;
+  background:#0F0B1C; border:1px solid #3D2F70; border-radius:10px;
+  padding:12px 16px; color:#fff;
+  font-size:22px; font-family:'JetBrains Mono',monospace;
+  letter-spacing:6px; text-align:center; outline:none;
+}
+.online-code-field:focus{ border-color:#7C3AED; }
+.online-code-field::placeholder{ letter-spacing:0; font-size:14px; color:#5B4A8A; }
+
+/* Lobby */
+.lobby-code-label{
+  text-align:center; color:#6B5EA0;
+  font-size:11px; font-family:Inter,sans-serif;
+  text-transform:uppercase; letter-spacing:1.5px; margin-top:8px;
+}
+.lobby-code-display{
+  text-align:center; font-family:'JetBrains Mono',monospace;
+  font-size:30px; font-weight:700; color:#C6FF3D;
+  letter-spacing:8px; margin:4px 0 20px;
+  background:rgba(198,255,61,.07); border-radius:10px; padding:10px;
+}
+.lobby-players-row{
+  display:flex; align-items:center; gap:12px; margin-bottom:16px;
+}
+.lobby-player-card{
+  flex:1; background:#1A1428; border:1px solid #2D2545;
+  border-radius:12px; padding:12px; text-align:center;
+}
+.lobby-role{
+  font-size:11px; color:#6B5EA0;
+  font-family:Inter,sans-serif; margin-bottom:6px;
+}
+.lobby-pname{
+  font-size:14px; font-weight:600;
+  color:#E0D9F5; font-family:Inter,sans-serif;
+}
+.lobby-waiting{ color:#6B5EA0; font-size:13px; }
+.lobby-vs-badge{
+  font-family:Fredoka,sans-serif; font-size:18px;
+  color:#7C3AED; flex-shrink:0;
+}
+.lobby-status-text{
+  text-align:center; color:#8B7DB5;
+  font-size:13px; font-family:Inter,sans-serif;
+  margin-bottom:16px; min-height:20px;
+}
+.game-picker{
+  background:#0F0B1C; border:1px solid #3D2F70;
+  border-radius:12px; padding:16px; margin-bottom:12px;
+}
+.game-picker-label{
+  color:#8B7DB5; font-size:13px;
+  font-family:Inter,sans-serif; margin-bottom:10px;
+}
+.game-pick-btn{
+  background:#1A1428; border:2px solid #7C3AED; border-radius:10px;
+  padding:10px 20px; color:#A78BFA;
+  font-family:Fredoka,sans-serif; font-size:15px;
+  cursor:pointer; width:100%; transition:background .15s;
+}
+.game-pick-btn:hover{ background:rgba(124,58,237,.2); }
+.online-leave-btn{
+  background:transparent; border:1px solid #3D2F70; border-radius:10px;
+  padding:10px 20px; color:#6B5EA0; font-size:13px;
+  font-family:Inter,sans-serif; cursor:pointer;
+  width:100%; margin-top:8px; transition:border-color .15s,color .15s;
+}
+.online-leave-btn:hover{ border-color:#EF4444; color:#EF4444; }
+
+/* Spiel-Ansicht */
+.online-score-display{
+  font-family:Fredoka,sans-serif; font-size:16px;
+  color:#E0D9F5; margin-bottom:8px;
+}
+.online-canvas{
+  border-radius:10px; max-width:100%; display:block; margin:0 auto;
+}
+.online-result-banner{
+  font-family:Fredoka,sans-serif; font-size:24px;
+  color:#C6FF3D; margin-top:16px; text-align:center;
+}
+
+/* Header-Button */
+.online-header-btn{
+  border:1px solid #7C3AED !important;
+  color:#C6FF3D !important;
+}
+.online-header-btn:hover{ background:rgba(124,58,237,.2) !important; }
