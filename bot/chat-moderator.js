@@ -22,6 +22,8 @@ const SUPABASE_ANON_KEY   = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
 const OPENAI_API_KEY      = process.env.OPENAI_API_KEY      || '';
 const MUTE_MINUTES        = parseInt(process.env.MUTE_MINUTES || '60');
 const BOT_USER_ID         = process.env.BOT_USER_ID         || '';
+const VIOLATION_LIMIT     = parseInt(process.env.VIOLATION_LIMIT     || '3');
+const VIOLATION_WINDOW_H  = parseInt(process.env.VIOLATION_WINDOW_HOURS || '24');
 
 if(!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !OPENAI_API_KEY) {
   console.error('❌  .env fehlt oder unvollständig — bitte .env.example kopieren und ausfüllen.');
@@ -176,6 +178,40 @@ async function muteUser(userId, username, minutes, reason) {
   else      console.log (`  🔇 ${username} für ${minutes} Min. gemutet [${reason}]`);
 }
 
+async function recordViolation(userId, username, reason) {
+  await sbAdmin.from('chat_violations').insert({ user_id: userId, username, reason });
+}
+
+async function checkAndBan(userId, username) {
+  const since = new Date(Date.now() - VIOLATION_WINDOW_H * 3_600_000).toISOString();
+  const { count } = await sbAdmin.from('chat_violations')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', since);
+
+  console.log(`  📊 Verstöße in den letzten ${VIOLATION_WINDOW_H}h: ${count}/${VIOLATION_LIMIT}`);
+
+  if(count >= VIOLATION_LIMIT) {
+    // Supabase-Account sperren (kann sich nicht mehr einloggen)
+    const { error } = await sbAdmin.auth.admin.updateUserById(userId, {
+      ban_duration: '876000h' // ~100 Jahre = permanent
+    });
+    if(error) {
+      console.error('  ✗ Ban fehlgeschlagen:', error.message);
+    } else {
+      console.log(`  🚫 ${username} GEBANNT nach ${count} Verstößen`);
+      // Auch aus Chat dauerhaft muten
+      await sbAdmin.from('chat_muted_users').upsert({
+        user_id: userId,
+        muted_until: new Date(Date.now() + 876_000 * 3_600_000).toISOString(),
+        reason: `Auto-Ban: ${count} Verstöße in ${VIOLATION_WINDOW_H}h`
+      }, { onConflict: 'user_id' });
+    }
+    return true;
+  }
+  return false;
+}
+
 // ===== NACHRICHT PRÜFEN =====
 async function handleMessage(msg, table = 'chat_messages') {
   if(BOT_USER_ID && msg.user_id === BOT_USER_ID) return;
@@ -199,7 +235,9 @@ async function handleMessage(msg, table = 'chat_messages') {
     console.log(`   🚨 Flagged: ${cats}`);
 
     await deleteMessage(msg.id, reason, table);
-    if(result.flaggedCats.some(c => MUTE_CATEGORIES.has(c))) {
+    await recordViolation(msg.user_id, msg.username, reason);
+    const banned = await checkAndBan(msg.user_id, msg.username);
+    if(!banned && result.flaggedCats.some(c => MUTE_CATEGORIES.has(c))) {
       await muteUser(msg.user_id, msg.username, MUTE_MINUTES, `Auto-Mute: ${reason}`);
     }
   } else {
@@ -208,6 +246,8 @@ async function handleMessage(msg, table = 'chat_messages') {
     if(found) {
       console.log(`   🚨 Verbotenes Wort gefunden: "${found}" (lokaler Filter)`);
       await deleteMessage(msg.id, `verbotenes Wort: ${found}`, table);
+      await recordViolation(msg.user_id, msg.username, `verbotenes Wort: ${found}`);
+      await checkAndBan(msg.user_id, msg.username);
     } else {
       console.log(`   ⚠  OpenAI nicht verfügbar, lokaler Filter: OK`);
     }
