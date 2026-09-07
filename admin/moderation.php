@@ -95,10 +95,10 @@ require __DIR__ . '/includes/layout_top.php';
 <p class="admin-hint">Chat-Nachrichten moderieren, verbotene Wörter verwalten und Nutzer stummschalten.</p>
 
 <!-- Bot Status Banner -->
-<div id="botStatusBanner" style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:12px 18px;margin-bottom:16px;">
-  <span id="botDot" style="width:10px;height:10px;border-radius:50%;background:#888;flex-shrink:0;transition:background .4s;"></span>
-  <span id="botStatusText" style="font-size:13px;color:var(--text);">🤖 Chat-Moderator Bot — lade…</span>
-  <span id="botLastSeen" style="font-size:11px;color:var(--text-dim);margin-left:auto;"></span>
+<div id="botStatusBanner" style="display:flex;align-items:center;gap:12px;background:#1E1535;border:1px solid #3D2F70;border-radius:10px;padding:14px 20px;margin-bottom:20px;">
+  <span id="botDot" style="width:12px;height:12px;border-radius:50%;background:#888;flex-shrink:0;transition:all .4s;"></span>
+  <span id="botStatusText" style="font-size:14px;font-weight:600;color:#ccc;">🤖 Chat-Moderator Bot &mdash; lade&hellip;</span>
+  <span id="botLastSeen" style="font-size:11px;color:#888;margin-left:auto;"></span>
 </div>
 
 <div class="mod-grid">
