@@ -164,7 +164,7 @@ function appendMsg(msg){
   const starBadge = isFriend ? `<span class="chat-friend-star" title="Freund">⭐</span>` : '';
 
   // Freund hinzufügen Button (nur für eingeloggte User, fremde Nachrichten, noch kein Freund/Anfrage, kein Bot)
-  const isBot = msg.username === 'ModBot';
+  const isBot = msg.username === '🤖 ModBot';
   let addFriendBtn = '';
   if(currentUser && !isOwn && !isFriend && !isBot && !sentSet.has(msg.user_id)) {
     addFriendBtn = `<button class="chat-add-friend-btn" id="chatFriend-${msg.user_id}"
