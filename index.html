@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260907n">
+<link rel="stylesheet" href="css/style.css?v=20260907o">
 </head>
 <body>
 
@@ -299,24 +299,47 @@
 <div class="online-overlay" id="onlineOverlay">
   <div class="online-box">
 
-    <!-- MENÜ: Raum erstellen oder beitreten -->
+    <!-- MENÜ: Freunde + Raum -->
     <div id="onlineMenu">
       <button class="online-close-btn" onclick="zzCloseOnline()">✕</button>
       <div class="online-title">🎮 ZockZone Online</div>
-      <p class="online-subtitle">Spiele gegen einen Freund!</p>
-      <div class="online-menu-btns">
-        <button class="online-create-btn" onclick="zzCreateRoom()">🟢 Online Raum erstellen</button>
-        <button class="online-join-btn"   onclick="zzShowJoinCode()">🔑 Raum-Code eingeben</button>
+
+      <!-- Tabs -->
+      <div class="online-tabs">
+        <button class="online-tab active" id="tabFriends" onclick="zzShowTab('friends')">👥 Freunde</button>
+        <button class="online-tab" id="tabRoom" onclick="zzShowTab('room')">🔑 Raum</button>
       </div>
-      <div id="joinCodeWrap" hidden style="margin-top:16px">
-        <input id="joinCodeInput" class="online-code-field" type="text"
-               placeholder="Code eingeben" maxlength="6" style="text-transform:uppercase"
-               onkeydown="if(event.key==='Enter') zzJoinRoom()">
-        <button class="online-create-btn" onclick="zzJoinRoom()" style="margin-top:10px;width:100%">Beitreten →</button>
+
+      <!-- Freunde-Tab -->
+      <div id="onlineFriendsTab">
+        <div class="friend-search-row">
+          <input id="friendSearchInput" class="friend-search-input" type="text"
+                 placeholder="Spieler suchen…" maxlength="40"
+                 onkeydown="if(event.key==='Enter') zzSearchUsers()">
+          <button class="friend-search-btn" onclick="zzSearchUsers()">🔍</button>
+        </div>
+        <div id="friendSearchResults"></div>
+        <div id="friendRequests"></div>
+        <div id="friendsList"><div class="friend-empty">Lade Freunde…</div></div>
+      </div>
+
+      <!-- Raum-Tab -->
+      <div id="onlineRoomTab" hidden>
+        <p class="online-subtitle">Spiele gegen einen Freund!</p>
+        <div class="online-menu-btns">
+          <button class="online-create-btn" onclick="zzCreateRoom()">🟢 Raum erstellen</button>
+          <button class="online-join-btn"   onclick="zzShowJoinCode()">🔑 Code eingeben</button>
+        </div>
+        <div id="joinCodeWrap" hidden style="margin-top:16px">
+          <input id="joinCodeInput" class="online-code-field" type="text"
+                 placeholder="Code eingeben" maxlength="6" style="text-transform:uppercase"
+                 onkeydown="if(event.key==='Enter') zzJoinRoom()">
+          <button class="online-create-btn" onclick="zzJoinRoom()" style="margin-top:10px;width:100%">Beitreten →</button>
+        </div>
       </div>
     </div>
 
-    <!-- LOBBY: Warte + Spielauswahl -->
+    <!-- LOBBY: Warte + Spielauswahl + Chat -->
     <div id="onlineLobby" hidden>
       <button class="online-close-btn" onclick="zzCloseOnline()">✕</button>
       <div class="online-title">🎮 ZockZone Online</div>
@@ -338,6 +361,17 @@
       <div id="gamePicker" class="game-picker" hidden>
         <div class="game-picker-label">Spiel wählen:</div>
         <button class="game-pick-btn" onclick="zzStartGame('pong')">🏓 Pong</button>
+      </div>
+      <!-- Privater Raum-Chat -->
+      <div id="lobbyChatArea" hidden class="lobby-chat-area">
+        <div class="lobby-chat-header">💬 Privater Chat</div>
+        <div id="lobbyChatMsgs" class="lobby-chat-msgs"></div>
+        <div class="lobby-chat-input-row">
+          <input id="lobbyChatInput" class="lobby-chat-input" type="text"
+                 placeholder="Nachricht…" maxlength="200"
+                 onkeydown="if(event.key==='Enter') zzSendRoomMsg()">
+          <button class="chat-send-btn" onclick="zzSendRoomMsg()">➤</button>
+        </div>
       </div>
       <button class="online-leave-btn" onclick="zzLeaveRoom()">Raum verlassen</button>
     </div>
@@ -378,6 +412,6 @@
 <script type="module" src="js/auth.js?v=20260908a"></script>
 <script type="module" src="js/core.js?v=20260906p"></script>
 <script type="module" src="js/chat.js?v=20260907d"></script>
-<script type="module" src="js/online.js?v=20260907a"></script>
+<script type="module" src="js/online.js?v=20260907b"></script>
 </body>
 </html>

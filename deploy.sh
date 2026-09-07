@@ -5,7 +5,7 @@ set -e
 SRC="/home/csurlee/zockzone/"
 DST="/var/www/zockzone/"
 
-rsync -av --checksum --no-group --no-owner --no-perms --omit-dir-times \
+rsync -av --checksum --no-group --no-owner --no-perms --omit-dir-times --no-times \
   --exclude='.git' \
   --exclude='bot/' \
   --exclude='.gitignore' \

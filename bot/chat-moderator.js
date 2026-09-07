@@ -138,10 +138,10 @@ function checkBannedWords(text) {
 }
 
 // ===== AKTIONEN =====
-async function deleteMessage(msgId, reason) {
-  const { error } = await sbAdmin.from('chat_messages').delete().eq('id', msgId);
+async function deleteMessage(msgId, reason, table = 'chat_messages') {
+  const { error } = await sbAdmin.from(table).delete().eq('id', msgId);
   if(error) console.error('  ✗ Löschen fehlgeschlagen:', error.message);
-  else      console.log (`  🗑  Nachricht gelöscht [${reason}]`);
+  else      console.log (`  🗑  Nachricht gelöscht [${reason}] (${table})`);
 }
 
 async function muteUser(userId, username, minutes, reason) {
@@ -155,7 +155,7 @@ async function muteUser(userId, username, minutes, reason) {
 }
 
 // ===== NACHRICHT PRÜFEN =====
-async function handleMessage(msg) {
+async function handleMessage(msg, table = 'chat_messages') {
   const text = msg.message?.trim();
   if(!text) return;
 
@@ -175,7 +175,7 @@ async function handleMessage(msg) {
     const reason = `${result.topCategory}${score}`;
     console.log(`   🚨 Flagged: ${cats}`);
 
-    await deleteMessage(msg.id, reason);
+    await deleteMessage(msg.id, reason, table);
     if(result.flaggedCats.some(c => MUTE_CATEGORIES.has(c))) {
       await muteUser(msg.user_id, msg.username, MUTE_MINUTES, `Auto-Mute: ${reason}`);
     }
@@ -184,7 +184,7 @@ async function handleMessage(msg) {
     const found = checkBannedWords(text);
     if(found) {
       console.log(`   🚨 Verbotenes Wort gefunden: "${found}" (lokaler Filter)`);
-      await deleteMessage(msg.id, `verbotenes Wort: ${found}`);
+      await deleteMessage(msg.id, `verbotenes Wort: ${found}`, table);
     } else {
       console.log(`   ⚠  OpenAI nicht verfügbar, lokaler Filter: OK`);
     }
@@ -220,11 +220,16 @@ function connect() {
     .on('postgres_changes', {
       event: 'INSERT', schema: 'public', table: 'chat_messages'
     }, ({ new: msg }) => {
-      handleMessage(msg).catch(e => console.error('Fehler:', e));
+      handleMessage(msg, 'chat_messages').catch(e => console.error('Fehler:', e));
+    })
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'room_messages'
+    }, ({ new: msg }) => {
+      handleMessage(msg, 'room_messages').catch(e => console.error('Fehler:', e));
     })
     .subscribe(async status => {
       if(status === 'SUBSCRIBED') {
-        console.log('✅ Verbunden — überwache Chat in Echtzeit…\n');
+        console.log('✅ Verbunden — überwache Chat + Räume in Echtzeit…\n');
         await setOnline(true);
         startHeartbeat();
         await loadBannedWords();
