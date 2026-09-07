@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import { readFileSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { readFileSync, appendFileSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'fs';
+import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 // ===== CONFIG =====
@@ -24,6 +24,8 @@ const MUTE_MINUTES        = parseInt(process.env.MUTE_MINUTES || '60');
 const BOT_USER_ID         = process.env.BOT_USER_ID         || '';
 const VIOLATION_LIMIT     = parseInt(process.env.VIOLATION_LIMIT     || '3');
 const VIOLATION_WINDOW_H  = parseInt(process.env.VIOLATION_WINDOW_HOURS || '24');
+const LOG_DIR             = process.env.LOG_DIR || '/var/log/zockzone-chat';
+const LOG_RETAIN_DAYS     = 365;
 
 if(!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !OPENAI_API_KEY) {
   console.error('❌  .env fehlt oder unvollständig — bitte .env.example kopieren und ausfüllen.');
@@ -36,6 +38,30 @@ const sbListen = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const sbAdmin  = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false }
 });
+
+// ===== LOGGING =====
+function logDay() {
+  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+}
+function logTime() {
+  return new Date().toLocaleTimeString('de-DE', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+function writeLog(line) {
+  try {
+    mkdirSync(LOG_DIR, { recursive: true });
+    appendFileSync(join(LOG_DIR, `${logDay()}.log`), line + '\n', 'utf8');
+  } catch(e) { console.warn('⚠  Log-Fehler:', e.message); }
+}
+function rotateLogs() {
+  try {
+    const cutoff = Date.now() - LOG_RETAIN_DAYS * 86_400_000;
+    for(const f of readdirSync(LOG_DIR)) {
+      if(!f.endsWith('.log')) continue;
+      const fp = join(LOG_DIR, f);
+      if(statSync(fp).mtimeMs < cutoff) { unlinkSync(fp); console.log(`🗑  Log rotiert: ${f}`); }
+    }
+  } catch {}
+}
 
 // ===== OPENAI MODERATION =====
 // Kategorien die zum Löschen führen
@@ -221,19 +247,24 @@ async function handleMessage(msg, table = 'chat_messages') {
   // Verbotene Wörter alle 5 Min. neu laden
   if(Date.now() - bannedWordsLoaded > 5 * 60_000) await loadBannedWords();
 
+  const src   = table === 'room_messages' ? 'RAUM ' : 'LOBBY';
+  const logBase = `[${logTime()}] [${src}] ${msg.username} (${msg.user_id.slice(0,8)})`;
+
   console.log(`📨 [${msg.username}]: ${text.slice(0, 80)}${text.length > 80 ? '…' : ''}`);
 
   const result = await checkModeration(text);
 
   if(result) {
     // ---- OpenAI-Ergebnis verfügbar ----
-    if(!result.flagged) { console.log(`   ✅ OK`); return; }
+    if(!result.flagged) { writeLog(`${logBase}: "${text}"`); console.log(`   ✅ OK`); return; }
 
     const cats   = result.flaggedCats.join(', ');
     const score  = result.topScore ? ` (${(result.topScore * 100).toFixed(0)}%)` : '';
     const reason = `${result.topCategory}${score}`;
     console.log(`   🚨 Flagged: ${cats}`);
 
+    writeLog(`${logBase}: "${text}"`);
+    writeLog(`${logBase}: [🚨 MODERIERT: ${reason}] "${text}"`);
     await deleteMessage(msg.id, reason, table);
     await recordViolation(msg.user_id, msg.username, reason);
     const banned = await checkAndBan(msg.user_id, msg.username);
@@ -245,10 +276,13 @@ async function handleMessage(msg, table = 'chat_messages') {
     const found = checkBannedWords(text);
     if(found) {
       console.log(`   🚨 Verbotenes Wort gefunden: "${found}" (lokaler Filter)`);
+      writeLog(`${logBase}: "${text}"`);
+      writeLog(`${logBase}: [🚨 MODERIERT: verbotenes Wort "${found}"] "${text}"`);
       await deleteMessage(msg.id, `verbotenes Wort: ${found}`, table);
       await recordViolation(msg.user_id, msg.username, `verbotenes Wort: ${found}`);
       await checkAndBan(msg.user_id, msg.username);
     } else {
+      writeLog(`${logBase}: "${text}"`);
       console.log(`   ⚠  OpenAI nicht verfügbar, lokaler Filter: OK`);
     }
   }
@@ -275,6 +309,7 @@ function startHeartbeat() {
 
 // ===== REALTIME =====
 function connect() {
+  rotateLogs();
   console.log('🤖 ZockZone Chat-Moderator gestartet (OpenAI Moderation API)');
   console.log(`   Supabase: ${SUPABASE_URL}`);
   console.log('');
