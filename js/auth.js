@@ -463,6 +463,20 @@ supabase.auth.onAuthStateChange((event, session) => {
     }
   }
 });
+
+// Fehler im Hash (z.B. abgelaufener Link) beim Seitenaufruf anzeigen
+if(_initHash.includes('error=')){
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  const errCode = new URLSearchParams(_initHash.replace(/^#/, '')).get('error_code') || '';
+  const msg = errCode === 'otp_expired'
+    ? (getLang() === 'en'
+        ? '⚠️ Confirmation link expired. Please register again.'
+        : '⚠️ Bestätigungslink abgelaufen. Bitte registriere dich erneut.')
+    : (getLang() === 'en'
+        ? '⚠️ Link invalid or expired. Please try again.'
+        : '⚠️ Link ungültig oder abgelaufen. Bitte erneut versuchen.');
+  setTimeout(() => showToast(msg, 8000), 500);
+}
 supabase.auth.getSession().then(({ data }) => {
   const user = data.session?.user || null;
   updateAccountUI(user);
