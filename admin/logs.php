@@ -79,7 +79,7 @@ require __DIR__ . '/includes/layout_top.php';
 .log-box {
   background: #0d0d14; border: 1px solid rgba(255,255,255,0.07);
   border-radius: 10px; padding: 16px 18px;
-  font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.7;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.45;
   max-height: 72vh; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
   color: #c8c8d8;
 }
