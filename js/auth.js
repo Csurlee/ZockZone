@@ -6,7 +6,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
 const _initHash = window.location.hash;
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { t, getLang } from './i18n.js?v=20260907b';
+import { t, getLang } from './i18n.js?v=20260907c';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
