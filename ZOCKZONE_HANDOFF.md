@@ -1,4 +1,4 @@
-# ZockZone — Projekt-Handoff für Claude Code   -= claude --resume a72a729a-c6e3-4796-b50c-131e978c0df8 =-
+# ZockZone — Projekt-Handoff für Claude Code 
 
 ## Was das ist
 Deutschsprachiges Browsergame-Portal im Stil von Poki/CrazyGames, 47 spielbare Mini-Games.
