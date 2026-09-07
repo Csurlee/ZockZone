@@ -3,7 +3,7 @@ const SUPABASE_URL = 'https://supabase.hackthelab.uk';
 const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { t, getLang } from './i18n.js';
+import { t, getLang } from './i18n.js?v=20260907a';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
