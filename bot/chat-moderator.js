@@ -18,6 +18,7 @@ loadEnv();
 
 const SUPABASE_URL        = process.env.SUPABASE_URL        || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
+const SUPABASE_ANON_KEY   = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
 const OPENAI_API_KEY      = process.env.OPENAI_API_KEY      || '';
 const MUTE_MINUTES        = parseInt(process.env.MUTE_MINUTES || '60');
 
@@ -26,7 +27,10 @@ if(!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !OPENAI_API_KEY) {
   process.exit(1);
 }
 
-const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+// Realtime subscription: anon key (same as frontend, works with Realtime)
+const sbListen = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Admin actions: service key (bypasses RLS for delete/mute)
+const sbAdmin  = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false }
 });
 
@@ -94,14 +98,14 @@ async function checkModeration(text) {
 
 // ===== AKTIONEN =====
 async function deleteMessage(msgId, reason) {
-  const { error } = await sb.from('chat_messages').delete().eq('id', msgId);
+  const { error } = await sbAdmin.from('chat_messages').delete().eq('id', msgId);
   if(error) console.error('  ✗ Löschen fehlgeschlagen:', error.message);
   else      console.log (`  🗑  Nachricht gelöscht [${reason}]`);
 }
 
 async function muteUser(userId, username, minutes, reason) {
   const until = new Date(Date.now() + minutes * 60_000).toISOString();
-  const { error } = await sb.from('chat_muted_users').upsert(
+  const { error } = await sbAdmin.from('chat_muted_users').upsert(
     { user_id: userId, muted_until: until, reason },
     { onConflict: 'user_id' }
   );
@@ -148,7 +152,7 @@ function connect() {
   console.log(`   Supabase: ${SUPABASE_URL}`);
   console.log('');
 
-  const channel = sb.channel('bot-mod')
+  const channel = sbListen.channel('bot-mod')
     .on('postgres_changes', {
       event: 'INSERT', schema: 'public', table: 'chat_messages'
     }, ({ new: msg }) => {
