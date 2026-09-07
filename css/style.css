@@ -246,6 +246,9 @@
   .auth-error{color:var(--orange); font-size:13px; margin-bottom:10px; min-height:16px;}
   .auth-close{position:absolute; top:16px; right:16px;}
   .auth-step-label{color:var(--text-dim); font-size:13px; margin-bottom:12px; text-align:center; font-family:'Fredoka'; font-size:15px;}
+  .auth-step-hint{color:var(--text-dim); font-size:13px; text-align:center; margin-bottom:12px; line-height:1.5;}
+  .auth-forgot-link{display:block; background:none; border:none; color:var(--text-dim); font-size:12px; cursor:pointer; text-align:center; margin-top:8px; padding:4px; font-family:'Inter'; text-decoration:underline; text-underline-offset:3px;}
+  .auth-forgot-link:hover{color:var(--violet-light);}
   .avatar-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px;}
   .avatar-opt{
     aspect-ratio:1; border-radius:12px; border:2px solid rgba(255,255,255,0.08);

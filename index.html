@@ -6,7 +6,7 @@
 <title>ZockZone — Browsergames ohne Download</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260907d">
+<link rel="stylesheet" href="css/style.css?v=20260907e">
 </head>
 <body>
 
@@ -52,6 +52,19 @@
         <div class="cf-turnstile" id="turnstileWidget" data-sitekey="0x4AAAAAAEpjTAhsIQoKBUkO" data-theme="dark" data-callback="zzCaptchaOk" data-expired-callback="zzCaptchaReset"></div>
       </div>
       <button class="auth-submit" id="authSubmitBtn" onclick="zzSubmitAuth()" data-i18n="auth.btn.login">Einloggen</button>
+      <button class="auth-forgot-link" id="forgotLink" onclick="zzOpenForgot()" data-i18n="auth.forgot.link">Passwort vergessen?</button>
+    </div>
+
+    <!-- Schritt Passwort vergessen -->
+    <div id="authStepForgot" style="display:none">
+      <p class="auth-step-label" data-i18n="auth.forgot.label">Passwort zurücksetzen</p>
+      <p class="auth-step-hint" data-i18n="auth.forgot.hint">Wir senden dir einen Link per E-Mail.</p>
+      <input class="auth-field" id="forgotEmail" type="email" data-i18n-placeholder="auth.field.email" placeholder="E-Mail">
+      <div class="auth-error" id="forgotError"></div>
+      <div style="display:flex; gap:8px; margin-top:4px;">
+        <button class="auth-back" onclick="zzCloseForgot()" data-i18n="auth.btn.back">← Zurück</button>
+        <button class="auth-submit" style="flex:1; margin-bottom:0" onclick="zzSubmitForgot()" data-i18n="auth.forgot.btn">Link senden</button>
+      </div>
     </div>
 
     <!-- Schritt 2: Avatar auswählen -->
@@ -67,6 +80,18 @@
   </div>
 </div>
 
+
+<!-- RESET PASSWORD OVERLAY -->
+<div class="auth-overlay" id="resetPasswordOverlay">
+  <div class="auth-box" style="position:relative;">
+    <h2 class="profile-title" data-i18n="reset.title">🔐 Neues Passwort</h2>
+    <p class="auth-step-hint" data-i18n="reset.hint" style="margin-bottom:14px;">Gib dein neues Passwort ein.</p>
+    <div class="auth-error" id="resetError"></div>
+    <input class="auth-field" id="resetPw"  type="password" data-i18n-placeholder="auth.field.password"  placeholder="Neues Passwort (min. 6 Zeichen)">
+    <input class="auth-field" id="resetPw2" type="password" data-i18n-placeholder="auth.field.password2" placeholder="Passwort wiederholen">
+    <button class="auth-submit" onclick="zzSubmitResetPassword()" data-i18n="reset.btn">Passwort speichern</button>
+  </div>
+</div>
 
 <!-- RANKING OVERLAY -->
 <div class="auth-overlay" id="rankingOverlay">
@@ -272,7 +297,7 @@
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script type="module" src="js/i18n.js?v=20260907a"></script>
 <script type="module" src="js/consent.js?v=20260906p"></script>
-<script type="module" src="js/auth.js?v=20260907f"></script>
+<script type="module" src="js/auth.js?v=20260907g"></script>
 <script type="module" src="js/core.js?v=20260906p"></script>
 </body>
 </html>

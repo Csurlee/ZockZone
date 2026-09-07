@@ -202,6 +202,73 @@ window.zzCloseAuth = () => {
   document.getElementById('authOverlay').classList.remove('open');
   document.getElementById('authStep1').style.display = '';
   document.getElementById('authStep2').style.display = 'none';
+  document.getElementById('authStepForgot').style.display = 'none';
+  document.getElementById('forgotLink').style.display = '';
+};
+
+window.zzOpenForgot = () => {
+  document.getElementById('authStep1').style.display = 'none';
+  document.getElementById('forgotLink').style.display = 'none';
+  document.getElementById('authStepForgot').style.display = '';
+  document.getElementById('forgotError').textContent = '';
+  const email = document.getElementById('authEmail').value.trim();
+  document.getElementById('forgotEmail').value = email;
+  document.getElementById('forgotEmail').focus();
+};
+
+window.zzCloseForgot = () => {
+  document.getElementById('authStepForgot').style.display = 'none';
+  document.getElementById('authStep1').style.display = '';
+  document.getElementById('forgotLink').style.display = '';
+};
+
+window.zzSubmitForgot = async () => {
+  const errEl = document.getElementById('forgotError');
+  errEl.textContent = '';
+  const email = document.getElementById('forgotEmail').value.trim();
+  if(!email){ errEl.textContent = t('err.fill.email'); return; }
+  try{
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin
+    });
+    if(error) throw error;
+    window.zzCloseAuth();
+    const msg = getLang() === 'en'
+      ? '📧 Reset link sent! Please check your email.'
+      : '📧 Link gesendet! Bitte prüfe deine E-Mails.';
+    showToast(msg, 8000);
+  } catch(e){
+    errEl.textContent = t('err.prefix') + e.message;
+  }
+};
+
+window.zzOpenResetPassword = () => {
+  document.getElementById('resetPw').value = '';
+  document.getElementById('resetPw2').value = '';
+  document.getElementById('resetError').textContent = '';
+  document.getElementById('resetPasswordOverlay').classList.add('open');
+  document.getElementById('resetPw').focus();
+};
+
+window.zzSubmitResetPassword = async () => {
+  const errEl = document.getElementById('resetError');
+  errEl.textContent = '';
+  const pw  = document.getElementById('resetPw').value;
+  const pw2 = document.getElementById('resetPw2').value;
+  if(!pw)           { errEl.textContent = t('err.fill.pw'); return; }
+  if(pw.length < 6) { errEl.textContent = t('err.pw.short'); return; }
+  if(pw !== pw2)    { errEl.textContent = t('err.pw.mismatch'); return; }
+  try{
+    const { error } = await supabase.auth.updateUser({ password: pw });
+    if(error) throw error;
+    document.getElementById('resetPasswordOverlay').classList.remove('open');
+    const msg = getLang() === 'en'
+      ? '✅ Password updated! You are now logged in.'
+      : '✅ Passwort gespeichert! Du bist jetzt eingeloggt.';
+    showToast(msg, 6000);
+  } catch(e){
+    errEl.textContent = t('err.prefix') + e.message;
+  }
 };
 window.zzSwitchTab = (mode) => {
   authMode = mode;
@@ -219,6 +286,8 @@ window.zzSwitchTab = (mode) => {
   document.getElementById('authSubmitBtn').textContent = isSignup ? t('auth.btn.next') : t('auth.btn.login');
   document.getElementById('authStep1').style.display = '';
   document.getElementById('authStep2').style.display = 'none';
+  document.getElementById('authStepForgot').style.display = 'none';
+  document.getElementById('forgotLink').style.display = isSignup ? 'none' : '';
   captchaToken = null;
   if(!isSignup && typeof turnstile !== 'undefined') turnstile.reset('#turnstileWidget');
 };
@@ -437,6 +506,10 @@ supabase.auth.onAuthStateChange((event, session) => {
   const user = session?.user || null;
   if(!user) cachedProfileAvatar = null;
   updateAccountUI(user);
+  if(event === 'PASSWORD_RECOVERY'){
+    window.zzOpenResetPassword();
+    return;
+  }
   if(event === 'SIGNED_IN' && user){
     ensureProfile(user);
     if(!user.user_metadata?.avatar) fetchAndCacheProfileAvatar(user);
