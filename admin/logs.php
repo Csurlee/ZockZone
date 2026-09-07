@@ -81,7 +81,7 @@ require __DIR__ . '/includes/layout_top.php';
   border-radius: 10px; padding: 16px 18px;
   font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.45;
   max-height: 72vh; overflow-y: auto; white-space: pre-wrap; word-break: break-word;
-  color: #c8c8d8;
+  color: #c8c8d8; display: flex; flex-direction: column; gap: 0;
 }
 .log-empty { color: var(--text-dim); font-style: italic; }
 .line-mod   { color: #f97316; font-weight: 600; }
@@ -89,6 +89,7 @@ require __DIR__ . '/includes/layout_top.php';
 .line-lobby { color: #a78bfa; }
 .line-raum  { color: #60a5fa; }
 .line-hi    { background: rgba(250,204,21,0.2); border-radius: 3px; }
+.log-line   { margin: 0; padding: 0; line-height: 1.45; }
 .log-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11.5px; margin-bottom: 10px; }
 .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
 </style>
