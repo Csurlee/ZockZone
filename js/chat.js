@@ -20,6 +20,7 @@ let staffMap      = new Map(); // userId → role  ('moderator' | 'admin')
 let privacySet    = new Set(); // userIds die hide_from_ranking=true haben
 let friendSet     = new Set(); // userId von akzeptierten Freunden
 let sentSet       = new Set(); // userId zu denen Anfrage gesendet wurde
+let mySentIds     = new Set(); // IDs eigener gesendeter Nachrichten (für Moderations-Erkennung)
 let realtimeChannel = null;
 let isOpen        = false;
 let unread        = 0;
@@ -240,7 +241,13 @@ function subscribeRealtime(){
         if(!isOpen){ unread++; updateBadge(); }
       })
     .on('postgres_changes',{event:'DELETE',schema:'public',table:'chat_messages'},
-      ({old}) => removeMsg(old.id))
+      ({old}) => {
+        removeMsg(old.id);
+        if(mySentIds.has(old.id)) {
+          mySentIds.delete(old.id);
+          showChatNotice(t('chat.notice.moderated'), true);
+        }
+      })
     .subscribe();
 }
 
@@ -357,13 +364,14 @@ window.zzSendChat = async () => {
   msgTimestamps.push(Date.now());
 
   const meta = currentUser.user_metadata || {};
-  const { error } = await sb.from('chat_messages').insert({
+  const { data: inserted, error } = await sb.from('chat_messages').insert({
     user_id: currentUser.id,
     username: meta.display_name || currentUser.email?.split('@')[0] || 'Spieler',
     avatar: meta.avatar || '',
     message: msg
-  });
+  }).select('id').single();
   if(error) showChatNotice(t('chat.notice.send.error'), true);
+  else if(inserted?.id) mySentIds.add(inserted.id);
 };
 
 $('chatInput')?.addEventListener('keydown', e => {

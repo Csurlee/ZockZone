@@ -211,6 +211,7 @@ const TRANSLATIONS = {
     'chat.notice.ratelimit': '⏳ Zu viele Nachrichten — bitte kurz warten.',
     'chat.notice.muted': '🔇 Du bist stummgeschaltet.',
     'chat.notice.send.error': '🔇 Nachricht konnte nicht gesendet werden.',
+    'chat.notice.moderated': '🤖 Deine Nachricht wurde von unserem Moderations-Bot entfernt. Bitte achte auf einen respektvollen Umgangston — dieser Chat wird moderiert.',
   },
   en: {
     'header.login': '👤 Login',
@@ -424,6 +425,7 @@ const TRANSLATIONS = {
     'chat.notice.ratelimit': '⏳ Too many messages — please wait a moment.',
     'chat.notice.muted': '🔇 You are muted.',
     'chat.notice.send.error': '🔇 Message could not be sent.',
+    'chat.notice.moderated': '🤖 Your message was removed by our moderation bot. Please keep a respectful tone — this chat is moderated.',
   }
 };
 
