@@ -35,6 +35,17 @@ require __DIR__ . '/includes/layout_top.php';
   background: var(--bg-alt); color: var(--text); border: 1px solid rgba(255,255,255,0.12);
   border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif;
 }
+.user-search {
+  padding: 8px 14px; border-radius: 8px; font-size: 13.5px;
+  border: 1px solid rgba(255,255,255,0.12); background: var(--bg-alt);
+  color: var(--text); font-family: 'Inter', sans-serif; width: 280px;
+}
+.user-search:focus { outline: none; border-color: var(--violet-light); }
+.uid-cell {
+  font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;
+  cursor: pointer; user-select: all; white-space: nowrap;
+}
+.uid-cell:hover { color: var(--violet-light); }
 .pw-modal-overlay {
   display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
   z-index: 9999; align-items: center; justify-content: center;
@@ -51,6 +62,7 @@ require __DIR__ . '/includes/layout_top.php';
 
 <div class="toolbar">
   <button class="btn btn-primary" onclick="document.getElementById('createPanel').classList.toggle('open')">+ Nutzer anlegen</button>
+  <input class="user-search" id="userSearch" type="search" placeholder="🔍 Name, E-Mail oder User-ID suchen…" oninput="filterUsers()">
 </div>
 
 <div class="create-panel" id="createPanel">
@@ -85,9 +97,9 @@ require __DIR__ . '/includes/layout_top.php';
 
 <table class="data-table" id="usersTable">
   <thead>
-    <tr><th>Avatar</th><th>E-Mail</th><th>Anzeigename</th><th>Rolle</th><th>Registriert</th><th>Highscores</th><th>Status</th><th>Aktionen</th></tr>
+    <tr><th>Avatar</th><th>E-Mail</th><th>Anzeigename</th><th>User ID</th><th>Rolle</th><th>Registriert</th><th>Highscores</th><th>Status</th><th>Aktionen</th></tr>
   </thead>
-  <tbody><tr><td colspan="8">Lade…</td></tr></tbody>
+  <tbody><tr><td colspan="9">Lade…</td></tr></tbody>
 </table>
 
 <script>
@@ -105,9 +117,22 @@ const AVATARS = [
 ];
 
 let selectedAvatar = '';
+let allUsers = [];
 
 function avatarEmoji(id) {
   return AVATARS.find(a => a.id === id)?.emoji ?? '👤';
+}
+
+function filterUsers() {
+  const q = document.getElementById('userSearch').value.trim().toLowerCase();
+  const filtered = q
+    ? allUsers.filter(u =>
+        (u.display_name || '').toLowerCase().includes(q) ||
+        (u.email || '').toLowerCase().includes(q) ||
+        (u.id || '').toLowerCase().includes(q)
+      )
+    : allUsers;
+  renderUsers(filtered);
 }
 
 function buildAvatarPicker() {
@@ -129,13 +154,17 @@ function buildAvatarPicker() {
 }
 
 async function loadUsers() {
-  const users = await apiCall('GET', 'api/users.php');
+  allUsers = await apiCall('GET', 'api/users.php') || [];
+  filterUsers();
+}
+
+function renderUsers(users) {
   const tbody = document.querySelector('#usersTable tbody');
   tbody.innerHTML = '';
   if (!Array.isArray(users) || users.length === 0) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 7;
+    td.colSpan = 9;
     td.textContent = 'Keine Nutzer.';
     tr.appendChild(td);
     tbody.appendChild(tr);
@@ -156,6 +185,13 @@ async function loadUsers() {
     const tdName = document.createElement('td');
     tdName.textContent = u.display_name || '—';
     tr.appendChild(tdName);
+
+    const tdUid = document.createElement('td');
+    tdUid.className = 'uid-cell';
+    tdUid.title = u.id;
+    tdUid.textContent = u.id ? u.id.slice(0, 8) + '…' : '—';
+    tdUid.onclick = () => { navigator.clipboard.writeText(u.id); tdUid.textContent = '✓ kopiert'; setTimeout(() => { tdUid.textContent = u.id.slice(0, 8) + '…'; }, 1500); };
+    tr.appendChild(tdUid);
 
     const tdRole = document.createElement('td');
     const roleSelect = document.createElement('select');
