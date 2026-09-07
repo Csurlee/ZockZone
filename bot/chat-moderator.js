@@ -178,6 +178,7 @@ async function muteUser(userId, username, minutes, reason) {
 
 // ===== NACHRICHT PRÜFEN =====
 async function handleMessage(msg, table = 'chat_messages') {
+  if(BOT_USER_ID && msg.user_id === BOT_USER_ID) return;
   const text = msg.message?.trim();
   if(!text) return;
 
