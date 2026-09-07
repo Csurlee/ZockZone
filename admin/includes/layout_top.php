@@ -7,7 +7,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZockZone Admin — <?= htmlspecialchars($pageTitle) ?></title>
-<link rel="stylesheet" href="assets/admin.css">
+<link rel="stylesheet" href="assets/admin.css?v=20260907a">
 <script src="assets/admin.js"></script>
 </head>
 <body>
