@@ -316,7 +316,10 @@ window.zzConfirmSignup = async () => {
     if(data.user) await ensureProfile(data.user);
     window.zzCloseAuth();
     if(data.user && !data.session){
-      showToast(t('toast.signup.confirm'), 10000);
+      const msg = getLang() === 'en'
+        ? '📧 Almost there! We sent you a confirmation email. Please click the link to activate your account.'
+        : '📧 Fast geschafft! Bestätigungs-E-Mail gesendet. Bitte klicke auf den Link darin, um dein Konto zu aktivieren.';
+      showToast(msg, 10000);
     }
   } catch(e){
     errEl.textContent = translateAuthError(e.message);
@@ -437,7 +440,10 @@ supabase.auth.onAuthStateChange((event, session) => {
     const hash = window.location.hash;
     if(hash.includes('type=signup') || hash.includes('type=email_change')){
       history.replaceState(null, '', window.location.pathname + window.location.search);
-      showToast(t('toast.email.confirmed'), 6000);
+      const msg = getLang() === 'en'
+        ? '✅ Email confirmed! You are now logged in.'
+        : '✅ E-Mail bestätigt! Du bist jetzt eingeloggt.';
+      showToast(msg, 6000);
     }
     if(!isReauthForDeletion){
       supabase.from('profiles')
