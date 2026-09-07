@@ -96,6 +96,27 @@ async function checkModeration(text) {
   }
 }
 
+// ===== LOKALER WORT-FILTER (Fallback wenn OpenAI nicht verfügbar) =====
+let bannedWords = [];
+let bannedWordsLoaded = 0;
+
+async function loadBannedWords() {
+  const { data, error } = await sbAdmin.from('chat_banned_words').select('word');
+  if(error) { console.warn('⚠  Verbotene Wörter konnten nicht geladen werden:', error.message); return; }
+  bannedWords = (data || []).map(r => r.word.toLowerCase());
+  bannedWordsLoaded = Date.now();
+  if(bannedWords.length) console.log(`📋 ${bannedWords.length} verbotene Wörter geladen`);
+}
+
+function checkBannedWords(text) {
+  if(!bannedWords.length) return null;
+  const lower = text.toLowerCase();
+  for(const word of bannedWords) {
+    if(lower.includes(word)) return word;
+  }
+  return null;
+}
+
 // ===== AKTIONEN =====
 async function deleteMessage(msgId, reason) {
   const { error } = await sbAdmin.from('chat_messages').delete().eq('id', msgId);
@@ -118,31 +139,35 @@ async function handleMessage(msg) {
   const text = msg.message?.trim();
   if(!text) return;
 
+  // Verbotene Wörter alle 5 Min. neu laden
+  if(Date.now() - bannedWordsLoaded > 5 * 60_000) await loadBannedWords();
+
   console.log(`📨 [${msg.username}]: ${text.slice(0, 80)}${text.length > 80 ? '…' : ''}`);
 
   const result = await checkModeration(text);
-  if(!result) return;
 
-  if(!result.flagged) {
-    console.log(`   ✅ OK`);
-    return;
-  }
+  if(result) {
+    // ---- OpenAI-Ergebnis verfügbar ----
+    if(!result.flagged) { console.log(`   ✅ OK`); return; }
 
-  const cats   = result.flaggedCats.join(', ');
-  const score  = result.topScore ? ` (${(result.topScore * 100).toFixed(0)}%)` : '';
-  const reason = `${result.topCategory}${score}`;
+    const cats   = result.flaggedCats.join(', ');
+    const score  = result.topScore ? ` (${(result.topScore * 100).toFixed(0)}%)` : '';
+    const reason = `${result.topCategory}${score}`;
+    console.log(`   🚨 Flagged: ${cats}`);
 
-  console.log(`   🚨 Flagged: ${cats}`);
-
-  // Sollte gemutet werden? (schwerer Verstoß)
-  const shouldMute = result.flaggedCats.some(c => MUTE_CATEGORIES.has(c));
-
-  // Nachricht löschen
-  await deleteMessage(msg.id, reason);
-
-  // User muten
-  if(shouldMute) {
-    await muteUser(msg.user_id, msg.username, MUTE_MINUTES, `Auto-Mute: ${reason}`);
+    await deleteMessage(msg.id, reason);
+    if(result.flaggedCats.some(c => MUTE_CATEGORIES.has(c))) {
+      await muteUser(msg.user_id, msg.username, MUTE_MINUTES, `Auto-Mute: ${reason}`);
+    }
+  } else {
+    // ---- OpenAI nicht verfügbar → lokaler Wort-Filter ----
+    const found = checkBannedWords(text);
+    if(found) {
+      console.log(`   🚨 Verbotenes Wort gefunden: "${found}" (lokaler Filter)`);
+      await deleteMessage(msg.id, `verbotenes Wort: ${found}`);
+    } else {
+      console.log(`   ⚠  OpenAI nicht verfügbar, lokaler Filter: OK`);
+    }
   }
 }
 
@@ -182,6 +207,7 @@ function connect() {
         console.log('✅ Verbunden — überwache Chat in Echtzeit…\n');
         await setOnline(true);
         startHeartbeat();
+        await loadBannedWords();
       }
       if(status === 'CLOSED') {
         clearInterval(heartbeatTimer);
