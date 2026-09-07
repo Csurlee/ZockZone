@@ -24,8 +24,22 @@ $selected   = preg_replace('/[^0-9\-]/', '', $selected); // sanitize
 $logPath    = $LOG_DIR . '/' . $selected . '.log';
 $logContent = is_file($logPath) ? file_get_contents($logPath) : null;
 
-// Suchterm
+// Suchterm (innerhalb des Tages)
 $search = trim($_GET['q'] ?? '');
+
+// User-Suche über alle Logs
+$userSearch   = trim($_GET['user'] ?? '');
+$userResults  = [];
+if($userSearch !== '' && is_dir($LOG_DIR)) {
+  foreach(scandir($LOG_DIR) as $f) {
+    if(!preg_match('/^\d{4}-\d{2}-\d{2}\.log$/', $f)) continue;
+    $date    = substr($f, 0, 10);
+    $lines   = file($LOG_DIR . '/' . $f, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $matches = array_filter($lines, fn($l) => stripos($l, $userSearch) !== false);
+    if($matches) $userResults[$date] = array_values($matches);
+  }
+  krsort($userResults); // neueste zuerst
+}
 
 require __DIR__ . '/includes/layout_top.php';
 ?>
@@ -78,6 +92,57 @@ require __DIR__ . '/includes/layout_top.php';
 .log-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11.5px; margin-bottom: 10px; }
 .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
 </style>
+
+<!-- User-Suche über alle Logs -->
+<div style="margin-bottom:20px;">
+  <form method="get" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <input type="hidden" name="date" value="<?= htmlspecialchars($selected) ?>">
+    <input name="user" type="search" class="log-search" style="max-width:320px;"
+      placeholder="👤 User über alle Logs suchen (Name oder UUID)…"
+      value="<?= htmlspecialchars($userSearch) ?>">
+    <button type="submit" class="btn btn-primary">Suchen</button>
+    <?php if($userSearch !== ''): ?>
+      <a href="?date=<?= urlencode($selected) ?>" class="btn">✕ Zurücksetzen</a>
+    <?php endif; ?>
+  </form>
+
+  <?php if($userSearch !== ''): ?>
+    <div style="margin-top:14px;">
+      <div style="font-size:13px; color:var(--text-dim); margin-bottom:10px;">
+        Ergebnisse für <strong style="color:var(--violet-light)"><?= htmlspecialchars($userSearch) ?></strong>
+        — <?= array_sum(array_map('count', $userResults)) ?> Treffer in <?= count($userResults) ?> Tag(en)
+      </div>
+      <?php if(empty($userResults)): ?>
+        <div style="font-size:13px; color:var(--text-dim);">Keine Einträge gefunden.</div>
+      <?php else: ?>
+        <?php foreach($userResults as $date => $lines): ?>
+          <div style="margin-bottom:14px;">
+            <div style="font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:4px;">
+              📅 <?= htmlspecialchars($date) ?> — <?= count($lines) ?> Einträge
+              <a href="?date=<?= urlencode($date) ?>" style="margin-left:8px; font-size:11px; color:var(--violet-light);">→ Ganzes Log</a>
+            </div>
+            <div class="log-box" style="max-height:200px;">
+              <?php foreach($lines as $line):
+                $cls = 'line-lobby';
+                if(str_contains($line, '[RAUM'))     $cls = 'line-raum';
+                if(str_contains($line, 'MODERIERT')) $cls = 'line-mod';
+                if(str_contains($line, 'BAN') || str_contains($line, 'GEBANNT')) $cls = 'line-ban';
+                $escaped = htmlspecialchars($line);
+                $escaped = str_ireplace(
+                  htmlspecialchars($userSearch),
+                  '<mark class="line-hi">' . htmlspecialchars($userSearch) . '</mark>',
+                  $escaped
+                );
+              ?>
+              <div class="log-line <?= $cls ?>"><?= $escaped ?></div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
+</div>
 
 <div class="log-layout">
 
