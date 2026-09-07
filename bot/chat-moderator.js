@@ -199,7 +199,6 @@ async function handleMessage(msg, table = 'chat_messages') {
     console.log(`   🚨 Flagged: ${cats}`);
 
     await deleteMessage(msg.id, reason, table);
-    await sendBotWarning(msg.user_id, msg.username, table);
     if(result.flaggedCats.some(c => MUTE_CATEGORIES.has(c))) {
       await muteUser(msg.user_id, msg.username, MUTE_MINUTES, `Auto-Mute: ${reason}`);
     }
@@ -209,7 +208,6 @@ async function handleMessage(msg, table = 'chat_messages') {
     if(found) {
       console.log(`   🚨 Verbotenes Wort gefunden: "${found}" (lokaler Filter)`);
       await deleteMessage(msg.id, `verbotenes Wort: ${found}`, table);
-      await sendBotWarning(msg.user_id, msg.username, table);
     } else {
       console.log(`   ⚠  OpenAI nicht verfügbar, lokaler Filter: OK`);
     }
