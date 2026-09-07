@@ -16,9 +16,34 @@ const ROLE_LABEL = { moderator:'MOD', admin:'ADMIN' };
 let currentUser   = null;
 let currentRole   = 'user';
 let staffMap      = new Map(); // userId → role  ('moderator' | 'admin')
+let privacySet    = new Set(); // userIds die hide_from_ranking=true haben
 let realtimeChannel = null;
 let isOpen        = false;
 let unread        = 0;
+
+// ===== SOUND =====
+let soundEnabled = localStorage.getItem('zzChatSound') !== 'off';
+
+function playDing() {
+  if(!soundEnabled) return;
+  try {
+    const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.6);
+  } catch(e) {}
+}
+
+window.toggleChatSound = function() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('zzChatSound', soundEnabled ? 'on' : 'off');
+  const btn = document.getElementById('chatSoundBtn');
+  if(btn) btn.textContent = soundEnabled ? '🔔' : '🔕';
+};
 
 // ===== MODERATION =====
 let bannedWords   = [];
@@ -37,6 +62,17 @@ async function loadStaffMap() {
   const { data } = await sb.from('profiles')
     .select('id,role').in('role',['moderator','admin']);
   staffMap = new Map((data||[]).map(p=>[p.id, p.role]));
+}
+
+async function loadPrivacySet() {
+  const { data } = await sb.from('profiles')
+    .select('id').eq('hide_from_ranking', true);
+  privacySet = new Set((data||[]).map(p => p.id));
+}
+
+function maskName(name) {
+  if(!name) return '???';
+  return name.slice(0, 3) + '****';
 }
 
 async function loadBannedWords() {
@@ -89,11 +125,14 @@ function appendMsg(msg){
 
   const role    = staffMap.get(msg.user_id) || null;
   const isOwn   = msg.user_id === currentUser?.id;
-  const isOwner = isOwn && currentRole !== 'user';
-  // Use own live role for own messages (in case map not loaded yet)
   const effectiveRole = isOwn && currentRole !== 'user' ? currentRole : role;
 
-  // Avatar with role-badge overlay (visible to everyone)
+  // Name: maskieren wenn hide_from_ranking && kein Mod/Admin && nicht eigene Nachricht
+  const isPrivate    = privacySet.has(msg.user_id);
+  const canSeeFull   = isMod() || isOwn;
+  const displayName  = (isPrivate && !canSeeFull) ? maskName(msg.username) : msg.username;
+
+  // Avatar with role-badge overlay
   const avBadge = effectiveRole
     ? `<span class="chat-av-badge chat-av-badge--${effectiveRole}" title="${ROLE_LABEL[effectiveRole]}">${ROLE_ICON[effectiveRole]}</span>`
     : '';
@@ -119,7 +158,7 @@ function appendMsg(msg){
   el.innerHTML =
     avWrap +
     `<div class="chat-body">` +
-      `<span class="chat-name">${esc(msg.username)}</span>` +
+      `<span class="chat-name">${esc(displayName)}</span>` +
       `<span class="chat-time">${timeAgo(msg.created_at)}</span>` +
       `<p class="chat-text">${esc(msg.message)}</p>` +
     `</div>` +
@@ -127,6 +166,9 @@ function appendMsg(msg){
   const list = $('chatMessages');
   list.appendChild(el);
   list.scrollTop = list.scrollHeight;
+
+  // Sound für neue Nachrichten von anderen
+  if(!isOwn) playDing();
 }
 
 function removeMsg(id){
@@ -301,11 +343,14 @@ async function onAuthChanged(){
   if(!btn) return;
   if(currentUser){
     btn.hidden = false;
-    await Promise.all([loadProfile(), loadBannedWords(), loadStaffMap()]);
+    await Promise.all([loadProfile(), loadBannedWords(), loadStaffMap(), loadPrivacySet()]);
     subscribeRealtime();
     loadMessages();
     loadBotStatus();
     setInterval(loadBotStatus, 30_000);
+    // Sound-Button initial setzen
+    const sb2 = document.getElementById('chatSoundBtn');
+    if(sb2) sb2.textContent = soundEnabled ? '🔔' : '🔕';
     // Show own role badge in FAB
     if(isMod()) btn.title = ROLE_BADGE[currentRole] || '';
   } else {
