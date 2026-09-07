@@ -350,7 +350,7 @@
     position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
     background:#14532d; color:#bbf7d0; border:1px solid #4ade80;
     padding:12px 20px; border-radius:14px; font-size:14px; font-weight:600;
-    z-index:999; white-space:nowrap; opacity:0;
+    z-index:999; max-width:min(420px,90vw); text-align:center; opacity:0;
     transition: transform 0.3s ease, opacity 0.3s ease;
     pointer-events:none;
   }

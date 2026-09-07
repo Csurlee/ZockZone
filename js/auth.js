@@ -315,6 +315,9 @@ window.zzConfirmSignup = async () => {
     if(error) throw error;
     if(data.user) await ensureProfile(data.user);
     window.zzCloseAuth();
+    if(data.user && !data.session){
+      showToast(t('toast.signup.confirm'), 10000);
+    }
   } catch(e){
     errEl.textContent = translateAuthError(e.message);
     window.zzBackToStep1();
@@ -367,17 +370,21 @@ window.zzRequestDeletion = async () => {
   }
 };
 
-function showDeletionCancelledNotice(){
+function showToast(msg, duration = 4000){
   let toast = document.getElementById('zzToast');
   if(!toast){
     toast = document.createElement('div');
     toast.id = 'zzToast';
     document.body.appendChild(toast);
   }
-  toast.textContent = t('toast.deletion.cancelled');
+  toast.textContent = msg;
   toast.className = 'zz-toast zz-toast-show';
   clearTimeout(toast._hideTimer);
-  toast._hideTimer = setTimeout(() => { toast.className = 'zz-toast'; }, 4000);
+  toast._hideTimer = setTimeout(() => { toast.className = 'zz-toast'; }, duration);
+}
+
+function showDeletionCancelledNotice(){
+  showToast(t('toast.deletion.cancelled'), 4000);
 }
 
 window.zzCancelDeletion = async () => {
@@ -427,6 +434,11 @@ supabase.auth.onAuthStateChange((event, session) => {
   if(event === 'SIGNED_IN' && user){
     ensureProfile(user);
     if(!user.user_metadata?.avatar) fetchAndCacheProfileAvatar(user);
+    const hash = window.location.hash;
+    if(hash.includes('type=signup') || hash.includes('type=email_change')){
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      showToast(t('toast.email.confirmed'), 6000);
+    }
     if(!isReauthForDeletion){
       supabase.from('profiles')
         .select('deletion_requested_at')

@@ -82,6 +82,8 @@ const TRANSLATIONS = {
     'profile.delete.confirm': 'Konto löschen',
     'profile.delete.warning': (date) => `⚠️ Dein Konto wird am <strong>${date}</strong> endgültig gelöscht, sofern du dich nicht vorher einloggst.<br><button class="profile-cancel-delete-btn" onclick="zzCancelDeletion()">Löschung abbrechen</button>`,
     'toast.deletion.cancelled': '✅ Löschung abgebrochen — dein Konto ist wieder aktiv!',
+    'toast.signup.confirm': '📧 Fast geschafft! Wir haben dir eine Bestätigungs-E-Mail geschickt. Bitte klicke auf den Link darin, um dein Konto zu aktivieren.',
+    'toast.email.confirmed': '✅ E-Mail bestätigt! Du bist jetzt eingeloggt.',
 
     'ranking.title': '🏆 Rangliste',
     'ranking.loading': 'Lade…',
@@ -208,6 +210,8 @@ const TRANSLATIONS = {
     'profile.delete.confirm': 'Delete account',
     'profile.delete.warning': (date) => `⚠️ Your account will be permanently deleted on <strong>${date}</strong> unless you log in before then.<br><button class="profile-cancel-delete-btn" onclick="zzCancelDeletion()">Cancel deletion</button>`,
     'toast.deletion.cancelled': '✅ Deletion cancelled — your account is active again!',
+    'toast.signup.confirm': '📧 Almost there! We sent you a confirmation email. Please click the link in it to activate your account.',
+    'toast.email.confirmed': '✅ Email confirmed! You are now logged in.',
 
     'ranking.title': '🏆 Ranking',
     'ranking.loading': 'Loading…',
