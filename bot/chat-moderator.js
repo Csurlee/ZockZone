@@ -16,15 +16,13 @@ function loadEnv() {
 }
 loadEnv();
 
-const SUPABASE_URL       = process.env.SUPABASE_URL       || '';
+const SUPABASE_URL        = process.env.SUPABASE_URL        || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
-const PERSPECTIVE_KEY    = process.env.PERSPECTIVE_API_KEY || '';
-const TOXICITY_DELETE    = parseFloat(process.env.TOXICITY_DELETE || '0.85');
-const TOXICITY_MUTE      = parseFloat(process.env.TOXICITY_MUTE   || '0.95');
-const MUTE_MINUTES       = parseInt(process.env.MUTE_MINUTES      || '60');
+const OPENAI_API_KEY      = process.env.OPENAI_API_KEY      || '';
+const MUTE_MINUTES        = parseInt(process.env.MUTE_MINUTES || '60');
 
-if(!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !PERSPECTIVE_KEY) {
-  console.error('❌  .env fehlt oder unvollständig. Bitte .env.example kopieren und ausfüllen.');
+if(!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !OPENAI_API_KEY) {
+  console.error('❌  .env fehlt oder unvollständig — bitte .env.example kopieren und ausfüllen.');
   process.exit(1);
 }
 
@@ -32,54 +30,73 @@ const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false }
 });
 
-// ===== PERSPECTIVE API =====
-// Rate-limit: max 1 Request/Sekunde (Free Tier)
-let lastCall = 0;
-async function analyzeToxicity(text) {
-  const wait = Math.max(0, 1050 - (Date.now() - lastCall));
-  if(wait > 0) await new Promise(r => setTimeout(r, wait));
-  lastCall = Date.now();
+// ===== OPENAI MODERATION =====
+// Kategorien die zum Löschen führen
+const DELETE_CATEGORIES = new Set([
+  'hate', 'hate/threatening',
+  'harassment', 'harassment/threatening',
+  'sexual', 'sexual/minors',
+  'violence', 'violence/graphic',
+  'self-harm', 'self-harm/intent', 'self-harm/instructions',
+]);
 
-  const url = `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_KEY}`;
-  const body = {
-    comment:         { text },
-    languages:       ['de', 'en'],
-    requestedAttributes: {
-      TOXICITY:           {},
-      INSULT:             {},
-      THREAT:             {},
-      SEXUALLY_EXPLICIT:  {},
-    }
-  };
+// Kategorien die zusätzlich zum Muten führen (schwere Verstöße)
+const MUTE_CATEGORIES = new Set([
+  'hate/threatening',
+  'harassment/threatening',
+  'sexual/minors',
+  'violence/graphic',
+  'self-harm/intent',
+]);
 
+async function checkModeration(text) {
   try {
-    const res  = await fetch(url, {
+    const res = await fetch('https://api.openai.com/v1/moderations', {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(body),
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify({ input: text }),
     });
+
     if(!res.ok) {
       const err = await res.json().catch(() => ({}));
-      console.warn('⚠  Perspective API Fehler:', err?.error?.message || res.status);
+      console.warn('⚠  OpenAI API Fehler:', err?.error?.message || res.status);
       return null;
     }
-    const data = await res.json();
-    const scores = {};
-    for(const [attr, val] of Object.entries(data.attributeScores || {})) {
-      scores[attr] = val.summaryScore.value;
-    }
-    return scores;
+
+    const data   = await res.json();
+    const result = data.results?.[0];
+    if(!result) return null;
+
+    // Welche Kategorien sind geflaggt?
+    const flaggedCats = Object.entries(result.categories)
+      .filter(([, flagged]) => flagged)
+      .map(([cat]) => cat);
+
+    // Höchster Score
+    const topEntry = Object.entries(result.category_scores)
+      .sort((a, b) => b[1] - a[1])[0];
+
+    return {
+      flagged:     result.flagged,
+      flaggedCats,
+      topCategory: topEntry?.[0],
+      topScore:    topEntry?.[1],
+      scores:      result.category_scores,
+    };
   } catch(e) {
-    console.warn('⚠  Perspective API nicht erreichbar:', e.message);
+    console.warn('⚠  OpenAI nicht erreichbar:', e.message);
     return null;
   }
 }
 
-// ===== ACTIONS =====
+// ===== AKTIONEN =====
 async function deleteMessage(msgId, reason) {
   const { error } = await sb.from('chat_messages').delete().eq('id', msgId);
   if(error) console.error('  ✗ Löschen fehlgeschlagen:', error.message);
-  else      console.log(`  ✓ Nachricht gelöscht [${reason}]`);
+  else      console.log (`  🗑  Nachricht gelöscht [${reason}]`);
 }
 
 async function muteUser(userId, username, minutes, reason) {
@@ -89,41 +106,45 @@ async function muteUser(userId, username, minutes, reason) {
     { onConflict: 'user_id' }
   );
   if(error) console.error('  ✗ Muten fehlgeschlagen:', error.message);
-  else      console.log(`  ✓ ${username} für ${minutes} Min. stummgeschaltet [${reason}]`);
+  else      console.log (`  🔇 ${username} für ${minutes} Min. gemutet [${reason}]`);
 }
 
-// ===== MESSAGE HANDLER =====
+// ===== NACHRICHT PRÜFEN =====
 async function handleMessage(msg) {
   const text = msg.message?.trim();
   if(!text) return;
 
   console.log(`📨 [${msg.username}]: ${text.slice(0, 80)}${text.length > 80 ? '…' : ''}`);
 
-  const scores = await analyzeToxicity(text);
-  if(!scores) return; // API nicht verfügbar, überspringen
+  const result = await checkModeration(text);
+  if(!result) return;
 
-  const maxScore    = Math.max(...Object.values(scores));
-  const topAttr     = Object.entries(scores).sort((a,b) => b[1]-a[1])[0];
-  const scoreStr    = Object.entries(scores)
-    .map(([k,v]) => `${k.toLowerCase()}=${(v*100).toFixed(0)}%`)
-    .join(' | ');
+  if(!result.flagged) {
+    console.log(`   ✅ OK`);
+    return;
+  }
 
-  console.log(`   ${scoreStr}`);
+  const cats   = result.flaggedCats.join(', ');
+  const score  = result.topScore ? ` (${(result.topScore * 100).toFixed(0)}%)` : '';
+  const reason = `${result.topCategory}${score}`;
 
-  if(maxScore >= TOXICITY_DELETE) {
-    const reason = `${topAttr[0]} ${(topAttr[1]*100).toFixed(0)}%`;
-    await deleteMessage(msg.id, reason);
+  console.log(`   🚨 Flagged: ${cats}`);
 
-    if(maxScore >= TOXICITY_MUTE) {
-      await muteUser(msg.user_id, msg.username, MUTE_MINUTES, `Auto-Mute: ${reason}`);
-    }
+  // Sollte gemutet werden? (schwerer Verstoß)
+  const shouldMute = result.flaggedCats.some(c => MUTE_CATEGORIES.has(c));
+
+  // Nachricht löschen
+  await deleteMessage(msg.id, reason);
+
+  // User muten
+  if(shouldMute) {
+    await muteUser(msg.user_id, msg.username, MUTE_MINUTES, `Auto-Mute: ${reason}`);
   }
 }
 
 // ===== REALTIME =====
 function connect() {
-  console.log('🤖 ZockZone Chat-Moderator gestartet');
-  console.log(`   Löschen ab ${(TOXICITY_DELETE*100).toFixed(0)}% | Muten ab ${(TOXICITY_MUTE*100).toFixed(0)}%`);
+  console.log('🤖 ZockZone Chat-Moderator gestartet (OpenAI Moderation API)');
   console.log(`   Supabase: ${SUPABASE_URL}`);
   console.log('');
 
@@ -134,12 +155,11 @@ function connect() {
       handleMessage(msg).catch(e => console.error('Fehler:', e));
     })
     .subscribe(status => {
-      if(status === 'SUBSCRIBED') console.log('✅ Verbunden — überwache Chat…');
-      if(status === 'CLOSED')     { console.log('🔌 Verbindung getrennt, reconnect in 5s…'); setTimeout(connect, 5000); }
+      if(status === 'SUBSCRIBED')   console.log('✅ Verbunden — überwache Chat in Echtzeit…\n');
+      if(status === 'CLOSED')       { console.log('🔌 Verbindung getrennt, reconnect in 5s…'); setTimeout(connect, 5000); }
       if(status === 'CHANNEL_ERROR') console.error('❌ Channel-Fehler');
     });
 
-  // Graceful shutdown
   process.on('SIGINT',  () => { channel.unsubscribe(); process.exit(0); });
   process.on('SIGTERM', () => { channel.unsubscribe(); process.exit(0); });
 }
