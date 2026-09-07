@@ -397,6 +397,12 @@ loadMessages();
 loadWords();
 loadMutes();
 loadModerators();
+
+setInterval(() => {
+  loadMessages();
+  loadMutes();
+  loadModerators();
+}, 5000);
 </script>
 
 <?php require __DIR__ . '/includes/layout_bottom.php'; ?>
