@@ -598,11 +598,8 @@
 .chat-av-badge--admin    { filter:drop-shadow(0 0 4px rgba(198,255,61,.9)); }
 .chat-mod-btns{
   display:flex; gap:4px; align-items:flex-start;
-  margin-left:auto; flex-shrink:0; opacity:0.35;
-  transition:opacity .15s;
+  margin-left:auto; flex-shrink:0;
 }
-.chat-msg:hover .chat-mod-btns{ opacity:1; }
-@media (hover:none){ .chat-mod-btns{ opacity:1; } }
 .chat-msg{ position:relative; }
 .chat-mod-btn{
   background:transparent; border:1px solid rgba(255,255,255,.1);
