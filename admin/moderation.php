@@ -193,7 +193,7 @@ require __DIR__ . '/includes/layout_top.php';
 
 <script>
 const AVATARS = {snake:'🐍',alien:'👾',rocket:'🚀',bomb:'💣',dice:'🎲',joker:'🃏',puzzle:'🧩',lightning:'⚡',ghost:'👻',trophy:'🏆'};
-const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
 const av  = a => AVATARS[a] || '👤';
 
 function fmtDate(iso){ return new Date(iso).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}); }
