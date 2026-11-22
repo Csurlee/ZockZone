@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { t } from './i18n.js?v=20261122k';
+import { t } from './i18n.js?v=20261122o';
 import { GAMES } from './games-list.js?v=20261122c';
 import { makeHD } from './hd.js?v=20261122m';
 

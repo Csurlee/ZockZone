@@ -103,7 +103,7 @@
 <meta name="twitter:description" content="Über 50 kostenlose Mini-Games direkt im Browser spielen. Kein Download nötig!">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261122m">
+<link rel="stylesheet" href="css/style.css?v=20261122o">
 </head>
 <body>
 
@@ -114,6 +114,7 @@
   </div>
   <button class="account-btn ranking-btn" onclick="zzOpenRanking()" data-i18n="header.ranking">🏆 Rangliste</button>
   <button class="account-btn online-header-btn" onclick="zzOpenOnline()">🎮 Online</button>
+  <button class="account-btn report-header-btn" onclick="zzOpenReport()" data-i18n="report.btn">🐞 Problem melden</button>
   <div class="auth-btn-group">
     <button class="account-btn" id="accountBtn" onclick="zzToggleAccount()">👤 Login</button>
     <button class="account-btn signup-btn" id="signupBtn" onclick="zzOpenSignup()" data-i18n="header.register">Registrieren</button>
@@ -283,7 +284,24 @@
   <div class="grid" id="grid"></div>
 </section>
 
-<footer><span data-i18n="footer.text">ZockZone — gebaut zum Zocken in der Mittagspause. Keine Ads, keine Downloads.</span> · <button class="footer-link" onclick="zzOpenDatenschutz()" data-i18n="footer.privacy">Datenschutz</button></footer>
+<footer><span data-i18n="footer.text">ZockZone — gebaut zum Zocken in der Mittagspause. Keine Ads, keine Downloads.</span> · <button class="footer-link" onclick="zzOpenDatenschutz()" data-i18n="footer.privacy">Datenschutz</button> · <button class="footer-link" onclick="zzOpenReport()" data-i18n="report.btn">🐞 Problem melden</button></footer>
+
+<!-- PROBLEM MELDEN -->
+<div class="auth-overlay report-overlay" id="reportOverlay" role="dialog" aria-modal="true" aria-labelledby="reportHeading">
+  <div class="auth-box" style="position:relative; width:min(460px,100%);">
+    <button class="icon-btn auth-close" onclick="zzCloseReport()" aria-label="Schließen">✕</button>
+    <h2 id="reportHeading" class="report-heading" data-i18n="report.heading">🐞 Problem melden</h2>
+    <p class="auth-step-hint" data-i18n="report.intro">Etwas ist kaputt oder komisch? Schreib uns, was passiert ist.</p>
+    <p class="report-game" id="reportGame" hidden></p>
+    <label class="report-label" for="reportTitle" data-i18n="report.label.title">Titel</label>
+    <input class="auth-field" id="reportTitle" type="text" maxlength="100" data-i18n-placeholder="report.ph.title" placeholder="z. B. 2048 bewegt sich nicht">
+    <label class="report-label" for="reportDesc" data-i18n="report.label.desc">Beschreibung</label>
+    <textarea class="auth-field report-desc" id="reportDesc" rows="6" maxlength="2000" data-i18n-placeholder="report.ph.desc" placeholder="Was hast du gemacht? Was ist passiert? Was hättest du erwartet?"></textarea>
+    <input type="text" id="reportWebsite" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+    <div class="auth-error" id="reportMsg" aria-live="polite"></div>
+    <button class="auth-submit" id="reportSend" data-i18n="report.send">📮 Meldung senden</button>
+  </div>
+</div>
 
 <!-- PLAYER OVERLAY -->
 <div class="player-overlay" id="overlay">
@@ -292,6 +310,7 @@
       <h2 id="playerTitle"></h2>
       <div style="display:flex; gap:8px; align-items:center;">
         <div id="playerRating" class="player-rating"></div>
+        <button class="icon-btn" onclick="zzOpenReport()" title="Problem melden" data-i18n-title="report.btn">🐞</button>
         <button class="icon-btn" id="fullscreenBtn" title="Vollbild">⛶</button>
         <button class="icon-btn" id="restartBtn" title="Neu starten">⟳</button>
         <button class="icon-btn" onclick="closeGame()" title="Schließen">✕</button>
@@ -542,12 +561,13 @@
 </div>
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<script type="module" src="js/i18n.js?v=20261122k"></script>
+<script type="module" src="js/i18n.js?v=20261122o"></script>
 <script type="module" src="js/consent.js?v=20260906p"></script>
-<script type="module" src="js/auth.js?v=20261122k"></script>
-<script type="module" src="js/core.js?v=20261122n"></script>
-<script type="module" src="js/chat.js?v=20261122k"></script>
-<script type="module" src="js/online.js?v=20261122m"></script>
+<script type="module" src="js/auth.js?v=20261122o"></script>
+<script type="module" src="js/core.js?v=20261122o"></script>
+<script type="module" src="js/chat.js?v=20261122o"></script>
+<script type="module" src="js/online.js?v=20261122o"></script>
 <script type="module" src="js/music.js?v=20261122i"></script>
+<script type="module" src="js/report.js?v=20261122o"></script>
 </body>
 </html>

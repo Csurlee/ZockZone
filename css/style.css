@@ -293,6 +293,14 @@
     padding:12px; border-radius:12px; cursor:pointer; font-size:15px; margin-bottom:14px;
   }
   .auth-error{color:var(--orange); font-size:13px; margin-bottom:10px; min-height:16px;}
+  /* PROBLEM MELDEN */
+  .report-overlay{z-index:900;}   /* auch über dem Spiel- und Online-Fenster */
+  .report-heading{font-family:'Fredoka',sans-serif; font-size:22px; margin:0 0 6px;}
+  .report-label{display:block; font-size:13px; font-weight:600; color:var(--text-dim); margin:0 0 6px;}
+  .report-desc{resize:vertical; min-height:120px; line-height:1.5;}
+  .report-game{font-size:13px; color:var(--lime); margin:-4px 0 12px; font-weight:600;}
+  .report-ok{color:var(--lime);}
+  @media (max-width: 600px){ .report-header-btn{display:none;} }
   .auth-close{position:absolute; top:16px; right:16px;}
   .auth-step-label{color:var(--text-dim); font-size:13px; margin-bottom:12px; text-align:center; font-family:'Fredoka'; font-size:15px;}
   .auth-step-hint{color:var(--text-dim); font-size:13px; text-align:center; margin-bottom:12px; line-height:1.5;}

@@ -23,6 +23,17 @@
     <a href="broadcast.php" class="<?= $activeNav==='broadcast'?'active':'' ?>">Broadcast</a>
     <a href="moderation.php" class="<?= $activeNav==='moderation'?'active':'' ?>">Moderation</a>
     <a href="logs.php" class="<?= $activeNav==='logs'?'active':'' ?>">Chat-Logs</a>
+    <?php
+      // Anzahl offener Meldungen für das Abzeichen
+      $zzOpenReports = 0;
+      $zzRf = '/var/log/zockzone-chat/meldungen.jsonl';
+      if (is_readable($zzRf)) {
+        foreach (file($zzRf, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $zzL) {
+          if ((json_decode($zzL, true)['status'] ?? '') === 'neu') $zzOpenReports++;
+        }
+      }
+    ?>
+    <a href="reports.php" class="<?= $activeNav==='reports'?'active':'' ?>">🐞 Meldungen<?php if ($zzOpenReports): ?> <span class="badge badge-warn"><?= $zzOpenReports ?></span><?php endif; ?></a>
     <div class="admin-user-info">
       <span class="admin-user-email"><?= htmlspecialchars($_SESSION['zz_admin_email'] ?? '') ?></span>
       <span class="admin-user-role"><?= htmlspecialchars(ucfirst($_SESSION['zz_admin_role'] ?? '')) ?></span>

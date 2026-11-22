@@ -6,7 +6,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
 const _initHash = window.location.hash;
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { t, getLang } from './i18n.js?v=20261122k';
+import { t, getLang } from './i18n.js?v=20261122o';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -501,6 +501,7 @@ function updateAccountUI(user){
 }
 
 window.zzIsLoggedIn = () => !!currentUser;
+window.zzCurrentUserName = () => currentUser ? displayNameOf(currentUser) : '';
 
 supabase.auth.onAuthStateChange((event, session) => {
   const user = session?.user || null;
