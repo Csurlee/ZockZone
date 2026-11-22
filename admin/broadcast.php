@@ -200,7 +200,10 @@ function askConfirm() {
   const cnt = document.getElementById('recipientCount').textContent;
   document.getElementById('confirmCount').textContent = cnt;
   const conf = document.getElementById('bcConfirm');
-  conf.style.display = conf.style.display === 'none' ? '' : 'none';
+  // Der Kasten ist per CSS versteckt (display:none) – zum Zeigen braucht er "block", nicht "".
+  const shown = conf.style.display === 'block';
+  conf.style.display = shown ? 'none' : 'block';
+  if(!shown) conf.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 async function sendBroadcast() {
