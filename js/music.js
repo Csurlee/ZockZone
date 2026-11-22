@@ -1,4 +1,4 @@
-// ===== ZockZone Hintergrundmusik: "ZockZone Overdrive" =====
+// ===== ZockZone Hintergrundmusik: "ZockZone Overdrive" (mit Drop!) =====
 // Ein eigener Drum & Bass-Track, komplett im Browser erzeugt (Web Audio, keine Musikdatei).
 // Komponiert für Lukis ZockZone – gehört euch, keine fremde Musik.
 // - startet beim ersten Klick/Tastendruck (Browser erlauben Ton erst nach einer Aktion)
@@ -32,8 +32,17 @@ const BASS = [
 // Akkorde (je 1 Takt): f-Moll, Es-Dur, Des-Dur, c-Moll
 const CHORDS = [[53, 56, 60], [51, 55, 58], [49, 53, 56], [48, 51, 55]];
 
-// Aufbau über 16 Takte:  Takt 0–1 Intro · 2–3 Drums · 4–15 alles (mit Bass)
-const INTRO_BARS = 2, DRUMS_BARS = 4;
+// 💥 DROP: Kick-Muster und knurrendes Bass-Riff (2 Takte): [Schritt, Note, Länge, Art]
+// Art 0 = "Wauuu" (Filter geht auf und zu), Art 1 = "Brrrr" (schnelles Rattern)
+const KICK_DROP = 'x.........x..x..';
+const DROP_BASS = [
+  [0, 29, 3, 0], [3, 29, 2, 1], [6, 41, 2, 0], [8, 29, 4, 1], [12, 32, 2, 0], [14, 27, 2, 1],
+  [16, 29, 3, 0], [19, 29, 2, 1], [22, 36, 2, 0], [24, 25, 4, 1], [28, 24, 2, 0], [30, 31, 2, 1],
+];
+
+// Aufbau über 32 Takte (ca. 44 Sekunden):
+//   0–3  Intro · 4–11 Teil A (Groove) · 12–15 Build-up (Spannung!) · 16–31 💥 DROP
+const INTRO_END = 4, A_END = 12, BUILD_END = 16, SONG_BARS = 32;
 
 const STORE_KEY = 'zz_music';
 let ctx = null, master = null, bus = null, noiseBuf = null, timer = null;
@@ -160,35 +169,125 @@ function stab(t, m) {
   o.start(t); o.stop(t + 0.2);
 }
 
+// ---------- Effekte für Build-up und Drop ----------
+// Riser: Rauschen + Ton, die immer höher werden (wie eine startende Rakete)
+function riser(t, dur) {
+  const src = ctx.createBufferSource(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
+  src.buffer = noiseBuf; src.loop = true;
+  flt.type = 'bandpass'; flt.Q.value = 3;
+  flt.frequency.setValueAtTime(300, t); flt.frequency.exponentialRampToValueAtTime(9000, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + dur);
+  src.connect(flt); flt.connect(g); g.connect(bus);
+  src.start(t); src.stop(t + dur);
+  const o = ctx.createOscillator(), og = ctx.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(1760, t + dur);
+  og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(0.06, t + dur);
+  o.connect(og); og.connect(bus); o.start(t); o.stop(t + dur);
+}
+// Crash-Becken
+function crash(t) { noiseHit(t, 0.4, 1.6, 'highpass', 4500); }
+// Tiefer "Bumm" beim Drop
+function impact(t) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(30, t + 1.2);
+  g.gain.setValueAtTime(1.0, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+  o.connect(g); g.connect(bus); o.start(t); o.stop(t + 1.5);
+  noiseHit(t, 0.5, 0.4, 'lowpass', 900);
+}
+
+// Neurofunk-Bass: stark verzerrt, der Filter "spricht" (wauuu) oder rattert (brrrr)
+let neuroCurve = null;
+function neuroBass(t, m, dur, kind) {
+  if (BASS_STAERKE <= 0) return;
+  const f = freq(m);
+  if (!neuroCurve) {
+    neuroCurve = new Float32Array(2048);
+    for (let i = 0; i < 2048; i++) { const x = i / 1024 - 1; neuroCurve[i] = Math.tanh(x * 7) * 0.9 + Math.sin(x * 9) * 0.1; }
+  }
+  const sh = ctx.createWaveShaper(); sh.curve = neuroCurve; sh.oversample = '2x';
+  const flt = ctx.createBiquadFilter(); flt.type = 'lowpass'; flt.Q.value = 12;
+  const out = ctx.createGain();
+  out.gain.setValueAtTime(0.0001, t);
+  out.gain.exponentialRampToValueAtTime(0.42 * BASS_STAERKE, t + 0.01);
+  out.gain.setValueAtTime(0.42 * BASS_STAERKE, t + dur - 0.03);
+  out.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  [['sawtooth', 1], ['square', 1.006], ['sawtooth', 0.497]].forEach(([type, det]) => {
+    const o = ctx.createOscillator(); o.type = type; o.frequency.value = f * 2 * det;
+    const g = ctx.createGain(); g.gain.value = 0.3;
+    o.connect(g); g.connect(sh); o.start(t); o.stop(t + dur + 0.02);
+  });
+  sh.connect(flt); flt.connect(out);
+  if (kind === 0) {
+    // "Wauuu": Filter geht schnell auf und langsam wieder zu
+    flt.frequency.setValueAtTime(180, t);
+    flt.frequency.exponentialRampToValueAtTime(2600, t + dur * 0.3);
+    flt.frequency.exponentialRampToValueAtTime(220, t + dur);
+  } else {
+    // "Brrrr": Filter rattert im Takt (Sechzehntel × WOBBLE)
+    flt.frequency.value = 700;
+    const lfo = ctx.createOscillator(), amt = ctx.createGain();
+    lfo.type = 'square'; lfo.frequency.value = TEMPO / 60 * 2 * WOBBLE;
+    amt.gain.value = 600;
+    lfo.connect(amt); amt.connect(flt.frequency); lfo.start(t); lfo.stop(t + dur + 0.02);
+  }
+  const sub = ctx.createOscillator(), sg = ctx.createGain();
+  sub.type = 'sine'; sub.frequency.value = f; sg.gain.value = 0.8;
+  sub.connect(sg); sg.connect(out); sub.start(t); sub.stop(t + dur + 0.02);
+  out.connect(bus);
+}
+
 // ---------- Ein Sechzehntel spielen ----------
 function playStep(t) {
   const pos = step % 16;
-  const bar = Math.floor(step / 16) % 16;        // Takt im 16-Takte-Bogen
-  const fill = bar % 8 === 7;                     // jeder 8. Takt: Snare-Wirbel als Übergang
-  const drums = bar >= INTRO_BARS;
-  const full = bar >= DRUMS_BARS;
+  const bar = Math.floor(step / 16) % SONG_BARS;
+  const D = DRUMS;
 
-  // Pad zu jedem Taktanfang
-  if (pos === 0) pad(t, CHORDS[bar % 4], STEP() * 16);
-
-  // Hi-Hats (im Intro nur leise)
-  const hats = full ? HATS16 : HATS;
-  if (hats[pos] === 'x') hat(t, (pos % 2 ? 0.12 : 0.22) * (drums ? 1 : 0.5) * DRUMS);
-
-  if (drums) {
-    const k = (bar % 2 ? KICK_B : KICK_A);
-    if (k[pos] === 'x' && !(fill && pos >= 12)) kick(t, 1.0 * DRUMS);
-    if (SNARE[pos] === 'x') snare(t, 0.55 * DRUMS);
-    if (full && GHOST[pos] === 'o') snare(t, 0.12 * DRUMS);
-    if (fill && pos >= 12) snare(t, (0.15 + (pos - 12) * 0.1) * DRUMS);  // Wirbel wird lauter
+  if (bar < INTRO_END) {
+    // ---------- INTRO: Akkorde + leise Hi-Hats, ab Takt 2 Kick dazu ----------
+    if (pos === 0) pad(t, CHORDS[bar % 4], STEP() * 16);
+    if (HATS[pos] === 'x') hat(t, 0.1 * D);
+    if (bar >= 2 && KICK_A[pos] === 'x') kick(t, 0.8 * D);
+    if (bar === 3 && pos >= 12) snare(t, (0.15 + (pos - 12) * 0.1) * D);
   }
-
-  if (full) {
-    // Bass-Riff (4 Takte lang)
-    const bpos = step % 64;
+  else if (bar < A_END) {
+    // ---------- TEIL A: Groove mit Reese-Bass ----------
+    if (pos === 0) pad(t, CHORDS[bar % 4], STEP() * 16);
+    if (bar === INTRO_END && pos === 0) crash(t);
+    if (HATS16[pos] === 'x') hat(t, (pos % 2 ? 0.1 : 0.2) * D);
+    const k = bar % 2 ? KICK_B : KICK_A;
+    if (k[pos] === 'x') kick(t, 1.0 * D);
+    if (SNARE[pos] === 'x') snare(t, 0.55 * D);
+    if (GHOST[pos] === 'o') snare(t, 0.12 * D);
+    const bpos = (step - INTRO_END * 16) % 64;
     for (const [s0, m, len] of BASS) if (s0 === bpos) bassNote(t, m, STEP() * len);
-    // Synthie-Stöße jeden 2. Takt
     if (bar % 2 === 1 && (pos === 6 || pos === 14)) stab(t, CHORDS[bar % 4][2] + 12);
+  }
+  else if (bar < BUILD_END) {
+    // ---------- BUILD-UP: Spannung aufbauen ----------
+    const b = bar - A_END;   // 0..3
+    if (b === 0 && pos === 0) riser(t, STEP() * 64 - STEP() * 2);   // Rakete über 4 Takte
+    if (pos === 0) pad(t, CHORDS[3], STEP() * 16);
+    // Snare-Wirbel wird immer schneller: Viertel -> Achtel -> Sechzehntel
+    const every = b === 0 ? 4 : b === 1 ? 2 : 1;
+    const last = b === 3 && pos >= 14;   // letzte zwei Sechzehntel: STILLE vor dem Drop
+    if (!last && pos % every === 0) snare(t, (0.2 + (b * 16 + pos) / 64 * 0.5) * D);
+    if (b < 2 && pos % 4 === 0) kick(t, 0.7 * D);
+  }
+  else {
+    // ---------- 💥 DROP ----------
+    const d = bar - BUILD_END;   // 0..15
+    if (d === 0 && pos === 0) { crash(t); impact(t); }
+    if (d === 8 && pos === 0) crash(t);
+    if (HATS16[pos] === 'x') hat(t, (pos % 2 ? 0.13 : 0.24) * D);
+    const k = d % 4 === 3 ? KICK_B : KICK_DROP;
+    if (k[pos] === 'x') kick(t, 1.15 * D);
+    if (SNARE[pos] === 'x') snare(t, 0.65 * D);
+    if (GHOST[pos] === 'o') snare(t, 0.16 * D);
+    if (d === 15 && pos >= 12) snare(t, (0.2 + (pos - 12) * 0.12) * D);   // Wirbel zum Neustart
+    const bpos = (step - BUILD_END * 16) % 32;
+    for (const [s0, m, len, kind] of DROP_BASS) if (s0 === bpos) neuroBass(t, m, STEP() * len, kind);
   }
   step++;
 }
