@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js?v=20261122o';
-import { GAMES } from './games-list.js?v=20261122s';
+import { GAMES } from './games-list.js?v=20261122t';
 import { makeHD } from './hd.js?v=20261122r';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
@@ -134,6 +134,13 @@ function thumbBg(id){
     muehle:'linear-gradient(135deg,#A57A4F,#3B2A1A)',
     numbermemory:'linear-gradient(135deg,#EC4899,#4C1D95)',
     stacker:'linear-gradient(135deg,#6366F1,#0F0B1C)',
+    minigolf:'linear-gradient(135deg,#22C55E,#14532D)',
+    rocketland:'linear-gradient(135deg,#334155,#05030C)',
+    ski:'linear-gradient(135deg,#E0F2FE,#1E40AF)',
+    towerdefense:'linear-gradient(135deg,#65A30D,#3F2A1A)',
+    bowling:'linear-gradient(135deg,#E9C46A,#1F2937)',
+    codebreaker:'linear-gradient(135deg,#A855F7,#1D1730)',
+    timesrace:'linear-gradient(135deg,#FACC15,#1F2937)',
     breakout:'linear-gradient(135deg,#F97316,#7C2D12)',
     minesweeper:'linear-gradient(135deg,#64748B,#1E293B)',
     simon:'linear-gradient(135deg,#A855F7,#4C1D95)',
@@ -305,7 +312,14 @@ const builders = {
   flood: () => import('./games/flood.js?v=20261122s'),
   muehle: () => import('./games/muehle.js?v=20261122s'),
   numbermemory: () => import('./games/numbermemory.js?v=20261122s'),
-  stacker: () => import('./games/stacker.js?v=20261122s')
+  stacker: () => import('./games/stacker.js?v=20261122s'),
+  minigolf: () => import('./games/minigolf.js?v=20261122t'),
+  rocketland: () => import('./games/rocketland.js?v=20261122t'),
+  ski: () => import('./games/ski.js?v=20261122t'),
+  towerdefense: () => import('./games/towerdefense.js?v=20261122t'),
+  bowling: () => import('./games/bowling.js?v=20261122t'),
+  codebreaker: () => import('./games/codebreaker.js?v=20261122t'),
+  timesrace: () => import('./games/timesrace.js?v=20261122t')
 };
 
 async function loadGame(id){
