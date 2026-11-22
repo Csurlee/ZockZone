@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { sfx } from './sfx.js';
-import { t } from './i18n.js?v=20261122i';
+import { t } from './i18n.js?v=20261122k';
 import { startBoardOnline, BOARD_GAMES } from './online-board.js?v=20261122b';
 import { startTanksOnline } from './online-tanks.js?v=20261122d';
 
@@ -47,6 +47,44 @@ function showView(id) {
     const el = $(v);
     if(el) el.hidden = v !== id;
   });
+  // Beim Spielen wird das Fenster breit, im Menü/in der Lobby bleibt es schmal
+  document.querySelector('#onlineOverlay .online-box')?.classList.toggle('playing', id === 'onlineGame');
+  if(id === 'onlineGame') queueOnlineFit();
+}
+
+// ===== GRÖSSERES ONLINE-SPIELFELD =====
+// Wie bei den normalen Spielen: das Canvas wird so groß angezeigt, wie Platz ist.
+// Die Spiele rechnen intern mit ihrer normalen Größe weiter.
+const ONLINE_MAX_ZOOM = 3;
+function fitOnlineCanvas() {
+  const view = $('onlineGame'), canvas = $('onlineCanvas');
+  if(!view || view.hidden || !canvas || !canvas.width || !canvas.height) return;
+  if(!$('onlineOverlay')?.classList.contains('open')) return;
+  const box = view.closest('.online-box');
+  const bcs = getComputedStyle(box);
+  const padX = parseFloat(bcs.paddingLeft) + parseFloat(bcs.paddingRight);
+  const padY = parseFloat(bcs.paddingTop) + parseFloat(bcs.paddingBottom);
+  const maxBoxW = window.innerWidth * 0.98, maxBoxH = window.innerHeight * 0.97;
+  const otherH = view.scrollHeight - canvas.getBoundingClientRect().height;   // Punkte, Status, Knöpfe
+  const scale = Math.max(0.4, Math.min((maxBoxW - padX - 4) / canvas.width,
+                                       (maxBoxH - padY - otherH - 8) / canvas.height, ONLINE_MAX_ZOOM));
+  canvas.style.width  = Math.floor(canvas.width  * scale) + 'px';
+  canvas.style.height = Math.floor(canvas.height * scale) + 'px';
+}
+let onlineFitQueued = false;
+function queueOnlineFit() {
+  if(onlineFitQueued) return;
+  onlineFitQueued = true;
+  requestAnimationFrame(() => { onlineFitQueued = false; fitOnlineCanvas(); });
+}
+window.addEventListener('resize', queueOnlineFit);
+{
+  const oc = document.getElementById('onlineCanvas');
+  // Spiele setzen beim Start ihre Canvas-Größe -> dann neu anpassen
+  if(oc) new MutationObserver(queueOnlineFit).observe(oc, { attributes:true, attributeFilter:['width','height'] });
+  // Panzer-Knöpfe usw. kommen dazu -> auch neu anpassen
+  const og = document.getElementById('onlineGame');
+  if(og) new MutationObserver(queueOnlineFit).observe(og, { childList:true });
 }
 
 // ===== PRESENCE =====

@@ -731,6 +731,10 @@
   max-height:90vh; overflow-y:auto; position:relative;
   box-shadow:0 20px 60px rgba(0,0,0,.6);
 }
+.online-box.playing{
+  width:auto; min-width:min(460px,95vw); max-width:98vw; max-height:97vh;
+  padding:20px 18px;
+}
 .online-close-btn{
   position:absolute; top:14px; right:14px;
   background:transparent; border:none; color:#888;

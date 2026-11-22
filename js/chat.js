@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { t, getLang } from './i18n.js?v=20261122i';
+import { t, getLang } from './i18n.js?v=20261122k';
 
 const SUPABASE_URL = 'https://supabase.hackthelab.uk';
 const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
