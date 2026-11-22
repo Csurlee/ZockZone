@@ -16,6 +16,12 @@ const POCKETS = [
   {x:TX2,     y:TY2},
 ];
 
+// Ist der Ball direkt vor einem Loch? Dann darf er über die Bandenlinie ins Loch rollen.
+const MOUTH = PR + BR*0.6;
+function nearPocket(b){ return POCKETS.some(p => (b.x-p.x)**2 + (b.y-p.y)**2 < MOUTH*MOUTH); }
+// Ist der Ball über die Bande hinaus (passiert nur an einem Loch)?
+function offTable(b){ return b.x < TX1 || b.x > TX2 || b.y < TY1 || b.y > TY2; }
+
 const BALL_COLOR = [
   '#F2F2F2',  // 0 cue
   '#E8C400',  // 1
@@ -150,11 +156,14 @@ export function build() {
       if (Math.abs(b.vy) < 0.04) b.vy = 0;
       if (b.vx || b.vy) moving = true;
 
-      // Cushion bounce
-      if (b.x-BR < TX1) { b.x = TX1+BR; b.vx =  Math.abs(b.vx)*.72; }
-      if (b.x+BR > TX2) { b.x = TX2-BR; b.vx = -Math.abs(b.vx)*.72; }
-      if (b.y-BR < TY1) { b.y = TY1+BR; b.vy =  Math.abs(b.vy)*.72; }
-      if (b.y+BR > TY2) { b.y = TY2-BR; b.vy = -Math.abs(b.vy)*.72; }
+      // Cushion bounce – aber nicht direkt vor einem Loch, da gibt es keine Bande.
+      // (Vorher prallten Bälle immer ab, bevor sie ein Loch erreichen konnten.)
+      if (!nearPocket(b)) {
+        if (b.x-BR < TX1) { b.x = TX1+BR; b.vx =  Math.abs(b.vx)*.72; }
+        if (b.x+BR > TX2) { b.x = TX2-BR; b.vx = -Math.abs(b.vx)*.72; }
+        if (b.y-BR < TY1) { b.y = TY1+BR; b.vy =  Math.abs(b.vy)*.72; }
+        if (b.y+BR > TY2) { b.y = TY2-BR; b.vy = -Math.abs(b.vy)*.72; }
+      }
     }
 
     // Ball-ball collisions (3 iterations for stability)
@@ -186,7 +195,7 @@ export function build() {
       if (b.pocketed) continue;
       for (const p of POCKETS) {
         const dx = b.x-p.x, dy = b.y-p.y;
-        if (dx*dx+dy*dy < PR*PR) {
+        if (dx*dx+dy*dy < PR*PR || (offTable(b) && dx*dx+dy*dy < (PR*2.2)*(PR*2.2))) {
           b.pocketed = true; b.vx = 0; b.vy = 0;
           onPocket(b);
           moving = true;

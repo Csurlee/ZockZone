@@ -525,6 +525,9 @@ function startBilliardOnline(canvas) {
   const POCKETS=[{x:TX1,y:TY1},{x:TX1+TW/2,y:TY1-7},{x:TX2,y:TY1},{x:TX1,y:TY2},{x:TX1+TW/2,y:TY2+7},{x:TX2,y:TY2}];
   const BALL_COLOR=['#F2F2F2','#E8C400','#1833CC','#CC2200','#7700BB','#DD6600','#115500','#8B1010','#111111','#E8C400','#1833CC','#CC2200','#7700BB','#DD6600','#115500','#8B1010'];
 
+  const MOUTH=PR+BR*0.6;
+  const nearPocket=b=>POCKETS.some(p=>(b.x-p.x)**2+(b.y-p.y)**2<MOUTH*MOUTH);
+  const offTable=b=>b.x<TX1||b.x>TX2||b.y<TY1||b.y>TY2;
   const myRole  = isHost ? 0 : 1;
   let balls=[],state='waiting',turn=0,group=[null,null];
   let keepTurn=false,scratch=false,pocketsThisTurn=[];
@@ -552,10 +555,13 @@ function startBilliardOnline(canvas) {
       b.x+=b.vx;b.y+=b.vy;b.vx*=0.987;b.vy*=0.987;
       if(Math.abs(b.vx)<0.04)b.vx=0;if(Math.abs(b.vy)<0.04)b.vy=0;
       if(b.vx||b.vy)moving=true;
-      if(b.x-BR<TX1){b.x=TX1+BR;b.vx=Math.abs(b.vx)*.72;}
-      if(b.x+BR>TX2){b.x=TX2-BR;b.vx=-Math.abs(b.vx)*.72;}
-      if(b.y-BR<TY1){b.y=TY1+BR;b.vy=Math.abs(b.vy)*.72;}
-      if(b.y+BR>TY2){b.y=TY2-BR;b.vy=-Math.abs(b.vy)*.72;}
+      // Bande – aber nicht direkt vor einem Loch (sonst kommt nie ein Ball hinein)
+      if(!nearPocket(b)){
+        if(b.x-BR<TX1){b.x=TX1+BR;b.vx=Math.abs(b.vx)*.72;}
+        if(b.x+BR>TX2){b.x=TX2-BR;b.vx=-Math.abs(b.vx)*.72;}
+        if(b.y-BR<TY1){b.y=TY1+BR;b.vy=Math.abs(b.vy)*.72;}
+        if(b.y+BR>TY2){b.y=TY2-BR;b.vy=-Math.abs(b.vy)*.72;}
+      }
     }
     for(let iter=0;iter<3;iter++){
       for(let i=0;i<balls.length-1;i++){if(balls[i].pocketed)continue;
@@ -571,7 +577,7 @@ function startBilliardOnline(canvas) {
     }
     for(const b of balls){if(b.pocketed)continue;
       for(const p of POCKETS){const dx=b.x-p.x,dy=b.y-p.y;
-        if(dx*dx+dy*dy<PR*PR){b.pocketed=true;b.vx=0;b.vy=0;onPocket(b);moving=true;break;}
+        if(dx*dx+dy*dy<PR*PR||(offTable(b)&&dx*dx+dy*dy<(PR*2.2)*(PR*2.2))){b.pocketed=true;b.vx=0;b.vy=0;onPocket(b);moving=true;break;}
       }
     }
     return moving;

@@ -240,7 +240,7 @@ const builders = {
   whack: () => import('./games/whack.js'),
   flappy: () => import('./games/flappy.js'),
   ttt: () => import('./games/ttt.js'),
-  billiard: () => import('./games/billiard.js?v=20260906p'),
+  billiard: () => import('./games/billiard.js?v=20261122l'),
   blackjack: () => import('./games/blackjack.js?v=20261122a'),
   pong: () => import('./games/pong.js'),
   breakout: () => import('./games/breakout.js'),
