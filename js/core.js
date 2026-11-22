@@ -236,7 +236,7 @@ function closeGame(){
 
 const builders = {
   snake: () => import('./games/snake.js'),
-  twenty48: () => import('./games/twenty48.js'),
+  twenty48: () => import('./games/twenty48.js?v=20261122n'),
   memory: () => import('./games/memory.js'),
   whack: () => import('./games/whack.js'),
   flappy: () => import('./games/flappy.js'),

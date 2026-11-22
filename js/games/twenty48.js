@@ -7,7 +7,7 @@ export function build(){
   const gridDiv = document.createElement('div');
   gridDiv.style.cssText = 'display:grid; grid-template-columns:repeat(4,74px); grid-gap:8px; background:#1D1730; padding:8px; border-radius:12px;';
   wrap.appendChild(gridDiv);
-  playerBody.append(scoreEl, wrap, mkHint('Pfeiltasten zum Verschieben der Kacheln.'));
+  playerBody.append(scoreEl, wrap, mkHint('Pfeiltasten oder WASD – auf dem Handy wischen. Gleiche Zahlen verschmelzen!'));
   addLeaderboardUI('twenty48', '2048 Fusion');
   const over = overMsg(wrap, 'Keine Züge mehr!', start);
   let board, score, best=0;
@@ -49,7 +49,8 @@ export function build(){
   function move(dir){
     let moved=false;
     let b = board;
-    let rotations = {left:0, up:1, right:2, down:3}[dir];
+    // rotate() dreht im Uhrzeigersinn: "oben" wird nach 3 Drehungen zu "links", "unten" nach 1 Drehung
+    let rotations = {left:0, up:3, right:2, down:1}[dir];
     for(let i=0;i<rotations;i++) b = rotate(b);
     const newB = b.map(slide);
     if(JSON.stringify(newB)!==JSON.stringify(b)) moved=true;
@@ -60,7 +61,8 @@ export function build(){
       document.getElementById('g48Score').textContent=score;
       if(score>best){best=score; document.getElementById('g48Best').textContent=best;}
       render();
-      sfx.lose(); if(isGameOver()){ over.classList.add('show'); if(window.zzSaveHighScore) window.zzSaveHighScore('twenty48','2048 Fusion',score); }
+      sfx.tick?.();
+      if(isGameOver()){ sfx.lose(); over.classList.add('show'); if(window.zzSaveHighScore) window.zzSaveHighScore('twenty48','2048 Fusion',score); }
     }
   }
   function isGameOver(){
@@ -72,10 +74,23 @@ export function build(){
     return true;
   }
   function key(e){
-    const map={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};
+    if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;   // nicht beim Chatten
+    const map={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',
+               a:'left',d:'right',w:'up',s:'down',A:'left',D:'right',W:'up',S:'down'};
     if(map[e.key]){ e.preventDefault(); move(map[e.key]); }
   }
   document.addEventListener('keydown', key);
+  // Wischen auf Handy/Tablet (und mit gedrückter Maus)
+  let sx=null, sy=null;
+  gridDiv.style.touchAction='none';
+  gridDiv.addEventListener('pointerdown', e=>{ sx=e.clientX; sy=e.clientY; });
+  gridDiv.addEventListener('pointerup', e=>{
+    if(sx===null) return;
+    const dx=e.clientX-sx, dy=e.clientY-sy; sx=null;
+    if(Math.max(Math.abs(dx),Math.abs(dy))<25) return;   // zu kurz = kein Wischen
+    move(Math.abs(dx)>Math.abs(dy) ? (dx>0?'right':'left') : (dy>0?'down':'up'));
+  });
+  gridDiv.addEventListener('pointercancel', ()=>{ sx=null; });
   window.__restartCurrent = start;
   start();
   return ()=>document.removeEventListener('keydown', key);
