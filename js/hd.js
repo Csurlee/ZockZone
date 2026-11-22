@@ -6,7 +6,7 @@
 // Für das Spiel ändert sich nichts: canvas.width ist weiterhin 400, und alle
 // Koordinaten bleiben gleich. Es sieht nur gestochen scharf aus.
 
-const MAX_RATIO = 4;      // höchstens 4× so viele Pixel (sonst wird es langsam)
+const MAX_RATIO = 2.5;    // höchstens 2,5× so viele Pixel pro Richtung (mehr macht langsame Computer ruckelig)
 const protoW = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'width');
 const protoH = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'height');
 

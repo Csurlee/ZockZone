@@ -57,7 +57,8 @@ function ensureCtx() {
   if (ctx) return ctx;
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return null;
-  ctx = new AC();
+  // "playback" = Hintergrundmusik: größerer Puffer, weniger Knacksen und Stottern
+  try { ctx = new AC({ latencyHint: 'playback' }); } catch { ctx = new AC(); }
   master = ctx.createGain();
   master.gain.value = 0;
   // Kompressor macht alles druckvoller und verhindert Übersteuern
@@ -206,7 +207,7 @@ function neuroBass(t, m, dur, kind) {
     neuroCurve = new Float32Array(2048);
     for (let i = 0; i < 2048; i++) { const x = i / 1024 - 1; neuroCurve[i] = Math.tanh(x * 7) * 0.9 + Math.sin(x * 9) * 0.1; }
   }
-  const sh = ctx.createWaveShaper(); sh.curve = neuroCurve; sh.oversample = '2x';
+  const sh = ctx.createWaveShaper(); sh.curve = neuroCurve; sh.oversample = 'none';   // spart Rechenkraft
   const flt = ctx.createBiquadFilter(); flt.type = 'lowpass'; flt.Q.value = 12;
   const out = ctx.createGain();
   out.gain.setValueAtTime(0.0001, t);
@@ -293,7 +294,10 @@ function playStep(t) {
 }
 
 function scheduler() {
-  while (nextTime < ctx.currentTime + 0.12) {
+  // Hing der Computer kurz (z. B. Tab im Hintergrund)? Dann nicht alle verpassten Töne auf einmal spielen.
+  if (nextTime < ctx.currentTime - 0.05) nextTime = ctx.currentTime + 0.05;
+  // 0,35 s im Voraus planen: genug Vorrat, falls der Computer kurz beschäftigt ist
+  while (nextTime < ctx.currentTime + 0.35) {
     playStep(nextTime);
     nextTime += STEP();
   }
@@ -313,7 +317,7 @@ function start() {
   if (!playing) {
     playing = true;
     nextTime = ctx.currentTime + 0.05;
-    timer = setInterval(scheduler, 25);
+    timer = setInterval(scheduler, 40);
   }
   fadeTo(ducked ? 0 : LAUTSTAERKE, 1.2);
 }
