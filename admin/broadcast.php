@@ -82,13 +82,17 @@ require __DIR__ . '/includes/layout_top.php';
 .btn-danger:hover{ background:#A93226; }
 </style>
 
-<p class="admin-hint">Broadcast-E-Mails werden an alle nicht-Admin-Nutzer gesendet. Die E-Mail nutzt das gleiche Design wie die Registrierungs-E-Mail.</p>
+<p class="admin-hint">Broadcast-E-Mails werden an alle Nutzer gesendet – Admins nur, wenn das Kästchen unten angehakt ist. Die E-Mail nutzt das gleiche Design wie die Registrierungs-E-Mail.</p>
 
 <!-- Empfänger-Zahl -->
 <div class="bc-hint">
   <span>👥</span>
   <span>Empfänger: <span class="bc-count" id="recipientCount">…</span> Nutzer</span>
+  <label style="margin-left:auto;display:flex;align-items:center;gap:6px;cursor:pointer">
+    <input type="checkbox" id="includeAdmins" onchange="updateCount()"> Auch an Admins senden
+  </label>
 </div>
+<div id="bcErrors" style="display:none;margin:0 0 16px;padding:12px 14px;border-radius:10px;background:rgba(255,107,74,.12);color:#ffb4a3;font-size:13px;white-space:pre-wrap;word-break:break-word"></div>
 
 <!-- Compose-Formular -->
 <div class="bc-form">
@@ -159,6 +163,7 @@ function getFormData() {
     icon:    document.getElementById('selectedIcon').value,
     subject: document.getElementById('bcSubject').value.trim(),
     message: document.getElementById('bcMessage').value.trim(),
+    include_admins: document.getElementById('includeAdmins').checked,
   };
 }
 
@@ -205,35 +210,52 @@ async function sendBroadcast() {
   btn.textContent = 'Sende…';
   document.getElementById('bcConfirm').style.display = 'none';
 
-  const res  = await fetch('api/broadcast.php', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({action:'send', ...d}),
-  });
-  const json = await res.json().catch(() => ({}));
+  const errBox = document.getElementById('bcErrors');
+  errBox.style.display = 'none';
+  let res, json = {};
+  try {
+    res  = await fetch('api/broadcast.php', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'send', ...d}),
+    });
+    json = await res.json().catch(() => ({}));
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Jetzt senden';
+    showMsg('Netzwerkfehler: ' + e.message, 'err');
+    return;
+  }
 
   btn.disabled = false;
   btn.textContent = 'Jetzt senden';
 
   if(!res.ok) {
-    showMsg('Fehler: ' + (json.error || '?'), 'err');
+    showMsg('Fehler: ' + (json.error || ('HTTP ' + res.status + (res.status === 524 ? ' – Zeitüberschreitung (zu viele Empfänger auf einmal?)' : ''))), 'err');
     return;
   }
 
   let msg = '✓ Gesendet: ' + json.sent + ' E-Mail(s)';
   if(json.errors && json.errors.length > 0)
-    msg += ' · ' + json.errors.length + ' Fehler';
-  showMsg(msg, 'ok');
+    msg += ' · ' + json.errors.length + ' Fehler (siehe unten)';
+  showMsg(msg, json.sent > 0 ? 'ok' : 'err');
 
-  if(json.errors && json.errors.length > 0)
-    console.warn('Broadcast-Fehler:', json.errors);
+  if(json.errors && json.errors.length > 0) {
+    errBox.textContent = '⚠️ Diese E-Mails sind nicht angekommen:\n' + json.errors.join('\n');
+    errBox.style.display = '';
+  }
 }
 
+let counts = {};
 async function loadRecipientCount() {
   const res  = await fetch('api/broadcast.php');
-  const json = await res.json().catch(() => ({}));
-  document.getElementById('recipientCount').textContent = json.count ?? '?';
-  document.getElementById('confirmCount').textContent = json.count ?? '?';
+  counts = await res.json().catch(() => ({}));
+  updateCount();
+}
+function updateCount() {
+  const withAdmins = document.getElementById('includeAdmins').checked;
+  const n = withAdmins ? counts.count_with_admins : counts.count;
+  document.getElementById('recipientCount').textContent = n ?? '?';
+  document.getElementById('confirmCount').textContent = n ?? '?';
 }
 
 loadRecipientCount();

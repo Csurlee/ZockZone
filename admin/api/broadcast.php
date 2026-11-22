@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/api_auth_guard.php';
 require_once __DIR__ . '/../includes/supabase_client.php';
 
-set_time_limit(120);
+set_time_limit(600);
 
 require_once __DIR__ . '/../includes/mail_settings.php';
 
@@ -178,17 +178,25 @@ HTML;
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-if ($method === 'GET') {
-    // Return recipient count (non-admin users)
+// Empfänger: alle Nutzer mit E-Mail, Admins nur wenn gewünscht
+function bc_recipients(bool $includeAdmins): array {
     $users = bc_get_all_users();
-    [, $profiles] = sb_request('GET', '/rest/v1/profiles?select=id,role');
     $adminIds = [];
-    foreach (($profiles ?? []) as $p) {
-        if (($p['role'] ?? 'user') === 'admin') $adminIds[$p['id']] = true;
+    if (!$includeAdmins) {
+        [, $profiles] = sb_request('GET', '/rest/v1/profiles?select=id,role');
+        foreach (($profiles ?? []) as $p) {
+            if (($p['role'] ?? 'user') === 'admin') $adminIds[$p['id']] = true;
+        }
     }
-    $recipients = array_filter($users, fn($u) => !isset($adminIds[$u['id']]) && !empty($u['email']));
+    return array_values(array_filter($users, fn($u) => !isset($adminIds[$u['id']]) && !empty($u['email'])));
+}
+
+if ($method === 'GET') {
+    // Anzahl Empfänger – ohne und mit Admins
+    $all = bc_recipients(true);
+    $noAdmins = bc_recipients(false);
     http_response_code(200);
-    echo json_encode(['count' => count($recipients)]);
+    echo json_encode(['count' => count($noAdmins), 'count_with_admins' => count($all)]);
     exit;
 }
 
@@ -213,13 +221,8 @@ if ($method === 'POST') {
         $cfg = mail_settings_read();
         if (!($cfg['enabled'] ?? false)) { http_response_code(503); echo json_encode(['error' => 'E-Mail-Versand ist deaktiviert. Bitte erst unter E-Mail aktivieren.']); exit; }
 
-        $users = bc_get_all_users();
-        [, $profiles] = sb_request('GET', '/rest/v1/profiles?select=id,role');
-        $adminIds = [];
-        foreach (($profiles ?? []) as $p) {
-            if (($p['role'] ?? 'user') === 'admin') $adminIds[$p['id']] = true;
-        }
-        $recipients = array_filter($users, fn($u) => !isset($adminIds[$u['id']]) && !empty($u['email']));
+        $recipients = bc_recipients(!empty($input['include_admins']));
+        if (!$recipients) { http_response_code(400); echo json_encode(['error' => 'Keine Empfänger gefunden.']); exit; }
 
         $html   = bc_build_email($icon, $subject, $message);
         $sent   = 0;
@@ -232,6 +235,7 @@ if ($method === 'POST') {
             } else {
                 $sent++;
             }
+            usleep(600000);   // Resend erlaubt nur ca. 2 E-Mails pro Sekunde
         }
 
         http_response_code(200);
