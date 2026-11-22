@@ -218,6 +218,11 @@ const TRANSLATIONS = {
     'chat.notice.muted': '🔇 Du bist stummgeschaltet.',
     'chat.notice.send.error': '🔇 Nachricht konnte nicht gesendet werden.',
     'chat.notice.moderated': '🤖 Deine Nachricht wurde von unserem Moderations-Bot entfernt. Bitte achte auf einen respektvollen Umgangston — dieser Chat wird moderiert.',
+
+    'promo.muenzarcade.badge': '🪙 NEU',
+    'promo.muenzarcade.title': 'MÜNZ-ARCADE',
+    'promo.muenzarcade.desc': '50 Mini-Games mit Ticket- & Münz-Wirtschaft, Shop und Boni — als eigenständige Mini-Site, offline spielbar.',
+    'promo.muenzarcade.cta': '🪙 Zur Münz-Arcade',
   },
   en: {
     'header.login': '👤 Login',
@@ -438,6 +443,11 @@ const TRANSLATIONS = {
     'chat.notice.muted': '🔇 You are muted.',
     'chat.notice.send.error': '🔇 Message could not be sent.',
     'chat.notice.moderated': '🤖 Your message was removed by our moderation bot. Please keep a respectful tone — this chat is moderated.',
+
+    'promo.muenzarcade.badge': '🪙 NEW',
+    'promo.muenzarcade.title': 'MÜNZ-ARCADE',
+    'promo.muenzarcade.desc': '50 mini-games with a ticket & coin economy, shop and bonuses — a standalone mini-site, playable offline.',
+    'promo.muenzarcade.cta': '🪙 Go to Münz-Arcade',
   }
 };
 

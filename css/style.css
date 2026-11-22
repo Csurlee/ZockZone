@@ -101,6 +101,36 @@
   .stat-num{font-size:32px; color:var(--lime);}
   .stat-label{font-size:13px; color:var(--text-dim); margin-top:4px;}
 
+  /* MÜNZ-ARCADE PROMO */
+  .promo-banner{
+    margin: 0 5vw 22px;
+    background: linear-gradient(135deg, #7C2D12 0%, #B45309 45%, #241D3B 100%);
+    border-radius: 24px;
+    padding: 26px 30px;
+    display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .promo-text{display:flex; flex-direction:column; gap:6px; max-width:560px;}
+  .promo-badge{
+    align-self:flex-start;
+    background: var(--lime); color:#14101F; font-weight:700; font-size:12px;
+    padding: 5px 11px; border-radius: 999px; letter-spacing:0.5px;
+  }
+  .promo-text h3{font-family:'Fredoka', sans-serif; font-size:22px;}
+  .promo-text p{color:#F3E5D0; font-size:14px;}
+  .promo-cta{
+    background: var(--lime); color:#14101F; border:none;
+    font-weight:700; font-size:15px; padding: 14px 24px; border-radius:14px;
+    cursor:pointer; text-decoration:none; display:inline-block; white-space:nowrap;
+    box-shadow: 0 8px 0 #7FA82A; transition: transform .15s ease;
+  }
+  .promo-cta:active{transform: translateY(6px); box-shadow:0 2px 0 #7FA82A;}
+  .promo-cta:hover{transform: translateY(-2px);}
+  @media (max-width: 640px){
+    .promo-banner{padding:20px; margin:0 4vw 16px;}
+    .promo-text h3{font-size:19px;}
+  }
+
   /* CATEGORY CHIPS */
   .chips{display:flex; gap:10px; padding: 0 5vw; margin-bottom: 22px; flex-wrap:wrap;}
   .chip{
