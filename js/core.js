@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js?v=20261122o';
-import { GAMES } from './games-list.js?v=20261122c';
+import { GAMES } from './games-list.js?v=20261122s';
 import { makeHD } from './hd.js?v=20261122r';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
@@ -124,6 +124,16 @@ function thumbBg(id){
     blackjack:'linear-gradient(135deg,#0F5132,#062919)',
     pong:'linear-gradient(135deg,#0EA5E9,#075985)',
     tanks:'linear-gradient(135deg,#7C5A3A,#1E1B4B)',
+    basketball:'linear-gradient(135deg,#EA580C,#431407)',
+    balloons:'linear-gradient(135deg,#38BDF8,#BE185D)',
+    catcher:'linear-gradient(135deg,#65A30D,#1E3A8A)',
+    cloudjump:'linear-gradient(135deg,#7DD3FC,#1E40AF)',
+    dotsboxes:'linear-gradient(135deg,#C6FF3D,#3F6212)',
+    fishing:'linear-gradient(135deg,#0EA5E9,#0C1E42)',
+    flood:'linear-gradient(135deg,#F59E0B,#7C3AED)',
+    muehle:'linear-gradient(135deg,#A57A4F,#3B2A1A)',
+    numbermemory:'linear-gradient(135deg,#EC4899,#4C1D95)',
+    stacker:'linear-gradient(135deg,#6366F1,#0F0B1C)',
     breakout:'linear-gradient(135deg,#F97316,#7C2D12)',
     minesweeper:'linear-gradient(135deg,#64748B,#1E293B)',
     simon:'linear-gradient(135deg,#A855F7,#4C1D95)',
@@ -285,7 +295,17 @@ const builders = {
   slots: () => import('./games/slots.js'),
   racer: () => import('./games/racer.js'),
   kartclash: () => import('./games/kartclash.js'),
-  tanks: () => import('./games/tanks.js?v=20261122d')
+  tanks: () => import('./games/tanks.js?v=20261122d'),
+  basketball: () => import('./games/basketball.js?v=20261122s'),
+  balloons: () => import('./games/balloons.js?v=20261122s'),
+  catcher: () => import('./games/catcher.js?v=20261122s'),
+  cloudjump: () => import('./games/cloudjump.js?v=20261122s'),
+  dotsboxes: () => import('./games/dotsboxes.js?v=20261122s'),
+  fishing: () => import('./games/fishing.js?v=20261122s'),
+  flood: () => import('./games/flood.js?v=20261122s'),
+  muehle: () => import('./games/muehle.js?v=20261122s'),
+  numbermemory: () => import('./games/numbermemory.js?v=20261122s'),
+  stacker: () => import('./games/stacker.js?v=20261122s')
 };
 
 async function loadGame(id){
