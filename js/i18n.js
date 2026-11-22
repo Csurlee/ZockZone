@@ -192,6 +192,9 @@ const TRANSLATIONS = {
     'online.board.passed': (name) => `${name} konnte nicht ziehen und setzt aus.`,
     'online.board.draw': 'Unentschieden!',
     'online.board.again': 'Klick aufs Brett für eine neue Runde.',
+    'online.tanks.yourturn': 'Du bist dran! Zielen mit ← → ↑ ↓, Feuer mit Leertaste.',
+    'online.tanks.wait': (name) => `${name} zielt…`,
+    'online.tanks.again': 'Drück FEUER für eine neue Runde.',
 
     // === Chat ===
     'chat.header': '💬 Lobby Chat',
@@ -417,6 +420,9 @@ const TRANSLATIONS = {
     'online.board.passed': (name) => `${name} had no move and passes.`,
     'online.board.draw': 'Draw!',
     'online.board.again': 'Click the board for a new round.',
+    'online.tanks.yourturn': 'Your turn! Aim with ← → ↑ ↓, fire with Space.',
+    'online.tanks.wait': (name) => `${name} is aiming…`,
+    'online.tanks.again': 'Press FIRE for a new round.',
 
     // === Chat ===
     'chat.header': '💬 Lobby Chat',

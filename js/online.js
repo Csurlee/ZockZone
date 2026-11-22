@@ -1,7 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { sfx } from './sfx.js';
-import { t } from './i18n.js?v=20261122b';
+import { t } from './i18n.js?v=20261122d';
 import { startBoardOnline, BOARD_GAMES } from './online-board.js?v=20261122b';
+import { startTanksOnline } from './online-tanks.js?v=20261122d';
 
 const SUPABASE_URL     = 'https://supabase.hackthelab.uk';
 const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
@@ -765,6 +766,17 @@ function startGame(gameName) {
 
   if(gameName === 'billiard') {
     gameCleanup = startBilliardOnline(canvas);
+    return;
+  }
+
+  if(gameName === 'tanks') {
+    let cancelled = false, stopFn = null;
+    gameCleanup = () => { cancelled = true; if(stopFn) stopFn(); };
+    startTanksOnline(canvas, {
+      sb, roomId: myRoom.id, isHost,
+      hostName: myRoom.host_name, guestName: myRoom.guest_name,
+      sfx, t, scoreEl: $('onlineScore'), resultEl: $('onlineResult'),
+    }).then(fn => { if(cancelled) fn(); else stopFn = fn; });
     return;
   }
 

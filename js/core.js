@@ -282,7 +282,7 @@ const builders = {
   slots: () => import('./games/slots.js'),
   racer: () => import('./games/racer.js'),
   kartclash: () => import('./games/kartclash.js'),
-  tanks: () => import('./games/tanks.js?v=20261122c')
+  tanks: () => import('./games/tanks.js?v=20261122d')
 };
 
 async function loadGame(id){

@@ -5,6 +5,7 @@ import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 //  PANZER-DUELL  —  ein Spiel von Luki 🎮
 //  Zwei Spieler schießen abwechselnd. Stell Winkel und Kraft ein,
 //  denk an den Wind und triff den anderen Panzer!
+//  Gibt es am selben Gerät (build) und online (js/online-tanks.js).
 // =====================================================================
 
 // ---------- 🛠️ LUKI-ECKE: Hier darfst du alles verändern! ----------
@@ -18,43 +19,42 @@ const FARBE_2       = '#FF6B4A';  // Farbe von Spieler 2
 const FARBE_BODEN   = '#7C5A3A';  // Farbe vom Boden
 // ---------------------------------------------------------------------
 
-const W = 480, H = 300;
+export const W = 480, H = 300;
+const COLORS = [FARBE_1, FARBE_2];
 
-export function build(){
-  const scoreEl = hud(['Spieler 1','tnkP1'], ['Spieler 2','tnkP2'], ['Wind','tnkWind']);
-  const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
-  const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
-  canvas.style.touchAction = 'none';
-  wrap.appendChild(canvas);
-
-  // Steuer-Knöpfe (für Handy und Maus)
-  const pad = document.createElement('div');
-  pad.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;';
-  const btn = (label, bg) => { const b = mkButton(label, bg || 'var(--card)', bg ? '#14101F' : '#fff'); b.style.padding = '10px 14px'; b.style.touchAction = 'manipulation'; return b; };
-  const bAngL = btn('↺ Winkel'), bAngR = btn('Winkel ↻'), bPowD = btn('− Kraft'), bPowU = btn('Kraft +'), bFire = btn('🔥 FEUER!', '#FF6B4A');
-  pad.append(bAngL, bAngR, bPowD, bPowU, bFire);
-
-  playerBody.append(scoreEl, wrap, pad, mkHint('2 Spieler abwechselnd. ← → Winkel, ↑ ↓ Kraft, Leertaste = Feuer. Achte auf den Wind!'));
+// =====================================================================
+//  DER MOTOR: Physik, Malen und Spielregeln.
+//  hooks = {
+//    names:        ['Spieler 1', 'Spieler 2'],
+//    canControl:   (turn) => darf dieser Computer gerade zielen/schießen?
+//    onAim:        (angle, power)  Rohr wurde bewegt
+//    onFire:       (angle, power)  es wurde geschossen
+//    onTurnEnd:    (snapshot)      Schuss ist fertig, neuer Stand
+//    onHud:        (info)          Leben/Wind haben sich geändert
+//    onGameOver:   (text)          jemand hat gewonnen
+//    onRestart:    ()              nach Spielende wurde "Feuer" gedrückt
+//  }
+// =====================================================================
+export function createTanks(canvas, hooks){
   const ctx = canvas.getContext('2d');
-  const over = overMsg(wrap, '', start);
-
-  let ground, tanks, turn, shot, wind, booms, loopId, gameOver, trails;
-  let starter = 1;   // wer beginnt, wechselt jede Runde (fair!)
+  canvas.width = W; canvas.height = H;
+  let ground, tanks, turn, shot, wind, booms, loopId, gameOver, winnerText, winner, trails;
+  let remoteShot = false;   // fliegt gerade eine Kugel vom anderen Computer?
+  let pending = null;       // Spielstand, der nach dem Flug geladen wird
+  let stopped = false;
 
   // ---------- Neues Spiel ----------
-  function start(){
+  function newGame(starter){
     makeGround();
     tanks = [
-      { x: 60,     angle: 45,  power: 60, hp: MAX_LEBEN, color: FARBE_1, name: 'Spieler 1' },
-      { x: W - 60, angle: 135, power: 60, hp: MAX_LEBEN, color: FARBE_2, name: 'Spieler 2' },
+      { x: 60,     angle: 45,  power: 60, hp: MAX_LEBEN },
+      { x: W - 60, angle: 135, power: 60, hp: MAX_LEBEN },
     ];
     tanks.forEach(t => flattenAt(t.x));
-    starter = 1 - starter; turn = starter; shot = null; booms = []; trails = [[], []]; gameOver = false;
+    turn = starter; shot = null; booms = []; trails = [[], []]; gameOver = false; winnerText = ''; winner = -1;
     newWind();
-    updateHud();
-    over.classList.remove('show');
-    if(loopId) cancelAnimationFrame(loopId);
-    loop();
+    hud();
+    return snapshot();
   }
 
   // Hügel-Landschaft aus Wellen bauen
@@ -76,15 +76,30 @@ export function build(){
   function newWind(){ wind = Math.round((Math.random() * 2 - 1) * MAX_WIND * 10) / 10; }
   function tankY(t){ return ground[Math.round(t.x)]; }
 
-  function updateHud(){
-    document.getElementById('tnkP1').textContent = Math.max(0, tanks[0].hp);
-    document.getElementById('tnkP2').textContent = Math.max(0, tanks[1].hp);
-    document.getElementById('tnkWind').textContent = wind === 0 ? '0' : (wind > 0 ? '→ ' : '← ') + Math.abs(wind);
+  function hud(){
+    hooks.onHud?.({ hp: tanks.map(t => Math.max(0, t.hp)), wind, turn, gameOver, busy: !!shot });
+  }
+
+  // ---------- Spielstand speichern und laden (für online) ----------
+  function snapshot(){
+    return {
+      ground: ground.map(v => Math.round(v * 10) / 10),
+      tanks: tanks.map(t => ({ ...t })),
+      turn, wind, gameOver, winnerText, winner,
+    };
+  }
+  function load(s){
+    if(shot){ pending = s; return; }  // erst fertig fliegen lassen
+    ground = s.ground.slice();
+    tanks = s.tanks.map(t => ({ ...t }));
+    turn = s.turn; wind = s.wind; gameOver = s.gameOver; winnerText = s.winnerText; winner = s.winner;
+    booms = booms || []; trails = trails || [[], []];
+    hud();
+    if(gameOver) hooks.onGameOver?.(winnerText);
   }
 
   // ---------- Schießen ----------
-  function fire(){
-    if(shot || gameOver) return;
+  function launch(isRemote){
     const t = tanks[turn];
     const rad = t.angle * Math.PI / 180;
     const speed = t.power * 0.13;
@@ -94,8 +109,23 @@ export function build(){
       vx: Math.cos(rad) * speed,
       vy: -Math.sin(rad) * speed,
     };
+    remoteShot = isRemote;
     trails[turn] = [];
     sfx.whoosh();
+    hud();
+  }
+  function fire(){
+    if(stopped || shot) return;
+    if(gameOver){ hooks.onRestart?.(); return; }
+    if(!hooks.canControl(turn)) return;
+    const t = tanks[turn];
+    hooks.onFire?.(t.angle, t.power);
+    launch(false);
+  }
+  function remoteFire(angle, power){
+    if(shot || gameOver) return;
+    tanks[turn].angle = angle; tanks[turn].power = power;
+    launch(true);
   }
 
   function explode(x, y){
@@ -114,30 +144,41 @@ export function build(){
         t.hp -= Math.round(MAX_SCHADEN * (1 - d / (EXPLOSION + 10)));
       }
     });
-    updateHud();
+    hud();
   }
 
   function endTurn(){
     shot = null;
+    // Schuss vom anderen Computer: nicht selbst entscheiden, sondern auf seinen Stand warten
+    if(remoteShot){
+      remoteShot = false;
+      if(pending){ const p = pending; pending = null; load(p); }
+      return;
+    }
     const loser = tanks.findIndex(t => t.hp <= 0);
     if(loser >= 0){
       gameOver = true;
-      const winner = tanks[1 - loser];
-      setTimeout(() => {
-        sfx.win();
-        over.querySelector('div').textContent = (tanks.every(t => t.hp <= 0) ? 'Beide kaputt! Unentschieden 💥' : winner.name + ' gewinnt! 🏆');
-        over.classList.add('show');
-      }, 600);
+      winner = tanks.every(t => t.hp <= 0) ? -1 : 1 - loser;   // -1 = unentschieden
+      winnerText = tanks.every(t => t.hp <= 0)
+        ? 'Beide kaputt! Unentschieden 💥'
+        : hooks.names[1 - loser] + ' gewinnt! 🏆';
+      sfx.win();
+      hud();
+      hooks.onTurnEnd?.(snapshot());
+      setTimeout(() => hooks.onGameOver?.(winnerText), 600);
       return;
     }
     turn = 1 - turn;
     newWind();
-    updateHud();
+    hud();
     sfx.blip();
+    hooks.onTurnEnd?.(snapshot());
   }
 
   // ---------- Spiel-Schleife: läuft 60 Mal pro Sekunde ----------
   function loop(){
+    if(stopped) return;
+    if(!ground){ loopId = requestAnimationFrame(loop); return; }   // noch kein Spielstand da
     if(shot){
       shot.vx += wind * 0.01;          // Wind schiebt die Kugel
       shot.vy += SCHWERKRAFT;          // Schwerkraft zieht sie nach unten
@@ -176,11 +217,12 @@ export function build(){
     // Panzer
     tanks.forEach((t, i) => {
       const y = tankY(t);
+      const color = COLORS[i];
       if(t.hp <= 0) ctx.globalAlpha = .35;
       const rad = t.angle * Math.PI / 180;
-      ctx.strokeStyle = t.color; ctx.lineWidth = 4; ctx.lineCap = 'round';
+      ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(t.x, y - 10); ctx.lineTo(t.x + Math.cos(rad) * 16, y - 10 - Math.sin(rad) * 16); ctx.stroke();
-      ctx.fillStyle = t.color;
+      ctx.fillStyle = color;
       ctx.beginPath(); ctx.arc(t.x, y - 8, 7, Math.PI, 0); ctx.fill();   // Kuppel
       ctx.fillRect(t.x - 12, y - 8, 24, 7);                            // Körper
       ctx.fillStyle = '#1F2937'; ctx.fillRect(t.x - 13, y - 2, 26, 3); // Ketten
@@ -207,52 +249,109 @@ export function build(){
 
     // Info oben: wer ist dran, Winkel, Kraft
     const t = tanks[turn];
-    ctx.fillStyle = t.color; ctx.font = 'bold 15px Fredoka, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillStyle = COLORS[turn]; ctx.font = 'bold 15px Fredoka, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
     const shownAngle = turn === 0 ? t.angle : 180 - t.angle;   // beide sehen "45°" als Start
-    if(!gameOver) ctx.fillText(`${t.name} ist dran   Winkel: ${shownAngle}°   Kraft: ${t.power}`, 10, 8);
+    if(!gameOver) ctx.fillText(`${hooks.names[turn]} ist dran   Winkel: ${shownAngle}°   Kraft: ${t.power}`, 10, 8);
     // Wind-Pfeil
     ctx.fillStyle = '#fff'; ctx.textAlign = 'right';
     ctx.fillText('Wind ' + (wind === 0 ? '–' : (wind > 0 ? '→'.repeat(Math.ceil(Math.abs(wind))) : '←'.repeat(Math.ceil(Math.abs(wind))))), W - 10, 8);
   }
 
-  // ---------- Steuerung ----------
+  // ---------- Zielen ----------
   function change(what, delta){
-    if(shot || gameOver) return;
+    if(stopped || shot || gameOver || !hooks.canControl(turn)) return;
     const t = tanks[turn];
-    // Für Spieler 2 sind links/rechts beim Winkel gespiegelt, damit es sich gleich anfühlt
+    // Für Spieler 2 ist der Winkel gespiegelt, damit es sich gleich anfühlt
     if(what === 'angle') t.angle = Math.max(5, Math.min(175, t.angle + (turn === 0 ? delta : -delta)));
     if(what === 'power') t.power = Math.max(10, Math.min(100, t.power + delta));
     sfx.tick?.();
+    hooks.onAim?.(t.angle, t.power);
   }
+  function remoteAim(angle, power){
+    if(shot || gameOver) return;
+    tanks[turn].angle = angle; tanks[turn].power = power;
+  }
+
+  function stop(){ stopped = true; cancelAnimationFrame(loopId); }
+  function begin(){ loop(); }
+
+  return { newGame, load, snapshot, fire, remoteFire, change, remoteAim, begin, stop,
+           get turn(){ return turn; }, get gameOver(){ return gameOver; }, get busy(){ return !!shot; } };
+}
+
+// =====================================================================
+//  STEUERUNG: Tastatur + Knöpfe (am selben Gerät und online gleich)
+// =====================================================================
+export function createControls(api, canvas){
+  const pad = document.createElement('div');
+  pad.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;';
+  const btn = (label, bg) => { const b = mkButton(label, bg || 'var(--card)', bg ? '#14101F' : '#fff'); b.style.padding = '10px 14px'; b.style.touchAction = 'manipulation'; return b; };
+  const bAngL = btn('↺ Winkel'), bAngR = btn('Winkel ↻'), bPowD = btn('− Kraft'), bPowU = btn('Kraft +'), bFire = btn('🔥 FEUER!', '#FF6B4A');
+  pad.append(bAngL, bAngR, bPowD, bPowU, bFire);
+
   function onKey(e){
-    if(!canvas.isConnected) return;
+    if(!canvas.isConnected || canvas.offsetParent === null) return;   // nur wenn das Spiel sichtbar ist
+    if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;     // nicht beim Chatten
     const k = e.key;
-    if(k === 'ArrowLeft')  { change('angle', 1);  e.preventDefault(); }
-    if(k === 'ArrowRight') { change('angle', -1); e.preventDefault(); }
-    if(k === 'ArrowUp')    { change('power', 1);  e.preventDefault(); }
-    if(k === 'ArrowDown')  { change('power', -1); e.preventDefault(); }
-    if(k === ' ' || k === 'Enter') { fire(); e.preventDefault(); }
+    if(k === 'ArrowLeft')  { api.change('angle', 1);  e.preventDefault(); }
+    if(k === 'ArrowRight') { api.change('angle', -1); e.preventDefault(); }
+    if(k === 'ArrowUp')    { api.change('power', 1);  e.preventDefault(); }
+    if(k === 'ArrowDown')  { api.change('power', -1); e.preventDefault(); }
+    if(k === ' ' || k === 'Enter') { api.fire(); e.preventDefault(); }
   }
   window.addEventListener('keydown', onKey);
 
   // Knöpfe: gedrückt halten = schneller verstellen
   let holdTimer = null;
+  const stopHold = () => { clearInterval(holdTimer); holdTimer = null; };
   function holdable(el, fn){
-    const stop = () => { clearInterval(holdTimer); holdTimer = null; };
-    el.addEventListener('pointerdown', e => { e.preventDefault(); fn(); stop(); holdTimer = setInterval(fn, 70); });
-    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => el.addEventListener(ev, stop));
+    el.addEventListener('pointerdown', e => { e.preventDefault(); fn(); stopHold(); holdTimer = setInterval(fn, 70); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => el.addEventListener(ev, stopHold));
   }
-  holdable(bAngL, () => change('angle', 1));
-  holdable(bAngR, () => change('angle', -1));
-  holdable(bPowD, () => change('power', -1));
-  holdable(bPowU, () => change('power', 1));
-  bFire.addEventListener('click', fire);
+  holdable(bAngL, () => api.change('angle', 1));
+  holdable(bAngR, () => api.change('angle', -1));
+  holdable(bPowD, () => api.change('power', -1));
+  holdable(bPowU, () => api.change('power', 1));
+  bFire.addEventListener('click', () => api.fire());
+
+  return { el: pad, stop(){ stopHold(); window.removeEventListener('keydown', onKey); pad.remove(); } };
+}
+
+// =====================================================================
+//  AM SELBEN GERÄT: beide Spieler am gleichen Computer
+// =====================================================================
+export function build(){
+  const scoreEl = hud(['Spieler 1','tnkP1'], ['Spieler 2','tnkP2'], ['Wind','tnkWind']);
+  const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
+  const canvas = document.createElement('canvas');
+  canvas.style.touchAction = 'none';
+  wrap.appendChild(canvas);
+  const over = overMsg(wrap, '', start);
+
+  let starter = 1;   // wer beginnt, wechselt jede Runde (fair!)
+  const game = createTanks(canvas, {
+    names: ['Spieler 1', 'Spieler 2'],
+    canControl: () => true,
+    onHud: ({ hp, wind }) => {
+      document.getElementById('tnkP1').textContent = hp[0];
+      document.getElementById('tnkP2').textContent = hp[1];
+      document.getElementById('tnkWind').textContent = wind === 0 ? '0' : (wind > 0 ? '→ ' : '← ') + Math.abs(wind);
+    },
+    onGameOver: text => { over.querySelector('div').textContent = text; over.classList.add('show'); },
+    onRestart: () => start(),
+  });
+  const controls = createControls(game, canvas);
+
+  playerBody.append(scoreEl, wrap, controls.el, mkHint('2 Spieler abwechselnd. ← → Winkel, ↑ ↓ Kraft, Leertaste = Feuer. Achte auf den Wind!'));
+
+  function start(){
+    starter = 1 - starter;
+    over.classList.remove('show');
+    game.newGame(starter);
+  }
 
   window.__restartCurrent = start;
   start();
-  return () => {
-    cancelAnimationFrame(loopId);
-    clearInterval(holdTimer);
-    window.removeEventListener('keydown', onKey);
-  };
+  game.begin();
+  return () => { game.stop(); controls.stop(); };
 }
