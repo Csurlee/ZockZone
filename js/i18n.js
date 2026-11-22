@@ -186,6 +186,12 @@ const TRANSLATIONS = {
     'online.billiard.opponent': '⏳ Gegner zielt…',
     'online.billiard.wins': (name) => `${name} gewinnt! 🏆`,
     'online.pong.wins': (name) => `${name} gewinnt! 🎉`,
+    'online.board.connecting': 'Verbinde mit deinem Gegner…',
+    'online.board.yourturn': (mark) => `Du bist dran! (${mark})`,
+    'online.board.wait': (name, mark) => `${name} ist dran (${mark})…`,
+    'online.board.passed': (name) => `${name} konnte nicht ziehen und setzt aus.`,
+    'online.board.draw': 'Unentschieden!',
+    'online.board.again': 'Klick aufs Brett für eine neue Runde.',
 
     // === Chat ===
     'chat.header': '💬 Lobby Chat',
@@ -400,6 +406,12 @@ const TRANSLATIONS = {
     'online.billiard.opponent': '⏳ Opponent aiming…',
     'online.billiard.wins': (name) => `${name} wins! 🏆`,
     'online.pong.wins': (name) => `${name} wins! 🎉`,
+    'online.board.connecting': 'Connecting to your opponent…',
+    'online.board.yourturn': (mark) => `Your turn! (${mark})`,
+    'online.board.wait': (name, mark) => `${name}'s turn (${mark})…`,
+    'online.board.passed': (name) => `${name} had no move and passes.`,
+    'online.board.draw': 'Draw!',
+    'online.board.again': 'Click the board for a new round.',
 
     // === Chat ===
     'chat.header': '💬 Lobby Chat',
