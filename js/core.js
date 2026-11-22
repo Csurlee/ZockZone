@@ -230,6 +230,7 @@ function closeGame(){
   overlay.classList.remove('open');
   if(currentCleanup) currentCleanup();
   playerBody.innerHTML = '';
+  playerBody.style.zoom = '';
 }
 
 const builders = {
@@ -289,6 +290,7 @@ const builders = {
 async function loadGame(id){
   if(currentCleanup) currentCleanup();
   playerBody.innerHTML = '';
+  playerBody.style.zoom = '';
   window.__restartCurrent = null;
   const mod = await builders[id]();
   currentCleanup = mod.build();
@@ -297,35 +299,59 @@ async function loadGame(id){
 }
 
 // ===== GRÖSSERER SPIEL-BILDSCHIRM =====
-// Macht das Spielfeld (Canvas) so groß, wie es auf den Bildschirm passt.
-// Die Spiele rechnen intern weiter mit ihrer normalen Größe (z. B. 400×280),
-// nur die Anzeige wird größer. Mausklicks rechnen die Spiele selbst um.
-const MAX_ZOOM = 3;   // höchstens 3× so groß
-function fitGame(){
-  if(!overlay.classList.contains('open')) return;
-  if(window.matchMedia('(max-width: 600px)').matches) return;   // Handy: CSS macht volle Breite
-  // größtes Canvas im Spiel suchen (fremde Bibliotheken wie three.js lassen wir in Ruhe)
-  const canvases = [...playerBody.querySelectorAll('canvas')]
-    .filter(c => c.width > 0 && c.height > 0 && (!c.style.width || c.dataset.zzfit));
-  if(!canvases.length) return;
-  const c = canvases.reduce((a, b) => (b.width * b.height > a.width * a.height ? b : a));
+// Macht das Spiel so groß, wie es auf den Bildschirm passt.
+//  - Spiele mit Canvas (Pong, Snake, Panzer-Duell …): das Canvas wird größer angezeigt.
+//    Die Spiele rechnen intern weiter mit ihrer normalen Größe (z. B. 400×280),
+//    Mausklicks rechnen sie selbst um.
+//  - Spiele ohne Canvas (Tic-Tac-Toe, Dame, Memory …): alles wird mit CSS-"zoom" vergrößert.
+const MAX_ZOOM = 3;       // Canvas höchstens 3× so groß
+const MAX_DOM_ZOOM = 2.2; // Brettspiele höchstens 2,2× so groß
+function fitSpace(){
   const ocs = getComputedStyle(overlay);
   const boxW = overlay.clientWidth  - parseFloat(ocs.paddingLeft) - parseFloat(ocs.paddingRight);
-  const boxH = Math.min(overlay.clientHeight - parseFloat(ocs.paddingTop) - parseFloat(ocs.paddingBottom),
-                        document.fullscreenElement ? Infinity : window.innerHeight * 0.94);
+  const boxH = overlay.clientHeight - parseFloat(ocs.paddingTop)  - parseFloat(ocs.paddingBottom);
   const topH = overlay.querySelector('.player-top').offsetHeight;
+  return { boxW, boxH: boxH - topH - 2 };
+}
+function fitGame(){
+  if(!overlay.classList.contains('open')) return;
+  if(window.matchMedia('(max-width: 600px)').matches){ playerBody.style.zoom = ''; return; }   // Handy: CSS macht volle Breite
+  const { boxW, boxH } = fitSpace();
   const bcs = getComputedStyle(playerBody);
   const padX = parseFloat(bcs.paddingLeft) + parseFloat(bcs.paddingRight) + 4;
-  const otherH = playerBody.scrollHeight - c.getBoundingClientRect().height;   // HUD, Knöpfe, Hinweise
-  const maxW = boxW - padX;
-  const maxH = boxH - topH - otherH - 6;
-  const scale = Math.max(0.5, Math.min(maxW / c.width, maxH / c.height, MAX_ZOOM));
-  c.style.width  = Math.floor(c.width  * scale) + 'px';
-  c.style.height = Math.floor(c.height * scale) + 'px';
-  c.dataset.zzfit = '1';
-  // Manche Spiele begrenzen ihren Rahmen (z. B. max. 340px) – der muss mitwachsen
-  const wrap = c.closest('.canvas-wrap');
-  if(wrap && wrap.style.maxWidth){ wrap.style.maxWidth = 'none'; wrap.style.width = 'auto'; }
+
+  // Canvas suchen: eigene Größe (Spiel-Pixel) oder "width:100%" (z. B. Billard). Fremde Bibliotheken (three.js) nicht anfassen.
+  const canvases = [...playerBody.querySelectorAll('canvas')]
+    .filter(c => c.width > 0 && c.height > 0 && (!c.style.width || c.dataset.zzfit || c.style.width === '100%'));
+  if(canvases.length){
+    playerBody.style.zoom = '';
+    const c = canvases.reduce((a, b) => (b.width * b.height > a.width * a.height ? b : a));
+    const otherH = playerBody.scrollHeight - c.getBoundingClientRect().height;   // HUD, Knöpfe, Hinweise
+    const scale = Math.max(0.5, Math.min((boxW - padX) / c.width, (boxH - otherH - 4) / c.height, MAX_ZOOM));
+    const w = Math.floor(c.width * scale), h = Math.floor(c.height * scale);
+    const wrap = c.closest('.canvas-wrap') || c.parentElement;
+    if(c.style.width === '100%' && !c.dataset.zzfit){
+      // Spiel will 100% Breite seines Rahmens: dann den Rahmen passend breit machen
+      if(wrap){ wrap.style.maxWidth = w + 'px'; wrap.style.width = w + 'px'; }
+      return;
+    }
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+    c.dataset.zzfit = '1';
+    // Manche Spiele begrenzen ihren Rahmen (z. B. max. 340px) – der muss mitwachsen
+    if(wrap && wrap.style.maxWidth){ wrap.style.maxWidth = 'none'; wrap.style.width = 'auto'; }
+    return;
+  }
+
+  // Kein Canvas: ganzes Spiel mit zoom vergrößern.
+  if(playerBody.querySelector('[data-zz-nozoom]')) return;
+  playerBody.style.zoom = '';                     // kurz ohne zoom messen (passiert im selben Bild, flackert nicht)
+  let natW = 0;
+  [...playerBody.children].forEach(el => { natW = Math.max(natW, el.getBoundingClientRect().width); });
+  if(!natW) return;
+  const natH = playerBody.scrollHeight;
+  const scale = Math.min(boxW / (natW + padX), boxH / natH, MAX_DOM_ZOOM);
+  playerBody.style.zoom = scale > 1.05 ? scale.toFixed(3) : '';
 }
 let fitQueued = false;
 function queueFit(){ if(fitQueued) return; fitQueued = true; requestAnimationFrame(() => { fitQueued = false; fitGame(); }); }
