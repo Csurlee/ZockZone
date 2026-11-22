@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { sfx } from './sfx.js';
-import { t } from './i18n.js?v=20261122f';
+import { t } from './i18n.js?v=20261122g';
 import { startBoardOnline, BOARD_GAMES } from './online-board.js?v=20261122b';
 import { startTanksOnline } from './online-tanks.js?v=20261122d';
 
