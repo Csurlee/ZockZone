@@ -162,11 +162,11 @@ export function build(){
     let msg;
     if(reason==='blackjack'){ sfx.bigWin(); bank += 25; msg = 'Blackjack! Du gewinnst 25€ 🎉'; }
     else if(reason==='push21'){ bank += 10; msg = `Beide haben Blackjack (21)! Unentschieden – Einsatz zurück.`; }
-    sfx.fail(); else if(reason==='bust'){ msg = `Überkauft (${pVal})! Verloren.`; }
+    else if(reason==='bust'){ sfx.fail(); msg = `Überkauft (${pVal})! Verloren.`; }
     else if(dVal>21){ sfx.win(); bank += 20; msg = `Dealer überkauft (${dVal})! Du gewinnst 20€.`; }
     else if(pVal>dVal){ sfx.coin(); bank += 20; msg = `Du gewinnst! ${pVal} gegen ${dVal}.`; }
     else if(pVal===dVal){ bank += 10; msg = `Unentschieden (${pVal}). Einsatz zurück.`; }
-    sfx.lose(); } else{ msg = `Dealer gewinnt. ${dVal} gegen ${pVal}.`; }
+    else{ sfx.lose(); msg = `Dealer gewinnt. ${dVal} gegen ${pVal}.`; }
     updateHud();
     over.querySelector('div').textContent = msg;
     over.classList.add('show');

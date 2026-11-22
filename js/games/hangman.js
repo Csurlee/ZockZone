@@ -53,8 +53,8 @@ export function build(){
       }
     }
     renderWord(); renderKb();
-    sfx.win(); if(word.split('')'').every(l=>guessed.has(l))){
-      over.querySelector('div').textContent='Richtig erraten! 🎉';
+    if(word.split('').every(l=>guessed.has(l))){
+      sfx.win(); over.querySelector('div').textContent='Richtig erraten! 🎉';
       over.classList.add('show');
     }
   }

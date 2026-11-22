@@ -32,8 +32,8 @@ export function build(){
       input.disabled=true; submitBtn.disabled=true;
       over.querySelector('div').textContent=`Erraten in ${tries} Versuchen!`;
       over.classList.add('show');
-    } sfx.blip(); } else if(g<target){ msgEl.textContent='Höher! ⬆️'; }
-    sfx.blip(); } else { msgEl.textContent='Niedriger! ⬇️'; }
+    } else if(g<target){ sfx.blip(); msgEl.textContent='Höher! ⬆️'; }
+    else { sfx.blip(); msgEl.textContent='Niedriger! ⬇️'; }
     input.value='';
   }
   submitBtn.onclick=submit;

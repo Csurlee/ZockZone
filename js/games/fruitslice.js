@@ -50,8 +50,8 @@ export function build(){
     for(let i=items.length-1;i>=0;i--){
       const it=items[i];
       if(Math.hypot(x-it.x,y-it.y)<24){
-        if(it.bomb){ lives--; document.getElementById('frtLives').textContent=Math.max(0,lives); }
-        sfx.eat(); } else{ score++; sfx.pop2(); document.getElementById('frtScore').textContent=score; }
+        if(it.bomb){ sfx.eat(); lives--; document.getElementById('frtLives').textContent=Math.max(0,lives); }
+        else{ score++; sfx.pop2(); document.getElementById('frtScore').textContent=score; }
         items.splice(i,1);
         break;
       }

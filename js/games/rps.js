@@ -21,7 +21,7 @@ export function build(){
       let msg;
       if(cpu===icon) msg='Unentschieden ('+icon+' vs '+cpu+')';
       else if(beats(icon,cpu)){ pScore++; sfx.win(); msg='Du gewinnst! '+icon+' schlägt '+cpu; }
-      sfx.lose(); else{ cScore++; msg='CPU gewinnt. '+cpu+' schlägt '+icon; }
+      else{ cScore++; sfx.lose(); msg='CPU gewinnt. '+cpu+' schlägt '+icon; }
       document.getElementById('rpsP').textContent=pScore;
       document.getElementById('rpsC').textContent=cScore;
       sfx.blip(); resultEl.textContent=msg;
