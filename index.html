@@ -103,7 +103,7 @@
 <meta name="twitter:description" content="Über 50 kostenlose Mini-Games direkt im Browser spielen. Kein Download nötig!">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261122f">
+<link rel="stylesheet" href="css/style.css?v=20261122i">
 </head>
 <body>
 
@@ -118,6 +118,7 @@
     <button class="account-btn" id="accountBtn" onclick="zzToggleAccount()">👤 Login</button>
     <button class="account-btn signup-btn" id="signupBtn" onclick="zzOpenSignup()" data-i18n="header.register">Registrieren</button>
   </div>
+  <button class="lang-btn music-btn" id="musicBtn" type="button" aria-pressed="true" title="Musik ausschalten">🔊</button>
   <div class="lang-switcher" id="langSwitcher">
     <button class="lang-btn" onclick="zzToggleLangMenu()"><span id="langFlag">🇩🇪</span></button>
     <div class="lang-menu" id="langMenu" hidden>
@@ -291,6 +292,7 @@
       <h2 id="playerTitle"></h2>
       <div style="display:flex; gap:8px; align-items:center;">
         <div id="playerRating" class="player-rating"></div>
+        <button class="icon-btn" id="fullscreenBtn" title="Vollbild">⛶</button>
         <button class="icon-btn" id="restartBtn" title="Neu starten">⟳</button>
         <button class="icon-btn" onclick="closeGame()" title="Schließen">✕</button>
       </div>
@@ -540,11 +542,12 @@
 </div>
 
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<script type="module" src="js/i18n.js?v=20261122h"></script>
+<script type="module" src="js/i18n.js?v=20261122i"></script>
 <script type="module" src="js/consent.js?v=20260906p"></script>
-<script type="module" src="js/auth.js?v=20261122h"></script>
-<script type="module" src="js/core.js?v=20261122h"></script>
-<script type="module" src="js/chat.js?v=20261122h"></script>
-<script type="module" src="js/online.js?v=20261122h"></script>
+<script type="module" src="js/auth.js?v=20261122i"></script>
+<script type="module" src="js/core.js?v=20261122i"></script>
+<script type="module" src="js/chat.js?v=20261122i"></script>
+<script type="module" src="js/online.js?v=20261122i"></script>
+<script type="module" src="js/music.js?v=20261122i"></script>
 </body>
 </html>

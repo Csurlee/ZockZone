@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { t } from './i18n.js?v=20261122h';
+import { t } from './i18n.js?v=20261122i';
 import { GAMES } from './games-list.js?v=20261122c';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
@@ -226,6 +226,7 @@ function renderPlayerRating(gameId){
 }
 
 function closeGame(){
+  if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
   overlay.classList.remove('open');
   if(currentCleanup) currentCleanup();
   playerBody.innerHTML = '';
@@ -291,6 +292,63 @@ async function loadGame(id){
   window.__restartCurrent = null;
   const mod = await builders[id]();
   currentCleanup = mod.build();
+  requestAnimationFrame(fitGame);
+  setTimeout(fitGame, 200);
+}
+
+// ===== GRÖSSERER SPIEL-BILDSCHIRM =====
+// Macht das Spielfeld (Canvas) so groß, wie es auf den Bildschirm passt.
+// Die Spiele rechnen intern weiter mit ihrer normalen Größe (z. B. 400×280),
+// nur die Anzeige wird größer. Mausklicks rechnen die Spiele selbst um.
+const MAX_ZOOM = 3;   // höchstens 3× so groß
+function fitGame(){
+  if(!overlay.classList.contains('open')) return;
+  if(window.matchMedia('(max-width: 600px)').matches) return;   // Handy: CSS macht volle Breite
+  // größtes Canvas im Spiel suchen (fremde Bibliotheken wie three.js lassen wir in Ruhe)
+  const canvases = [...playerBody.querySelectorAll('canvas')]
+    .filter(c => c.width > 0 && c.height > 0 && (!c.style.width || c.dataset.zzfit));
+  if(!canvases.length) return;
+  const c = canvases.reduce((a, b) => (b.width * b.height > a.width * a.height ? b : a));
+  const ocs = getComputedStyle(overlay);
+  const boxW = overlay.clientWidth  - parseFloat(ocs.paddingLeft) - parseFloat(ocs.paddingRight);
+  const boxH = Math.min(overlay.clientHeight - parseFloat(ocs.paddingTop) - parseFloat(ocs.paddingBottom),
+                        document.fullscreenElement ? Infinity : window.innerHeight * 0.94);
+  const topH = overlay.querySelector('.player-top').offsetHeight;
+  const bcs = getComputedStyle(playerBody);
+  const padX = parseFloat(bcs.paddingLeft) + parseFloat(bcs.paddingRight) + 4;
+  const otherH = playerBody.scrollHeight - c.getBoundingClientRect().height;   // HUD, Knöpfe, Hinweise
+  const maxW = boxW - padX;
+  const maxH = boxH - topH - otherH - 6;
+  const scale = Math.max(0.5, Math.min(maxW / c.width, maxH / c.height, MAX_ZOOM));
+  c.style.width  = Math.floor(c.width  * scale) + 'px';
+  c.style.height = Math.floor(c.height * scale) + 'px';
+  c.dataset.zzfit = '1';
+  // Manche Spiele begrenzen ihren Rahmen (z. B. max. 340px) – der muss mitwachsen
+  const wrap = c.closest('.canvas-wrap');
+  if(wrap && wrap.style.maxWidth){ wrap.style.maxWidth = 'none'; wrap.style.width = 'auto'; }
+}
+let fitQueued = false;
+function queueFit(){ if(fitQueued) return; fitQueued = true; requestAnimationFrame(() => { fitQueued = false; fitGame(); }); }
+window.addEventListener('resize', queueFit);
+document.addEventListener('fullscreenchange', () => { renderFsBtn(); setTimeout(fitGame, 50); });
+// Wenn ein Spiel sein Canvas austauscht oder die Größe ändert, neu anpassen
+new MutationObserver(queueFit).observe(playerBody, { childList:true, subtree:true, attributes:true, attributeFilter:['width','height'] });
+
+// Vollbild-Knopf
+const fsBtn = document.getElementById('fullscreenBtn');
+function renderFsBtn(){
+  if(!fsBtn) return;
+  const on = document.fullscreenElement === overlay;
+  fsBtn.textContent = on ? '🗗' : '⛶';
+  fsBtn.title = on ? t('game.fullscreen.exit') : t('game.fullscreen');
+}
+if(fsBtn){
+  if(!document.fullscreenEnabled) fsBtn.hidden = true;   // z. B. iPhone kann das nicht
+  fsBtn.onclick = () => {
+    if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+    else overlay.requestFullscreen?.().catch(()=>{});
+  };
+  renderFsBtn();
 }
 
 window.openGame = openGame;

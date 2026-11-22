@@ -12,6 +12,8 @@ const TRANSLATIONS = {
     'hero.stat.games': 'Spiele im Katalog',
     'hero.stat.free': 'Kostenlos, Konto optional',
     'hero.stat.muenz': '🪙 50 Automaten — jetzt spielen ▶',
+    'game.fullscreen': 'Vollbild',
+    'game.fullscreen.exit': 'Vollbild beenden',
 
     'filter.all': 'Alle',
     'filter.hot': '🔥 HOT',
@@ -241,6 +243,8 @@ const TRANSLATIONS = {
     'hero.stat.games': 'Games in catalog',
     'hero.stat.free': 'Free, account optional',
     'hero.stat.muenz': '🪙 50 arcade machines — play now ▶',
+    'game.fullscreen': 'Fullscreen',
+    'game.fullscreen.exit': 'Exit fullscreen',
 
     'filter.all': 'All',
     'filter.hot': '🔥 HOT',
