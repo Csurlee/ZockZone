@@ -26,6 +26,7 @@ export const GAMES = [
   {id:'minesweeper', title:'Minesweeper', icon:'💣', cat:'puzzle', tag:'new', rating:'4.7', plays:'720'},
   {id:'sudoku', title:'Mini-Sudoku', icon:'🧮', cat:'puzzle', tag:'new', rating:'4.6', plays:'480'},
   {id:'nim', title:'Nim', icon:'🪵', cat:'2player', tag:'', rating:'4.0', plays:'180'},
+  {id:'tanks', title:'Panzer-Duell', icon:'💥', cat:'2player', tag:'new', rating:'5.0', plays:'0'},
   {id:'pong', title:'Pong Duell', icon:'🏓', cat:'arcade', tag:'', rating:'4.5', plays:'430'},
   {id:'reaction', title:'Reaktionstest', icon:'⚡', cat:'reflex', tag:'', rating:'4.3', plays:'340'},
   {id:'reversi', title:'Reversi', icon:'⚪', cat:'2player', tag:'', rating:'4.4', plays:'340'},

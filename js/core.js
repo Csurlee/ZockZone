@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js';
-import { GAMES } from './games-list.js?v=20260906p';
+import { GAMES } from './games-list.js?v=20261122c';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
 
@@ -122,6 +122,7 @@ function thumbBg(id){
     billiard:'linear-gradient(135deg,#1B7A3A,#0A3D1F)',
     blackjack:'linear-gradient(135deg,#0F5132,#062919)',
     pong:'linear-gradient(135deg,#0EA5E9,#075985)',
+    tanks:'linear-gradient(135deg,#7C5A3A,#1E1B4B)',
     breakout:'linear-gradient(135deg,#F97316,#7C2D12)',
     minesweeper:'linear-gradient(135deg,#64748B,#1E293B)',
     simon:'linear-gradient(135deg,#A855F7,#4C1D95)',
@@ -280,7 +281,8 @@ const builders = {
   typing: () => import('./games/typing.js'),
   slots: () => import('./games/slots.js'),
   racer: () => import('./games/racer.js'),
-  kartclash: () => import('./games/kartclash.js')
+  kartclash: () => import('./games/kartclash.js'),
+  tanks: () => import('./games/tanks.js?v=20261122c')
 };
 
 async function loadGame(id){
