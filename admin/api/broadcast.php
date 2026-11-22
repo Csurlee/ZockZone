@@ -4,16 +4,7 @@ require_once __DIR__ . '/../includes/supabase_client.php';
 
 set_time_limit(120);
 
-$SETTINGS_FILE = __DIR__ . '/../includes/mail_settings.json';
-
-function bc_read_settings(string $f): array {
-    if (!file_exists($f)) return [
-        'enabled' => false, 'smtp_host' => '', 'smtp_port' => 587,
-        'smtp_encryption' => 'tls', 'smtp_user' => '', 'smtp_password' => '',
-        'from_name' => 'ZockZone', 'from_email' => '',
-    ];
-    return json_decode(file_get_contents($f), true) ?? [];
-}
+require_once __DIR__ . '/../includes/mail_settings.php';
 
 function bc_get_all_users(): array {
     $page = 1; $all = [];
@@ -219,7 +210,7 @@ if ($method === 'POST') {
     if ($action === 'send') {
         if (!$subject || !$message) { http_response_code(400); echo json_encode(['error' => 'Betreff und Nachricht erforderlich']); exit; }
 
-        $cfg = bc_read_settings($SETTINGS_FILE);
+        $cfg = mail_settings_read();
         if (!($cfg['enabled'] ?? false)) { http_response_code(503); echo json_encode(['error' => 'E-Mail-Versand ist deaktiviert. Bitte erst unter E-Mail aktivieren.']); exit; }
 
         $users = bc_get_all_users();

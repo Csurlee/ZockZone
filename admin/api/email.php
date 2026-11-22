@@ -1,21 +1,10 @@
 <?php
 require_once __DIR__ . '/../includes/api_auth_guard.php';
 
-$SETTINGS_FILE = __DIR__ . '/../includes/mail_settings.json';
+require_once __DIR__ . '/../includes/mail_settings.php';
 
-function read_mail_settings(string $file): array {
-    if(!file_exists($file)) return [
-        'enabled'          => false,
-        'smtp_host'        => '',
-        'smtp_port'        => 587,
-        'smtp_encryption'  => 'tls',
-        'smtp_user'        => '',
-        'smtp_password'    => '',
-        'from_name'        => 'ZockZone',
-        'from_email'       => '',
-    ];
-    return json_decode(file_get_contents($file), true) ?? [];
-}
+// alte Aufrufe weiter unterstützen
+function read_mail_settings($unused = null): array { return mail_settings_read(); }
 
 function smtp_send(array $cfg, string $to, string $subject, string $body): ?string {
     $host = $cfg['smtp_host'] ?? '';
@@ -112,7 +101,7 @@ function smtp_send(array $cfg, string $to, string $subject, string $body): ?stri
 $method = $_SERVER['REQUEST_METHOD'];
 
 if($method === 'GET') {
-    $s = read_mail_settings($SETTINGS_FILE);
+    $s = mail_settings_read();
     if($s['smtp_password'] !== '') $s['smtp_password'] = '••••••••';
     http_response_code(200);
     echo json_encode($s);
@@ -124,7 +113,7 @@ if($method === 'POST') {
     $action = $input['action'] ?? 'save';
 
     if($action === 'save') {
-        $current = read_mail_settings($SETTINGS_FILE);
+        $current = mail_settings_read();
         $new = [
             'enabled'         => (bool)($input['enabled'] ?? $current['enabled']),
             'smtp_host'       => trim($input['smtp_host'] ?? $current['smtp_host']),
@@ -137,23 +126,23 @@ if($method === 'POST') {
             'from_name'       => trim($input['from_name'] ?? $current['from_name']),
             'from_email'      => trim($input['from_email'] ?? $current['from_email']),
         ];
-        file_put_contents($SETTINGS_FILE, json_encode($new, JSON_PRETTY_PRINT));
+        if(!mail_settings_write($new)) { http_response_code(500); echo json_encode(['error' => 'Einstellungen konnten nicht gespeichert werden (Datei nicht beschreibbar).']); exit; }
         http_response_code(200);
         echo json_encode(['ok' => true]);
         exit;
     }
 
     if($action === 'toggle') {
-        $current = read_mail_settings($SETTINGS_FILE);
+        $current = mail_settings_read();
         $current['enabled'] = (bool)($input['enabled'] ?? !$current['enabled']);
-        file_put_contents($SETTINGS_FILE, json_encode($current, JSON_PRETTY_PRINT));
+        if(!mail_settings_write($current)) { http_response_code(500); echo json_encode(['error' => 'Einstellungen konnten nicht gespeichert werden (Datei nicht beschreibbar).']); exit; }
         http_response_code(200);
         echo json_encode(['ok' => true, 'enabled' => $current['enabled']]);
         exit;
     }
 
     if($action === 'test') {
-        $s = read_mail_settings($SETTINGS_FILE);
+        $s = mail_settings_read();
         $to = trim($input['to'] ?? '');
         if(!$to) { http_response_code(400); echo json_encode(['error' => 'Empfänger fehlt']); exit; }
         $err = smtp_send(
