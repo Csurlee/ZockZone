@@ -222,7 +222,7 @@ const TRANSLATIONS = {
     'promo.muenzarcade.badge': '🪙 NEU',
     'promo.muenzarcade.title': 'MÜNZ-ARCADE',
     'promo.muenzarcade.desc': '50 Mini-Games mit Ticket- & Münz-Wirtschaft, Shop und Boni — als eigenständige Mini-Site, offline spielbar.',
-    'promo.muenzarcade.cta': '🪙 Zur Münz-Arcade',
+    'promo.muenzarcade.cta': '🪙 JETZT MÜNZ-ARCADE SPIELEN!!!',
   },
   en: {
     'header.login': '👤 Login',
@@ -447,7 +447,7 @@ const TRANSLATIONS = {
     'promo.muenzarcade.badge': '🪙 NEW',
     'promo.muenzarcade.title': 'MÜNZ-ARCADE',
     'promo.muenzarcade.desc': '50 mini-games with a ticket & coin economy, shop and bonuses — a standalone mini-site, playable offline.',
-    'promo.muenzarcade.cta': '🪙 Go to Münz-Arcade',
+    'promo.muenzarcade.cta': '🪙 PLAY MÜNZ-ARCADE NOW!!!',
   }
 };
 
