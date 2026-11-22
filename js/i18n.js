@@ -479,17 +479,20 @@ export function setLang(newLang) {
 }
 
 function applyTranslations() {
+  // Fehlt eine Übersetzung, liefert t() den Schlüssel zurück (z. B. "promo.x.title").
+  // Dann lassen wir den Text aus dem HTML stehen, statt den Schlüssel anzuzeigen.
+  const tr = key => { const v = t(key); return v === key ? null : v; };
   document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = t(el.dataset.i18n);
+    const v = tr(el.dataset.i18n); if (v !== null) el.textContent = v;
   });
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    el.innerHTML = t(el.dataset.i18nHtml);
+    const v = tr(el.dataset.i18nHtml); if (v !== null) el.innerHTML = v;
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    el.placeholder = t(el.dataset.i18nPlaceholder);
+    const v = tr(el.dataset.i18nPlaceholder); if (v !== null) el.placeholder = v;
   });
   document.querySelectorAll('[data-i18n-title]').forEach(el => {
-    el.title = t(el.dataset.i18nTitle);
+    const v = tr(el.dataset.i18nTitle); if (v !== null) el.title = v;
   });
   // Show/hide language-specific content blocks
   document.querySelectorAll('[data-lang]').forEach(el => {
