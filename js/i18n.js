@@ -11,6 +11,7 @@ const TRANSLATIONS = {
     'hero.cta': '▶ Spielen',
     'hero.stat.games': 'Spiele im Katalog',
     'hero.stat.free': 'Kostenlos, Konto optional',
+    'hero.stat.muenz': '🪙 50 Automaten — jetzt spielen ▶',
 
     'filter.all': 'Alle',
     'filter.hot': '🔥 HOT',
@@ -239,6 +240,7 @@ const TRANSLATIONS = {
     'hero.cta': '▶ Play',
     'hero.stat.games': 'Games in catalog',
     'hero.stat.free': 'Free, account optional',
+    'hero.stat.muenz': '🪙 50 arcade machines — play now ▶',
 
     'filter.all': 'All',
     'filter.hot': '🔥 HOT',
