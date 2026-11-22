@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { sfx } from './sfx.js';
 import { t } from './i18n.js?v=20261122k';
+import { makeHD } from './hd.js?v=20261122m';
 import { startBoardOnline, BOARD_GAMES } from './online-board.js?v=20261122b';
 import { startTanksOnline } from './online-tanks.js?v=20261122d';
 
@@ -70,6 +71,7 @@ function fitOnlineCanvas() {
                                        (maxBoxH - padY - otherH - 8) / canvas.height, ONLINE_MAX_ZOOM));
   canvas.style.width  = Math.floor(canvas.width  * scale) + 'px';
   canvas.style.height = Math.floor(canvas.height * scale) + 'px';
+  makeHD(canvas, scale);   // gestochen scharf statt verschwommen
 }
 let onlineFitQueued = false;
 function queueOnlineFit() {

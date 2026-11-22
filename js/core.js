@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js?v=20261122k';
 import { GAMES } from './games-list.js?v=20261122c';
+import { makeHD } from './hd.js?v=20261122m';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
 
@@ -315,7 +316,11 @@ function fitSpace(){
 }
 function fitGame(){
   if(!overlay.classList.contains('open')) return;
-  if(window.matchMedia('(max-width: 600px)').matches){ playerBody.style.zoom = ''; return; }   // Handy: CSS macht volle Breite
+  if(window.matchMedia('(max-width: 600px)').matches){   // Handy: CSS macht volle Breite, nur scharf machen
+    playerBody.style.zoom = '';
+    playerBody.querySelectorAll('canvas').forEach(c => { const w = c.getBoundingClientRect().width; if(c.width && w) makeHD(c, w / c.width); });
+    return;
+  }
   const { boxW, boxH } = fitSpace();
   const bcs = getComputedStyle(playerBody);
   const padX = parseFloat(bcs.paddingLeft) + parseFloat(bcs.paddingRight) + 4;
@@ -333,11 +338,13 @@ function fitGame(){
     if(c.style.width === '100%' && !c.dataset.zzfit){
       // Spiel will 100% Breite seines Rahmens: dann den Rahmen passend breit machen
       if(wrap){ wrap.style.maxWidth = w + 'px'; wrap.style.width = w + 'px'; }
+      makeHD(c, scale);
       return;
     }
     c.style.width = w + 'px';
     c.style.height = h + 'px';
     c.dataset.zzfit = '1';
+    makeHD(c, scale);   // gestochen scharf statt verschwommen
     // Manche Spiele begrenzen ihren Rahmen (z. B. max. 340px) – der muss mitwachsen
     if(wrap && wrap.style.maxWidth){ wrap.style.maxWidth = 'none'; wrap.style.width = 'auto'; }
     return;
