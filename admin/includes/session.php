@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/security_headers.php';
 // Sichere Admin-Sitzung starten.
 // - Cookie nur über HTTPS (secure), für JavaScript unsichtbar (httponly)
 // - SameSite=Strict: andere Webseiten können keine Anfragen mit dem Admin-Cookie schicken

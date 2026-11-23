@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.2';
 import { sfx } from './sfx.js';
 import { t } from './i18n.js?v=20261122o';
 import { makeHD } from './hd.js?v=20261122r';

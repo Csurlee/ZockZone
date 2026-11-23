@@ -5,7 +5,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB';
 // Hash vor Supabase-Init lesen — Supabase löscht ihn beim Start
 const _initHash = window.location.hash;
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.2';
 import { t, getLang } from './i18n.js?v=20261122o';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

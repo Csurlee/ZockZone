@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/admin/includes/security_headers.php';
 header('Content-Type: application/json');
 
 $token = json_decode(file_get_contents('php://input'), true)['token'] ?? '';

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/admin/includes/security_headers.php';
 // ===== PROBLEM MELDEN =====
 // Öffentlicher Empfang für "Problem melden" von der ZockZone-Startseite.
 // Speichert jede Meldung als eine JSON-Zeile in REPORTS_FILE (außerhalb des Webroots,

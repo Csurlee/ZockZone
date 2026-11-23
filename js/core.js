@@ -1,7 +1,10 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.119.2';
 import { t, getLang } from './i18n.js?v=20261122o';
 import { GAMES } from './games-list.js?v=20261123f';
 import { makeHD } from './hd.js?v=20261122r';
+
+// 🛡️ Klick-Falle verhindern: Packt eine fremde Seite ZockZone in einen Rahmen, springen wir raus (oder zeigen nichts).
+if (window.top !== window.self) { try { window.top.location.href = window.self.location.href; } catch { document.documentElement.style.display = 'none'; } }
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
 

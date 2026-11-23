@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/admin/includes/security_headers.php';
 // Public, unauthenticated visitor-tracking beacon. Called fire-and-forget from
 // js/core.js on every page load. Must never break or slow down the site for
 // visitors -- every failure path still responds 200 with {ok:...}.
