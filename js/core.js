@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js?v=20261122o';
-import { GAMES } from './games-list.js?v=20261123b';
+import { GAMES } from './games-list.js?v=20261123c';
 import { makeHD } from './hd.js?v=20261122r';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
@@ -114,6 +114,16 @@ window.addEventListener('zz:lang-changed', () => renderGrid());
 
 function thumbBg(id){
   const map = {
+    flipper:'linear-gradient(135deg,#F472B6,#1E1B4B)',
+    duckcross:'linear-gradient(135deg,#65A30D,#0284C7)',
+    treasure:'linear-gradient(135deg,#FDE68A,#B45309)',
+    laser:'linear-gradient(135deg,#EF4444,#0F0B1C)',
+    penguinslide:'linear-gradient(135deg,#E0F2FE,#64748B)',
+    garden:'linear-gradient(135deg,#4D7C0F,#8B5A2B)',
+    lightracer:'linear-gradient(135deg,#38BDF8,#F472B6)',
+    parachute:'linear-gradient(135deg,#60A5FA,#0369A1)',
+    chainreaction:'linear-gradient(135deg,#A855F7,#0B0717)',
+    pipes:'linear-gradient(135deg,#38BDF8,#1F2937)',
     wordsearch:'linear-gradient(135deg,#38BDF8,#1D1730)',
     fivedice:'linear-gradient(135deg,#F8FAFC,#7C3AED)',
     paintnumbers:'linear-gradient(135deg,#F472B6,#38BDF8)',
@@ -345,7 +355,17 @@ const builders = {
   quickdraw: () => import('./games/quickdraw.js?v=20261123b'),
   tugofwar: () => import('./games/tugofwar.js?v=20261123b'),
   maumau: () => import('./games/maumau.js?v=20261123b'),
-  numbersprint: () => import('./games/numbersprint.js?v=20261123b')
+  numbersprint: () => import('./games/numbersprint.js?v=20261123b'),
+  flipper: () => import('./games/flipper.js?v=20261123c'),
+  duckcross: () => import('./games/duckcross.js?v=20261123c'),
+  treasure: () => import('./games/treasure.js?v=20261123c'),
+  laser: () => import('./games/laser.js?v=20261123c'),
+  penguinslide: () => import('./games/penguinslide.js?v=20261123c'),
+  garden: () => import('./games/garden.js?v=20261123c'),
+  lightracer: () => import('./games/lightracer.js?v=20261123c'),
+  parachute: () => import('./games/parachute.js?v=20261123c'),
+  chainreaction: () => import('./games/chainreaction.js?v=20261123c'),
+  pipes: () => import('./games/pipes.js?v=20261123c')
 };
 
 async function loadGame(id){
