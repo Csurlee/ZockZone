@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/supabase_client.php';
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/includes/session.php';
 
 if (!empty($_SESSION['zz_admin_role'])) {
     header('Location: dashboard.php');
@@ -9,7 +9,9 @@ if (!empty($_SESSION['zz_admin_role'])) {
 }
 
 $error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && zz_login_blocked()) {
+    $error = 'Zu viele falsche Versuche. Bitte warte 15 Minuten.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     [$status, $data] = sb_user_login($email, $password);
@@ -18,14 +20,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         [, $profiles] = sb_request('GET', '/rest/v1/profiles?id=eq.' . rawurlencode($userId) . '&select=role');
         $role = $profiles[0]['role'] ?? 'user';
         if (in_array($role, ['admin', 'moderator'], true)) {
+            session_regenerate_id(true);   // neue Sitzungs-Nummer nach dem Login (Schutz vor "Session Fixation")
+            zz_login_reset();
             $_SESSION['zz_admin_uid']   = $userId;
             $_SESSION['zz_admin_email'] = $email;
             $_SESSION['zz_admin_role']  = $role;
             header('Location: dashboard.php');
             exit;
         }
+        zz_login_failed();
         $error = 'Kein Admin- oder Moderator-Zugang für dieses Konto.';
     } else {
+        zz_login_failed();
         $error = 'E-Mail oder Passwort falsch.';
     }
 }

@@ -677,7 +677,8 @@ window.zzShowLeaderboard = async (gameId, gameTitle, containerEl) => {
     data.forEach((row, i) => {
       const el = document.createElement('div');
       el.className='hs-row';
-      el.innerHTML = `<span>${i+1}. ${row.display_name}</span><b>${row.score}</b>`;
+      // Name entschärfen: Spieler bestimmen ihren Namen selbst (sonst könnte jemand Code einschleusen)
+      el.innerHTML = `<span>${i+1}. ${escapeHtml(String(row.display_name ?? ''))}</span><b>${Number(row.score) || 0}</b>`;
       containerEl.appendChild(el);
     });
   } catch(e){

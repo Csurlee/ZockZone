@@ -3,6 +3,13 @@
 // Läuft täglich via Systemcron (z.B. 3:00 Uhr nachts)
 // Setup: sudo crontab -e → 0 3 * * * php /var/www/zockzone/admin/cron/delete_accounts.php >> /var/log/zz_delete.log 2>&1
 
+// Nur auf dem Server selbst (Kommandozeile/Cron) ausführen – NICHT über den Browser.
+// Sonst könnte jeder die Seite aufrufen und sähe E-Mail-Adressen der gelöschten Konten.
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit;
+}
+
 require_once dirname(__DIR__) . '/includes/config.php';
 require_once dirname(__DIR__) . '/includes/supabase_client.php';
 
