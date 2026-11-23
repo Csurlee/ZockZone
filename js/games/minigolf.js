@@ -35,7 +35,8 @@ export function build(){
     updateHud();
   }
   function updateHud(){
-    document.getElementById('mgHole').textContent = `${hole + 1}/${COURSES.length} (Par ${COURSES[hole].par})`;
+    const h = Math.min(hole, COURSES.length - 1);   // nach der letzten Bahn nicht über das Ende hinaus lesen
+    document.getElementById('mgHole').textContent = `${h + 1}/${COURSES.length} (Par ${COURSES[h].par})`;
     document.getElementById('mgShots').textContent = shots;
     document.getElementById('mgTotal').textContent = total;
   }

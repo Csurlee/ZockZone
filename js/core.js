@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js?v=20261122o';
-import { GAMES } from './games-list.js?v=20261122t';
+import { GAMES } from './games-list.js?v=20261123a';
 import { makeHD } from './hd.js?v=20261122r';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
@@ -114,6 +114,9 @@ window.addEventListener('zz:lang-changed', () => renderGrid());
 
 function thumbBg(id){
   const map = {
+    clockquiz:'linear-gradient(135deg,#7C3AED,#F8FAFC)',
+    meteorshield:'linear-gradient(135deg,#1E3A8A,#05030C)',
+    trainswitch:'linear-gradient(135deg,#57534E,#3F6212)',
     snake:'linear-gradient(135deg,#1F7A3D,#0E4A24)',
     twenty48:'linear-gradient(135deg,#C6841E,#7A4E0C)',
     memory:'linear-gradient(135deg,#6D28D9,#2E1065)',
@@ -313,13 +316,16 @@ const builders = {
   muehle: () => import('./games/muehle.js?v=20261122s'),
   numbermemory: () => import('./games/numbermemory.js?v=20261122s'),
   stacker: () => import('./games/stacker.js?v=20261122s'),
-  minigolf: () => import('./games/minigolf.js?v=20261122t'),
+  minigolf: () => import('./games/minigolf.js?v=20261123a'),
   rocketland: () => import('./games/rocketland.js?v=20261122t'),
   ski: () => import('./games/ski.js?v=20261122t'),
   towerdefense: () => import('./games/towerdefense.js?v=20261122t'),
   bowling: () => import('./games/bowling.js?v=20261122t'),
   codebreaker: () => import('./games/codebreaker.js?v=20261122t'),
-  timesrace: () => import('./games/timesrace.js?v=20261122t')
+  timesrace: () => import('./games/timesrace.js?v=20261122t'),
+  clockquiz: () => import('./games/clockquiz.js?v=20261123a'),
+  meteorshield: () => import('./games/meteorshield.js?v=20261123a'),
+  trainswitch: () => import('./games/trainswitch.js?v=20261123a')
 };
 
 async function loadGame(id){
