@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🃏 MAU-MAU – wer zuerst alle Karten los ist, gewinnt!
 // Leg eine Karte mit gleicher Farbe (♥ ♦ ♠ ♣) oder gleichem Wert. Kannst du nicht, zieh eine Karte.
 // Sonderkarten: 7 = Gegner zieht 2 · 8 = Gegner muss aussetzen · Bube = du wünschst dir eine Farbe
@@ -11,7 +14,7 @@ const SUITS = ['♥', '♦', '♠', '♣'], RED = { '♥': 1, '♦': 1 };
 const VALUES = ['7', '8', '9', '10', 'B', 'D', 'K', 'A'];
 
 export function build(){
-  const scoreEl = hud(['Deine Karten','mmMe'], ['Computer','mmCpu'], ['Siege','mmWins']);
+  const scoreEl = hud([L('Deine Karten', 'Your cards'),'mmMe'], [L('Computer', 'Computer'),'mmCpu'], [L('Siege', 'Wins'),'mmWins']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:12px; align-items:center; width:100%; max-width:480px;';
   const cpuRow = document.createElement('div'); cpuRow.style.cssText = 'display:flex; gap:-10px; min-height:70px;';
@@ -21,7 +24,7 @@ export function build(){
   const wish = document.createElement('div'); wish.style.cssText = 'display:none; gap:8px;';
   SUITS.forEach(s => { const b = mkButton(s, '#F8FAFC', RED[s] ? '#DC2626' : '#111827'); b.style.fontSize = '22px'; b.onclick = () => chooseWish(s); wish.appendChild(b); });
   wrap.append(cpuRow, mid, status, wish, hand);
-  playerBody.append(scoreEl, wrap, mkHint('Klick eine passende Karte zum Legen. Keine passt? Klick auf den Stapel zum Ziehen. 7 = +2, 8 = Aussetzen, B = Farbe wünschen.'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Klick eine passende Karte zum Legen. Keine passt? Klick auf den Stapel zum Ziehen. 7 = +2, 8 = Aussetzen, B = Farbe wünschen.', 'Click a matching card to play it. Nothing fits? Click the pile to draw. 7 = +2, 8 = skip, J (B) = wish a suit.')));
   const over = overMsg(wrap, '', start);
   let deck, pile, me, cpu, wishSuit, drawPenalty, turn, wins = 0, done, timer;
 

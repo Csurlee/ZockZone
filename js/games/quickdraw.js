@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🤠 SCHNELL-DUELL – 2 Spieler an einer Tastatur. Wartet auf „JETZT!“ – wer zuerst drückt, gewinnt die Runde.
 // Wer zu früh drückt, verliert die Runde! Spieler 1: Taste A · Spieler 2: Taste L (oder die Hälften antippen)
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -10,12 +13,12 @@ const MIN_WARTEN = 1.5, MAX_WARTEN = 5;   // Sekunden bis „JETZT!“
 const W = 400, H = 260;
 
 export function build(){
-  const scoreEl = hud(['Spieler 1 (A)','qdP1'], ['Spieler 2 (L)','qdP2']);
+  const scoreEl = hud([L('Spieler 1 (A)', 'Player 1 (A)'),'qdP1'], [L('Spieler 2 (L)', 'Player 2 (L)'),'qdP2']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Spieler 1 drückt A (oder tippt links), Spieler 2 drückt L (oder tippt rechts). Erst bei „JETZT!“ drücken!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Spieler 1 drückt A (oder tippt links), Spieler 2 drückt L (oder tippt rechts). Erst bei „JETZT!“ drücken!', 'Player 1 presses A (or taps left), Player 2 presses L (or taps right). Only press at “JETZT!”!')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let score, phase, goAt, timer, msg, times, loopId;

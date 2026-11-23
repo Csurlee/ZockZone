@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🏗️ STAPELTURM – lass den Block genau auf den Turm fallen. Was übersteht, wird abgeschnitten!
 // ---------- 🛠️ LUKI-ECKE ----------
 const START_BREITE = 160;  // Wie breit ist der erste Block?
@@ -10,12 +13,12 @@ const PERFEKT      = 4;    // So viele Pixel daneben zählt noch als "Perfekt!"
 const W = 320, H = 460, BH = 24;
 
 export function build(){
-  const scoreEl = hud(['Höhe','stkScore'], ['Bestwert','stkBest']);
+  const scoreEl = hud([L('Höhe', 'Height'),'stkScore'], [L('Bestwert', 'Best'),'stkBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.cursor = 'pointer';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Klick, tipp oder Leertaste, um den Block fallen zu lassen. Perfekt getroffen = Block bleibt gleich breit!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Klick, tipp oder Leertaste, um den Block fallen zu lassen. Perfekt getroffen = Block bleibt gleich breit!', 'Click, tap or press Space to drop the block. Perfect hit = the block keeps its width!')));
   addLeaderboardUI('stacker', 'Stapelturm');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

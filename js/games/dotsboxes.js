@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // ✏️ KÄSEKÄSTCHEN – abwechselnd Striche ziehen. Wer ein Kästchen schließt, bekommt einen Punkt
 // und ist nochmal dran. Gegen einen Freund oder gegen den Computer.
 const N = 5;                 // 5 × 5 Kästchen
@@ -8,7 +11,7 @@ const S = 340, M = 30, G = (S - 2 * M) / N;
 const COL = ['#C6FF3D', '#FF6B4A'];
 
 export function build(){
-  const scoreEl = hud(['Spieler 1','dbP1'], ['Spieler 2','dbP2']);
+  const scoreEl = hud([L('Spieler 1', 'Player 1'),'dbP1'], [L('Spieler 2', 'Player 2'),'dbP2']);
   const statusEl = document.createElement('div');
   statusEl.style.cssText = 'font-family:Fredoka; font-weight:600; text-align:center;';
   const modeBtn = mkButton('🤖 Gegen Computer', 'var(--card)', '#fff');
@@ -16,7 +19,7 @@ export function build(){
   const canvas = document.createElement('canvas'); canvas.width = S; canvas.height = S;
   canvas.style.cursor = 'pointer';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, statusEl, wrap, modeBtn, mkHint('Klick zwischen zwei Punkte, um einen Strich zu ziehen. Schließt du ein Kästchen, bist du nochmal dran!'));
+  playerBody.append(scoreEl, statusEl, wrap, modeBtn, mkHint(L('Klick zwischen zwei Punkte, um einen Strich zu ziehen. Schließt du ein Kästchen, bist du nochmal dran!', 'Click between two dots to draw a line. Close a box and you go again!')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let H, V, boxes, turn, score, vsCpu = false, busy, done, hover = null;

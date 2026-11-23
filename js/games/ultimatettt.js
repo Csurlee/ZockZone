@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🔲 SUPER-TIC-TAC-TOE – 9 kleine Tic-Tac-Toe-Felder in einem großen!
 // Wo du in einem kleinen Feld setzt, bestimmt, in welchem großen Feld dein Gegner als Nächstes spielen muss.
 // Gewinn ein kleines Feld, um dort dein Zeichen zu bekommen. 3 große in einer Reihe = Sieg!
@@ -9,14 +12,14 @@ const LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 const COL = { X: '#C6FF3D', O: '#FF6B4A' };
 
 export function build(){
-  const scoreEl = hud(['X','utX'], ['O','utO']);
+  const scoreEl = hud([L('X', 'X'),'utX'], [L('O', 'O'),'utO']);
   const statusEl = document.createElement('div');
   statusEl.style.cssText = 'font-family:Fredoka; font-weight:600; text-align:center; min-height:22px;';
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = S; canvas.height = S;
   canvas.style.cursor = 'pointer';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, statusEl, wrap, mkHint('2 Spieler abwechselnd. Das leuchtende große Feld ist das, in dem du spielen musst. Ist es schon voll oder gewonnen, darfst du frei wählen.'));
+  playerBody.append(scoreEl, statusEl, wrap, mkHint(L('2 Spieler abwechselnd. Das leuchtende große Feld ist das, in dem du spielen musst. Ist es schon voll oder gewonnen, darfst du frei wählen.', '2 players take turns. The glowing big square is where you must play. If it is full or won, you may pick freely.')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let cells, big, turn, active, done, wins = { X: 0, O: 0 }, last, starter = 'O';

@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🁫 DOMINO – leg deine Steine an die Enden der Kette. Die Augenzahl muss passen!
 // Wer zuerst keine Steine mehr hat, gewinnt. Kannst du nicht, ziehst du vom Stapel.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -9,7 +12,7 @@ const START_STEINE = 7;
 const PIP = { 0: [], 1: [[1,1]], 2: [[0,0],[2,2]], 3: [[0,0],[1,1],[2,2]], 4: [[0,0],[2,0],[0,2],[2,2]], 5: [[0,0],[2,0],[1,1],[0,2],[2,2]], 6: [[0,0],[2,0],[0,1],[2,1],[0,2],[2,2]] };
 
 export function build(){
-  const scoreEl = hud(['Deine Steine','doMe'], ['Computer','doCpu'], ['Stapel','doPile']);
+  const scoreEl = hud([L('Deine Steine', 'Your tiles'),'doMe'], [L('Computer', 'Computer'),'doCpu'], [L('Stapel', 'Pile'),'doPile']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:12px; align-items:center; width:100%; max-width:520px;';
   const chainEl = document.createElement('div'); chainEl.style.cssText = 'display:flex; flex-wrap:wrap; gap:3px; justify-content:center; background:#14532D; padding:12px; border-radius:14px; min-height:60px; width:100%; box-sizing:border-box;';
@@ -18,7 +21,7 @@ export function build(){
   const drawBtn = document.createElement('button'); drawBtn.textContent = '🂠 Ziehen / Passen';
   drawBtn.style.cssText = 'background:#241C40; color:#fff; border:none; border-radius:10px; padding:10px 16px; font-family:Fredoka; font-weight:700; cursor:pointer;';
   wrap.append(chainEl, status, handEl, drawBtn);
-  playerBody.append(scoreEl, wrap, mkHint('Klick einen hellen Stein zum Anlegen. Passt er an beide Enden, wähle danach links ◀ oder rechts ▶. Nichts passt? Ziehen!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Klick einen hellen Stein zum Anlegen. Passt er an beide Enden, wähle danach links ◀ oder rechts ▶. Nichts passt? Ziehen!', 'Click a bright tile to play it. If it fits both ends, then pick left ◀ or right ▶. Nothing fits? Draw!')));
   const over = overMsg(wrap, '', start);
   let pile, me, cpu, chain, turn, pending, done, passes, timer;
 

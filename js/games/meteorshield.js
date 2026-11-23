@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🛡️ METEOR-SCHILD – dreh den Schild um deinen Planeten und fang die Meteore ab!
 // ---------- 🛠️ LUKI-ECKE ----------
 const SCHILD_BREITE = 0.9;   // Wie breit ist der Schild? (in Bogenmaß, 0.9 ≈ 52°)
@@ -10,12 +13,12 @@ const PLANET_LEBEN  = 5;     // So viele Treffer hält der Planet aus
 const W = 360, H = 360, CX = W / 2, CY = H / 2, PLANET_R = 34, SHIELD_R = 58;
 
 export function build(){
-  const scoreEl = hud(['Abgewehrt','msScore'], ['Planet','msLives'], ['Bestwert','msBest']);
+  const scoreEl = hud([L('Abgewehrt', 'Blocked'),'msScore'], [L('Planet', 'Planet'),'msLives'], [L('Bestwert', 'Best'),'msBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Maus/Finger zeigt, wohin der Schild soll – oder ← → drehen. 💖 heilt den Planeten: den durchlassen!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Maus/Finger zeigt, wohin der Schild soll – oder ← → drehen. 💖 heilt den Planeten: den durchlassen!', 'Mouse/finger points the shield – or rotate with ← →. 💖 heals the planet: let it through!')));
   addLeaderboardUI('meteorshield', 'Meteor-Schild');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

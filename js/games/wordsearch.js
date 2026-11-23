@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🔍 WORTSUCHE – finde alle versteckten Wörter! Zieh vom ersten bis zum letzten Buchstaben.
 // ---------- 🛠️ LUKI-ECKE ----------
 const GROESSE = 10;        // 10 × 10 Buchstaben
@@ -15,7 +18,7 @@ const DIRS = [[0, 1], [1, 0], [1, 1], [-1, 1], [0, -1], [-1, 0], [-1, -1], [1, -
 const FOUND_COLORS = ['#C6FF3D', '#38BDF8', '#F472B6', '#FACC15', '#A78BFA', '#FB923C', '#34D399', '#F87171'];
 
 export function build(){
-  const scoreEl = hud(['Gefunden','wsFound'], ['Zeit','wsTime']);
+  const scoreEl = hud([L('Gefunden', 'Found'),'wsFound'], [L('Zeit', 'Time'),'wsTime']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:12px; align-items:center;';
   const canvas = document.createElement('canvas'); canvas.width = S; canvas.height = S;
@@ -23,7 +26,7 @@ export function build(){
   const list = document.createElement('div');
   list.style.cssText = 'display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:380px;';
   wrap.append(canvas, list);
-  playerBody.append(scoreEl, wrap, mkHint('Drück auf den ersten Buchstaben eines Wortes und zieh bis zum letzten. Wörter können waagrecht, senkrecht, schräg und rückwärts stehen!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Drück auf den ersten Buchstaben eines Wortes und zieh bis zum letzten. Wörter können waagrecht, senkrecht, schräg und rückwärts stehen!', 'Press on the first letter of a word and drag to the last one. Words can run across, down, diagonally and backwards!')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let grid, words, found, sel, t0, timer;

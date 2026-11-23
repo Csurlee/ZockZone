@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // ⚖️ WAAGE – links liegt ein geheimnisvolles Paket. Leg Gewichte auf die rechte Seite,
 // bis die Waage genau gerade ist! Klick ein Gewicht zum Auflegen, nochmal klicken zum Runternehmen.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -10,14 +13,14 @@ const RUNDEN = 8;
 const W = 380, H = 230;
 
 export function build(){
-  const scoreEl = hud(['Runde','scRound'], ['Punkte','scScore']);
+  const scoreEl = hud([L('Runde', 'Round'),'scRound'], [L('Punkte', 'Points'),'scScore']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:12px; align-items:center;';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   const tray = document.createElement('div'); tray.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap; justify-content:center;';
   const msgEl = document.createElement('div'); msgEl.style.cssText = 'font-family:Fredoka; font-size:18px; font-weight:600; min-height:24px;';
   wrap.append(canvas, msgEl, tray);
-  playerBody.append(scoreEl, wrap, mkHint('Die Waage zeigt, welche Seite schwerer ist. Probier Gewichte aus, bis sie genau gerade steht. Wenig Ausprobieren = mehr Punkte!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Die Waage zeigt, welche Seite schwerer ist. Probier Gewichte aus, bis sie genau gerade steht. Wenig Ausprobieren = mehr Punkte!', 'The scale shows which side is heavier. Try weights until it is perfectly level. Fewer tries = more points!')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let target, used, round, score, tries, tilt, done;

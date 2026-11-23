@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🌱 GEMÜSEGARTEN – kauf Samen, pflanz sie, gieß sie und ernte, wenn sie reif sind!
 // Wer nicht gießt, dessen Pflanzen vertrocknen. Schaffst du 500 Münzen in 3 Minuten?
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -16,7 +19,7 @@ const PFLANZEN = [
 const COLS = 5, ROWS = 4, C = 70, W = COLS * C, H = ROWS * C;
 
 export function build(){
-  const scoreEl = hud(['Münzen','gdCoins'], ['Zeit','gdTime'], ['Ziel','gdGoal']);
+  const scoreEl = hud([L('Münzen', 'Coins'),'gdCoins'], [L('Zeit', 'Time'),'gdTime'], [L('Ziel', 'Goal'),'gdGoal']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:10px; align-items:center;';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
@@ -26,7 +29,7 @@ export function build(){
   PFLANZEN.forEach(p => { const b = mkButton(`${p.icon} ${p.preis}🪙`, 'var(--card)', '#fff'); b.onclick = () => { tool = p.id; render(); }; bar.appendChild(b); toolBtns[p.id] = b; });
   const water = mkButton('💧 Gießen', 'var(--card)', '#fff'); water.onclick = () => { tool = 'water'; render(); }; bar.appendChild(water); toolBtns.water = water;
   wrap.append(canvas, bar);
-  playerBody.append(scoreEl, wrap, mkHint('Samen wählen und auf ein leeres Beet klicken. Mit 💧 gießen (Tropfen = durstig!). Reife Pflanzen ✨ anklicken zum Ernten und Verkaufen.'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Samen wählen und auf ein leeres Beet klicken. Mit 💧 gießen (Tropfen = durstig!). Reife Pflanzen ✨ anklicken zum Ernten und Verkaufen.', 'Pick seeds and click an empty bed. Water with 💧 (drop = thirsty!). Click ripe plants ✨ to harvest and sell.')));
   addLeaderboardUI('garden', 'Gemüsegarten');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

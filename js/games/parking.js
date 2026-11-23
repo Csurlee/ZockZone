@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🚗 PARKPLATZ-CHAOS – schieb die Autos hin und her, bis das rote Auto rechts rausfahren kann!
 // Autos fahren nur vorwärts/rückwärts (waagrechte nach links/rechts, senkrechte nach oben/unten).
 // ---------- 🛠️ LUKI-ECKE: eigene Level bauen! ----------
@@ -18,12 +21,12 @@ const N = 6, S = 336, C = S / N;
 const CAR_COLORS = ['#3B82F6', '#22C55E', '#FACC15', '#A855F7', '#14B8A6', '#F97316', '#EC4899', '#64748B', '#0EA5E9', '#84CC16'];
 
 export function build(){
-  const scoreEl = hud(['Level','pkLevel'], ['Züge','pkMoves']);
+  const scoreEl = hud([L('Level', 'Level'),'pkLevel'], [L('Züge', 'Moves'),'pkMoves']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = S + 30; canvas.height = S;
   canvas.style.touchAction = 'none'; canvas.style.cursor = 'grab';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Zieh ein Auto in seine Richtung. Ziel: Das rote Auto muss rechts durch die Ausfahrt!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Zieh ein Auto in seine Richtung. Ziel: Das rote Auto muss rechts durch die Ausfahrt!', 'Drag a car along its direction. Goal: the red car has to leave through the exit on the right!')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', next);
   let level = -1, cars, moves, drag, done, exitAnim;

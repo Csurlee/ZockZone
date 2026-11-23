@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🐝 BIENENFLUG – flieg zu den Blumen, sammle Nektar und bring ihn zum Bienenstock!
 // Je mehr Nektar du auf einmal trägst, desto langsamer wirst du. Pass auf die Spinnen auf!
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -11,12 +14,12 @@ const SPINNEN = 3;
 const W = 400, H = 360, HIVE = { x: 40, y: 40 };
 
 export function build(){
-  const scoreEl = hud(['Honig','bfHoney'], ['Trägt','bfCarry'], ['Zeit','bfTime']);
+  const scoreEl = hud([L('Honig', 'Honey'),'bfHoney'], [L('Trägt', 'Carrying'),'bfCarry'], [L('Zeit', 'Time'),'bfTime']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none'; canvas.style.cursor = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Die Biene fliegt zur Maus/zum Finger (oder Pfeiltasten). Über eine Blume fliegen = Nektar. Zum Bienenstock 🏠 = Honig!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Die Biene fliegt zur Maus/zum Finger (oder Pfeiltasten). Über eine Blume fliegen = Nektar. Zum Bienenstock 🏠 = Honig!', 'The bee flies to the mouse/finger (or arrow keys). Fly over a flower = nectar. Back to the hive 🏠 = honey!')));
   addLeaderboardUI('beeflight', 'Bienenflug');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

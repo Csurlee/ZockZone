@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🎳 BOWLING – 5 Runden, je 2 Würfe. Erst die Position wählen, dann den Ball anschieben!
 // ---------- 🛠️ LUKI-ECKE ----------
 const RUNDEN = 5;          // Wie viele Runden (Frames)?
@@ -9,12 +12,12 @@ const KUGEL_TEMPO = 9;     // Wie schnell rollt die Kugel?
 const W = 260, H = 460, LANE_L = 50, LANE_R = 210, BR = 11, PR = 7;
 
 export function build(){
-  const scoreEl = hud(['Runde','bwFrame'], ['Wurf','bwThrow'], ['Punkte','bwScore']);
+  const scoreEl = hud([L('Runde', 'Round'),'bwFrame'], [L('Wurf', 'Throw'),'bwThrow'], [L('Punkte', 'Points'),'bwScore']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none'; canvas.style.cursor = 'pointer';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('1. Klick: Kugel stoppt an der Position. 2. Klick: Richtungspfeil stoppt, die Kugel rollt los! (Oder Leertaste)'));
+  playerBody.append(scoreEl, wrap, mkHint(L('1. Klick: Kugel stoppt an der Position. 2. Klick: Richtungspfeil stoppt, die Kugel rollt los! (Oder Leertaste)', '1st click: the ball stops at a position. 2nd click: the arrow stops and the ball rolls! (Or Space)')));
   addLeaderboardUI('bowling', 'Bowling');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

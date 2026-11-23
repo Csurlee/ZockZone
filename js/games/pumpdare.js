@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 💨 MUTPROBE – pump den Ballon auf! Je größer, desto mehr Punkte. Aber irgendwann platzt er …
 // Hör rechtzeitig auf und kassier die Punkte. Wie mutig bist du?
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -11,7 +14,7 @@ const W = 300, H = 340;
 const COLORS = ['#EF4444', '#3B82F6', '#22C55E', '#A855F7', '#F59E0B', '#EC4899'];
 
 export function build(){
-  const scoreEl = hud(['Bank','pdBank'], ['Ballon','pdNum'], ['Im Ballon','pdCur']);
+  const scoreEl = hud([L('Bank', 'Bank'),'pdBank'], [L('Ballon', 'Balloon'),'pdNum'], [L('Im Ballon', 'In balloon'),'pdCur']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:10px; align-items:center;';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
@@ -19,7 +22,7 @@ export function build(){
   const pumpBtn = mkButton('💨 Pumpen', '#C6FF3D'), cashBtn = mkButton('💰 Kassieren', 'var(--card)', '#fff');
   bar.append(pumpBtn, cashBtn);
   wrap.append(canvas, bar);
-  playerBody.append(scoreEl, wrap, mkHint('Pumpen = Leertaste, Kassieren = Enter. Jeder Pumpstoß gibt mehr Punkte – aber der Ballon kann jederzeit platzen!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Pumpen = Leertaste, Kassieren = Enter. Jeder Pumpstoß gibt mehr Punkte – aber der Ballon kann jederzeit platzen!', 'Pump = Space, cash in = Enter. Every pump is worth more points – but the balloon can pop at any time!')));
   addLeaderboardUI('pumpdare', 'Mutprobe');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

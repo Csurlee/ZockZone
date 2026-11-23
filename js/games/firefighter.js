@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🚒 FEUERWEHR – lösch die Feuer in den Fenstern, bevor das Haus abbrennt!
 // Halt die Maus/den Finger gedrückt, um zu spritzen. Der Wassertank füllt sich langsam wieder auf.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -12,12 +15,12 @@ const W = 380, H = 400, TRUCK = { x: 190, y: 370 };
 const WINDOWS = []; for(let r = 0; r < 3; r++) for(let c = 0; c < 4; c++) WINDOWS.push({ x: 70 + c * 80, y: 70 + r * 80 });
 
 export function build(){
-  const scoreEl = hud(['Gelöscht','ffScore'], ['Haus','ffHouse'], ['Wasser','ffWater']);
+  const scoreEl = hud([L('Gelöscht', 'Put out'),'ffScore'], [L('Haus', 'House'),'ffHouse'], [L('Wasser', 'Water'),'ffWater']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none'; canvas.style.cursor = 'crosshair';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Maus/Finger gedrückt halten und aufs Feuer zielen! Spar Wasser – der Tank füllt sich nur langsam nach.'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Maus/Finger gedrückt halten und aufs Feuer zielen! Spar Wasser – der Tank füllt sich nur langsam nach.', 'Hold the mouse/finger down and aim at the fire! Save water – the tank refills slowly.')));
   addLeaderboardUI('firefighter', 'Feuerwehr');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

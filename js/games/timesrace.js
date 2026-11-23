@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // ✖️ EINMALEINS-RENNEN – jede richtige Antwort bringt dein Auto nach vorne. Schlag das Computer-Auto!
 // ---------- 🛠️ LUKI-ECKE ----------
 const BIS        = 10;    // Einmaleins bis zu welcher Zahl? (10 = kleines Einmaleins)
@@ -10,7 +13,7 @@ const CPU_TEMPO  = 3.2;   // Sekunden pro Schritt für das Computer-Auto (kleine
 const W = 380, H = 150;
 
 export function build(){
-  const scoreEl = hud(['Richtig','trRight'], ['Fehler','trWrong'], ['Bestzeit','trBest']);
+  const scoreEl = hud([L('Richtig', 'Correct'),'trRight'], [L('Fehler', 'Mistakes'),'trWrong'], [L('Bestzeit', 'Best time'),'trBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:14px; align-items:center;';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
@@ -26,7 +29,7 @@ export function build(){
     answers.appendChild(b); return b;
   });
   wrap.append(canvas, qEl, answers);
-  playerBody.append(scoreEl, wrap, mkHint('Klick die richtige Antwort (oder Tasten 1–4). Jede richtige Antwort = ein Schritt nach vorne. Fehler bremsen!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Klick die richtige Antwort (oder Tasten 1–4). Jede richtige Antwort = ein Schritt nach vorne. Fehler bremsen!', 'Click the right answer (or keys 1–4). Every right answer = one step forward. Mistakes slow you down!')));
   addLeaderboardUI('timesrace', 'Einmaleins-Rennen');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🏭 FLIESSBAND – sortier alles in die richtige Kiste, bevor es vom Band fällt!
 // Taste 1 = 🍎 Obst · 2 = 🧸 Spielzeug · 3 = 👕 Kleidung · 4 = ♻️ Müll (oder die Kisten antippen)
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -16,12 +19,12 @@ const BINS = [
 ];
 
 export function build(){
-  const scoreEl = hud(['Sortiert','cvScore'], ['Leben','cvLives'], ['Bestwert','cvBest']);
+  const scoreEl = hud([L('Sortiert', 'Sorted'),'cvScore'], [L('Leben', 'Lives'),'cvLives'], [L('Bestwert', 'Best'),'cvBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.cursor = 'pointer';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Das vorderste Ding (mit Rahmen) kommt in die Kiste, die du wählst: Tasten 1–4 oder die Kisten antippen.'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Das vorderste Ding (mit Rahmen) kommt in die Kiste, die du wählst: Tasten 1–4 oder die Kisten antippen.', 'The front item (with frame) goes into the box you pick: keys 1–4 or tap the boxes.')));
   addLeaderboardUI('conveyor', 'Fließband');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

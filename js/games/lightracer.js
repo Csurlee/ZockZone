@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🏍️ LICHTRENNER – 2 Spieler, jedes Motorrad zieht eine Leuchtspur hinter sich her.
 // Wer in eine Spur oder an den Rand fährt, verliert! Spieler 1: W A S D · Spieler 2: Pfeiltasten
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -11,12 +14,12 @@ const COLS = 50, ROWS = 36, C = 8, W = COLS * C, H = ROWS * C;
 const COL = ['#38BDF8', '#F472B6'];
 
 export function build(){
-  const scoreEl = hud(['Blau (WASD)','lrP1'], ['Pink (Pfeile)','lrP2']);
+  const scoreEl = hud([L('Blau (WASD)', 'Blue (WASD)'),'lrP1'], [L('Pink (Pfeile)', 'Pink (arrows)'),'lrP2']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   wrap.appendChild(canvas);
   const cpuBtn = mkButton('🤖 Pink = Computer', 'var(--card)', '#fff');
-  playerBody.append(scoreEl, wrap, cpuBtn, mkHint('Blau lenkt mit W A S D, Pink mit den Pfeiltasten. Nicht in eine Spur fahren! Mit dem Knopf spielst du gegen den Computer.'));
+  playerBody.append(scoreEl, wrap, cpuBtn, mkHint(L('Blau lenkt mit W A S D, Pink mit den Pfeiltasten. Nicht in eine Spur fahren! Mit dem Knopf spielst du gegen den Computer.', 'Blue steers with W A S D, Pink with the arrow keys. Don’t hit a trail! Use the button to play against the computer.')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let grid, bikes, wins, timer, phase, cpu = false, roundMsg;

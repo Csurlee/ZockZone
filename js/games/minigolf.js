@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // ⛳ MINIGOLF – zieh vom Ball weg, zielen, loslassen! Wenige Schläge = gut.
 // ---------- 🛠️ LUKI-ECKE ----------
 const SCHLAGKRAFT = 0.12;   // Wie fest wird der Ball geschlagen?
@@ -18,12 +21,12 @@ const COURSES = [
 ];
 
 export function build(){
-  const scoreEl = hud(['Bahn','mgHole'], ['Schläge','mgShots'], ['Gesamt','mgTotal']);
+  const scoreEl = hud([L('Bahn', 'Hole'),'mgHole'], [L('Schläge', 'Strokes'),'mgShots'], [L('Gesamt', 'Total'),'mgTotal']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none'; canvas.style.cursor = 'crosshair';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Drück irgendwo, zieh vom Ball weg (wie eine Steinschleuder) und lass los. Treffer ins Loch → nächste Bahn!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Drück irgendwo, zieh vom Ball weg (wie eine Steinschleuder) und lass los. Treffer ins Loch → nächste Bahn!', 'Press anywhere, pull away from the ball (like a slingshot) and let go. Sink it → next hole!')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let hole, ball, shots, total, aiming, aim, loopId, running, sinking, scoreCard;

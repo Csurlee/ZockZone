@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🏰 TURM-VERTEIDIGUNG – bau Türme neben den Weg, damit kein Monster deine Burg erreicht!
 // ---------- 🛠️ LUKI-ECKE ----------
 const START_GOLD  = 120;   // Gold am Anfang
@@ -16,7 +19,7 @@ const TOWERS = {
 };
 
 export function build(){
-  const scoreEl = hud(['Welle','tdWave'], ['Gold','tdGold'], ['Burg','tdLives']);
+  const scoreEl = hud([L('Welle', 'Wave'),'tdWave'], [L('Gold', 'Gold'),'tdGold'], [L('Burg', 'Castle'),'tdLives']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.cursor = 'pointer';
@@ -25,7 +28,7 @@ export function build(){
   bar.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap; justify-content:center;';
   const typeBtns = Object.entries(TOWERS).map(([k, t]) => { const b = mkButton(`${t.name} ${TURM_PREIS[k]}🪙`, 'var(--card)', '#fff'); b.onclick = () => { sel = k; render(); }; bar.appendChild(b); return [k, b]; });
   const waveBtn = mkButton('▶ Nächste Welle', '#C6FF3D'); bar.appendChild(waveBtn);
-  playerBody.append(scoreEl, wrap, bar, mkHint('Turm-Art wählen, dann neben den Weg klicken. Frost macht Monster langsam, die Kanone trifft mehrere. Starte die Welle, wenn du bereit bist!'));
+  playerBody.append(scoreEl, wrap, bar, mkHint(L('Turm-Art wählen, dann neben den Weg klicken. Frost macht Monster langsam, die Kanone trifft mehrere. Starte die Welle, wenn du bereit bist!', 'Pick a tower type, then click next to the path. Frost slows monsters, the cannon hits several. Start the wave when you are ready!')));
   addLeaderboardUI('towerdefense', 'Turm-Verteidigung');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

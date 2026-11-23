@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // ⛷️ SKI-SLALOM – fahr durch die Tore (zwischen die Fahnen) und weich den Bäumen aus!
 // ---------- 🛠️ LUKI-ECKE ----------
 const START_TEMPO = 2.6;   // Wie schnell geht es am Anfang den Berg runter?
@@ -10,12 +13,12 @@ const LEBEN       = 3;     // So viele verpasste Tore / Bäume darfst du
 const W = 340, H = 460;
 
 export function build(){
-  const scoreEl = hud(['Tore','skScore'], ['Leben','skLives'], ['Bestwert','skBest']);
+  const scoreEl = hud([L('Tore', 'Gates'),'skScore'], [L('Leben', 'Lives'),'skLives'], [L('Bestwert', 'Best'),'skBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('← → oder A D zum Lenken (Handy: links/rechts tippen und halten). Durch jedes Tor fahren, Bäume vermeiden!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('← → oder A D zum Lenken (Handy: links/rechts tippen und halten). Durch jedes Tor fahren, Bäume vermeiden!', '← → or A D to steer (phone: tap and hold left/right). Pass through every gate, avoid the trees!')));
   addLeaderboardUI('ski', 'Ski-Slalom');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

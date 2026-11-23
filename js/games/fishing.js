@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🎣 ANGELGLÜCK – fahr mit dem Boot und lass den Haken runter. Je tiefer, desto wertvoller die Fische!
 // ---------- 🛠️ LUKI-ECKE ----------
 const SPIELZEIT = 60;   // Sekunden
@@ -16,11 +19,11 @@ const TYPES = [
 ];
 
 export function build(){
-  const scoreEl = hud(['Punkte','fshScore'], ['Zeit','fshTime']);
+  const scoreEl = hud([L('Punkte', 'Points'),'fshScore'], [L('Zeit', 'Time'),'fshTime']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('← → fahren (oder Finger links/rechts), Leertaste/Klick = Haken runter. 🦈 = 20 Punkte, 👢 = −3!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('← → fahren (oder Finger links/rechts), Leertaste/Klick = Haken runter. 🦈 = 20 Punkte, 👢 = −3!', '← → to sail (or finger left/right), Space/click = drop the hook. 🦈 = 20 points, 👢 = −3!')));
   addLeaderboardUI('fishing', 'Angelglück');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

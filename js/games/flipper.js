@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🔵 FLIPPER – halt den Ball mit den Flippern im Spiel und triff die Bumper für Punkte!
 // ---------- 🛠️ LUKI-ECKE ----------
 const BAELLE      = 3;      // Wie viele Bälle hast du?
@@ -13,12 +16,12 @@ const BUMPERS = [{ x: 90, y: 120, r: 20, p: 100 }, { x: 210, y: 120, r: 20, p: 1
 const WALLS = [[10, 10, 290, 10], [10, 10, 10, 360], [290, 10, 290, 360], [10, 360, 80, 400], [290, 360, 220, 400], [10, 60, 60, 10], [290, 60, 240, 10]];
 
 export function build(){
-  const scoreEl = hud(['Punkte','flScore'], ['Bälle','flBalls'], ['Bestwert','flBest']);
+  const scoreEl = hud([L('Punkte', 'Points'),'flScore'], [L('Bälle', 'Balls'),'flBalls'], [L('Bestwert', 'Best'),'flBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('← / A = linker Flipper, → / L = rechter Flipper. Am Handy: linke oder rechte Hälfte antippen. Leertaste startet den Ball.'));
+  playerBody.append(scoreEl, wrap, mkHint(L('← / A = linker Flipper, → / L = rechter Flipper. Am Handy: linke oder rechte Hälfte antippen. Leertaste startet den Ball.', '← / A = left flipper, → / L = right flipper. On a phone: tap the left or right half. Space launches the ball.')));
   addLeaderboardUI('flipper', 'Flipper');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🔺 ZAHLEN-PYRAMIDE – jeder Stein ist die Summe der beiden Steine darunter!
 // Fülle die leeren Steine aus. Klick einen leeren Stein an und tipp die Zahl ein.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -9,11 +12,11 @@ const MAX_UNTEN = 12;  // Größte Zahl in der untersten Reihe
 // ------------------------------------
 
 export function build(){
-  const scoreEl = hud(['Gelöst','npSolved'], ['Fehler','npErr']);
+  const scoreEl = hud([L('Gelöst', 'Solved'),'npSolved'], [L('Fehler', 'Mistakes'),'npErr']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:6px; align-items:center; background:#1D1730; padding:18px; border-radius:16px;';
   const pad = document.createElement('div'); pad.style.cssText = 'display:grid; grid-template-columns:repeat(5, 48px); gap:6px; margin-top:12px;';
-  playerBody.append(scoreEl, wrap, pad, mkHint('Beispiel: Stehen unten 3 und 5, dann kommt darüber 8. Klick einen leeren Stein und tipp die Zahl (Ziffern + Enter, oder die Knöpfe).'));
+  playerBody.append(scoreEl, wrap, pad, mkHint(L('Beispiel: Stehen unten 3 und 5, dann kommt darüber 8. Klick einen leeren Stein und tipp die Zahl (Ziffern + Enter, oder die Knöpfe).', 'Example: if 3 and 5 are below, 8 goes on top. Click an empty block and type the number (digits + Enter, or the buttons).')));
   const over = overMsg(wrap, '', start);
   let rows, shown, input, sel, solved = 0, errors = 0, done;
 

@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🥫 DOSENWERFEN – wirf den Ball auf die Dosentürme! Alle Dosen runter = nächstes Level.
 // ---------- 🛠️ LUKI-ECKE ----------
 const BAELLE_PRO_LEVEL = 3;   // So viele Bälle pro Level
@@ -10,12 +13,12 @@ const SCHWERKRAFT = 0.3;
 const W = 400, H = 300, BR = 9, CW = 18, CH = 26, SHELF = 220;
 
 export function build(){
-  const scoreEl = hud(['Level','ctLevel'], ['Bälle','ctBalls'], ['Punkte','ctScore']);
+  const scoreEl = hud([L('Level', 'Level'),'ctLevel'], [L('Bälle', 'Balls'),'ctBalls'], [L('Punkte', 'Points'),'ctScore']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none'; canvas.style.cursor = 'grab';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Drück auf den Ball, zieh nach hinten und lass los – wie eine Steinschleuder!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Drück auf den Ball, zieh nach hinten und lass los – wie eine Steinschleuder!', 'Press on the ball, pull back and let go – like a slingshot!')));
   addLeaderboardUI('canthrow', 'Dosenwerfen');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🛸 WELTRAUM-PATROUILLE – flieg durchs All, schieß die Gegner ab und sammle Extras!
 // ⚡ = schneller schießen · 🔱 = Dreifachschuss · 🛡️ = Schutzschild
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -10,12 +13,12 @@ const SCHUSS_PAUSE = 14;   // Bilder zwischen zwei Schüssen (kleiner = schnelle
 const W = 340, H = 460;
 
 export function build(){
-  const scoreEl = hud(['Punkte','spScore'], ['Leben','spLives'], ['Bestwert','spBest']);
+  const scoreEl = hud([L('Punkte', 'Points'),'spScore'], [L('Leben', 'Lives'),'spLives'], [L('Bestwert', 'Best'),'spBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Maus/Finger oder Pfeiltasten bewegen das Schiff. Es schießt von allein!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Maus/Finger oder Pfeiltasten bewegen das Schiff. Es schießt von allein!', 'Mouse/finger or arrow keys move the ship. It fires by itself!')));
   addLeaderboardUI('spacepatrol', 'Weltraum-Patrouille');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

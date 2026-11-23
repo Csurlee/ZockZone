@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🕐 UHRZEIT-PROFI – wie spät ist es? Lies die Uhr ab und wähl die richtige Zeit!
 // ---------- 🛠️ LUKI-ECKE ----------
 const FRAGEN     = 12;    // Wie viele Uhren pro Runde?
@@ -10,7 +13,7 @@ const ZEIT_PRO_UHR = 10;  // Sekunden pro Uhr
 const S = 240;
 
 export function build(){
-  const scoreEl = hud(['Richtig','clkRight'], ['Uhr','clkNum'], ['Zeit','clkTime']);
+  const scoreEl = hud([L('Richtig', 'Correct'),'clkRight'], [L('Uhr', 'Clock'),'clkNum'], [L('Zeit', 'Time'),'clkTime']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:14px; align-items:center;';
   const canvas = document.createElement('canvas'); canvas.width = S; canvas.height = S;
@@ -24,7 +27,7 @@ export function build(){
     answers.appendChild(b); return b;
   });
   wrap.append(canvas, answers);
-  playerBody.append(scoreEl, wrap, mkHint('Der kurze Zeiger zeigt die Stunde, der lange die Minuten. Klick die richtige Uhrzeit (oder Tasten 1–4)!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Der kurze Zeiger zeigt die Stunde, der lange die Minuten. Klick die richtige Uhrzeit (oder Tasten 1–4)!', 'The short hand shows the hour, the long hand the minutes. Click the right time (or keys 1–4)!')));
   addLeaderboardUI('clockquiz', 'Uhrzeit-Profi');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

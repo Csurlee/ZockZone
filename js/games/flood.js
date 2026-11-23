@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🌈 FARBFLUT – färbe das ganze Feld in eine Farbe!
 // Du startest oben links. Wähle eine Farbe: Dein Bereich nimmt sie an und schluckt alle
 // angrenzenden Felder mit dieser Farbe. Schaffst du es in wenigen Zügen?
@@ -12,7 +15,7 @@ const COLORS = ['#EF4444', '#F59E0B', '#22C55E', '#3B82F6', '#A855F7', '#EC4899'
 const S = 336;
 
 export function build(){
-  const scoreEl = hud(['Züge','fldMoves'], ['Geschafft','fldPct']);
+  const scoreEl = hud([L('Züge', 'Moves'),'fldMoves'], [L('Geschafft', 'Done'),'fldPct']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = S; canvas.height = S;
   wrap.appendChild(canvas);
@@ -25,7 +28,7 @@ export function build(){
     b.onclick = () => pick(i);
     pad.appendChild(b); return b;
   });
-  playerBody.append(scoreEl, wrap, pad, mkHint(`Klick eine Farbe (oder Tasten 1–6). Fülle das Feld in höchstens ${ZUEGE} Zügen!`));
+  playerBody.append(scoreEl, wrap, pad, mkHint(L(`Klick eine Farbe (oder Tasten 1–6). Fülle das Feld in höchstens ${ZUEGE} Zügen!`, `Pick a color (or keys 1–6). Fill the whole board in at most ${ZUEGE} moves!`)));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let grid, moves, done, anim;

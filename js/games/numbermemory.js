@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🧠 ZAHLEN-GEDÄCHTNIS – merk dir die Zahl! Jede Runde wird sie eine Ziffer länger.
 // ---------- 🛠️ LUKI-ECKE ----------
 const START_LAENGE = 3;     // Mit wie vielen Ziffern geht es los?
@@ -8,7 +11,7 @@ const ZEIT_PRO_ZIFFER = 0.7; // Sekunden Anschauzeit pro Ziffer
 // ------------------------------------
 
 export function build(){
-  const scoreEl = hud(['Ziffern','nmLevel'], ['Bestwert','nmBest']);
+  const scoreEl = hud([L('Ziffern', 'Digits'),'nmLevel'], [L('Bestwert', 'Best'),'nmBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'width:100%; max-width:420px; min-height:240px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:#1D1730; border-radius:16px; padding:24px; box-sizing:border-box;';
   const numEl = document.createElement('div');
@@ -25,7 +28,7 @@ export function build(){
   const msgEl = document.createElement('div');
   msgEl.style.cssText = 'font-family:Fredoka; font-size:18px; min-height:24px; text-align:center;';
   wrap.append(numEl, bar, input, okBtn, msgEl);
-  playerBody.append(scoreEl, wrap, mkHint('Schau dir die Zahl gut an. Wenn sie verschwindet, tipp sie ein und drück Enter!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Schau dir die Zahl gut an. Wenn sie verschwindet, tipp sie ein und drück Enter!', 'Look closely at the number. When it disappears, type it and press Enter!')));
   addLeaderboardUI('numbermemory', 'Zahlen-Gedächtnis');
   const over = overMsg(wrap, '', start);
   let len, number, best = 0, timer = null, phase;

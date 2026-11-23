@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🧺 OBSTKORB – fang die Früchte, weich den Bomben aus!
 // ---------- 🛠️ LUKI-ECKE ----------
 const LEBEN        = 3;      // Wie viele Leben hast du?
@@ -11,11 +14,11 @@ const W = 360, H = 420;
 const FRUITS = ['🍎', '🍌', '🍇', '🍓', '🍊', '🍉', '🍒'];
 
 export function build(){
-  const scoreEl = hud(['Punkte','catScore'], ['Leben','catLives'], ['Bestwert','catBest']);
+  const scoreEl = hud([L('Punkte', 'Points'),'catScore'], [L('Leben', 'Lives'),'catLives'], [L('Bestwert', 'Best'),'catBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Maus/Finger oder ← → bewegen den Korb. Früchte fangen, 💣 ausweichen, ⭐ gibt 5 Punkte!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Maus/Finger oder ← → bewegen den Korb. Früchte fangen, 💣 ausweichen, ⭐ gibt 5 Punkte!', 'Mouse/finger or ← → move the basket. Catch the fruit, dodge 💣, ⭐ gives 5 points!')));
   addLeaderboardUI('catcher', 'Obstkorb');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

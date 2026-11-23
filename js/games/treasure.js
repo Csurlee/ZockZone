@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🗺️ SCHATZSUCHE – irgendwo auf der Insel ist ein Schatz vergraben! Grab ein Loch und du erfährst,
 // ob du heiß 🔥 oder kalt 🧊 bist. Findest du ihn, bevor die Schaufeln alle sind?
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -10,7 +13,7 @@ const SCHAUFELN = 8;   // Wie oft darfst du graben?
 const S = 360, C = S / GROESSE;
 
 export function build(){
-  const scoreEl = hud(['Schaufeln','trShovels'], ['Gefunden','trFound']);
+  const scoreEl = hud([L('Schaufeln', 'Shovels'),'trShovels'], [L('Gefunden', 'Found'),'trFound']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = S; canvas.height = S;
   canvas.style.cursor = 'crosshair';
@@ -18,7 +21,7 @@ export function build(){
   msgEl.style.cssText = 'font-family:Fredoka; font-size:20px; font-weight:600; text-align:center; min-height:28px;';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:10px; align-items:center;';
   wrap.append(canvas, msgEl);
-  playerBody.append(scoreEl, wrap, mkHint('Klick auf ein Feld zum Graben. Die Farbe zeigt, wie nah du dran bist: 🔥 rot = ganz nah, 🧊 blau = weit weg.'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Klick auf ein Feld zum Graben. Die Farbe zeigt, wie nah du dran bist: 🔥 rot = ganz nah, 🧊 blau = weit weg.', 'Click a square to dig. The color shows how close you are: 🔥 red = very close, 🧊 blue = far away.')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let tr, digs, shovels, found = 0, done, sand;

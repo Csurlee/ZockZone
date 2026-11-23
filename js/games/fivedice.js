@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🎲 FÜNF WÜRFEL – würfle bis zu 3 Mal, behalte die guten Würfel und trag dein Ergebnis in die Tabelle ein.
 // Jedes Feld nur einmal! Wer am Ende die meisten Punkte hat, ist Würfel-König.
 const CATS = [
@@ -25,7 +28,7 @@ const straight = d => { const s = new Set(d); let best = 0, run = 0; for(let i =
 const PIPS = { 1: [[1,1]], 2: [[0,0],[2,2]], 3: [[0,0],[1,1],[2,2]], 4: [[0,0],[2,0],[0,2],[2,2]], 5: [[0,0],[2,0],[1,1],[0,2],[2,2]], 6: [[0,0],[2,0],[0,1],[2,1],[0,2],[2,2]] };
 
 export function build(){
-  const scoreEl = hud(['Punkte','fdScore'], ['Würfe','fdRolls'], ['Bestwert','fdBest']);
+  const scoreEl = hud([L('Punkte', 'Points'),'fdScore'], [L('Würfe', 'Rolls'),'fdRolls'], [L('Bestwert', 'Best'),'fdBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:12px; align-items:center;';
   const diceRow = document.createElement('div'); diceRow.style.cssText = 'display:flex; gap:10px;';
@@ -33,7 +36,7 @@ export function build(){
   const table = document.createElement('div');
   table.style.cssText = 'display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; width:100%; max-width:420px;';
   wrap.append(diceRow, rollBtn, table);
-  playerBody.append(scoreEl, wrap, mkHint('Würfeln, Würfel antippen zum Behalten (grün), nochmal würfeln. Nach höchstens 3 Würfen ein Feld in der Tabelle wählen. Bonus: 35 Punkte, wenn Einser bis Sechser zusammen 63+ ergeben!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Würfeln, Würfel antippen zum Behalten (grün), nochmal würfeln. Nach höchstens 3 Würfen ein Feld in der Tabelle wählen. Bonus: 35 Punkte, wenn Einser bis Sechser zusammen 63+ ergeben!', 'Roll, tap dice to keep them (green), roll again. After at most 3 rolls pick a box in the table. Bonus: 35 points if Ones to Sixes add up to 63+!')));
   addLeaderboardUI('fivedice', 'Fünf Würfel');
   const over = overMsg(wrap, '', start);
   let dice, held, rolls, used, best = 0, rolling = false;

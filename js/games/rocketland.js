@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🚀 RAKETEN-LANDUNG – lande sanft und gerade auf der Plattform, bevor der Sprit alle ist!
 // ---------- 🛠️ LUKI-ECKE ----------
 const SCHWERKRAFT = 0.035;  // Mond-Schwerkraft (Erde wäre viel stärker!)
@@ -11,7 +14,7 @@ const MAX_LANDE_TEMPO = 1.4; // Schneller aufsetzen = Bruchlandung
 const W = 400, H = 340;
 
 export function build(){
-  const scoreEl = hud(['Level','rlLevel'], ['Sprit','rlFuel'], ['Punkte','rlScore']);
+  const scoreEl = hud([L('Level', 'Level'),'rlLevel'], [L('Sprit', 'Fuel'),'rlFuel'], [L('Punkte', 'Points'),'rlScore']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none';
@@ -20,7 +23,7 @@ export function build(){
   pad.style.cssText = 'display:flex; gap:8px; justify-content:center; flex-wrap:wrap;';
   const bL = mkButton('↺ Links', 'var(--card)', '#fff'), bT = mkButton('🔥 Schub', '#FF6B4A'), bR = mkButton('Rechts ↻', 'var(--card)', '#fff');
   [bL, bT, bR].forEach(b => { b.style.touchAction = 'manipulation'; pad.appendChild(b); });
-  playerBody.append(scoreEl, wrap, pad, mkHint('↑ oder Leertaste = Schub, ← → = drehen. Lande langsam (grün!) und gerade auf der Plattform.'));
+  playerBody.append(scoreEl, wrap, pad, mkHint(L('↑ oder Leertaste = Schub, ← → = drehen. Lande langsam (grün!) und gerade auf der Plattform.', '↑ or Space = thrust, ← → = rotate. Land slowly (green!) and straight on the pad.')));
   addLeaderboardUI('rocketland', 'Raketen-Landung');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

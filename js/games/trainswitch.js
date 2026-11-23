@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🚂 WEICHENSTELLER – jeder Zug hat eine Farbe. Stell die Weichen so, dass er zum Bahnhof
 // mit derselben Farbe fährt! Klick auf eine Weiche, um sie umzustellen.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -24,12 +27,12 @@ const NODES = {
 const COLORS = ['#EF4444', '#3B82F6', '#22C55E', '#FACC15'];
 
 export function build(){
-  const scoreEl = hud(['Richtig','tsRight'], ['Falsch','tsWrong'], ['Züge','tsLeft']);
+  const scoreEl = hud([L('Richtig', 'Correct'),'tsRight'], [L('Falsch', 'Wrong'),'tsWrong'], [L('Züge', 'Moves'),'tsLeft']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.cursor = 'pointer';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Klick auf eine Weiche (Kreis), um sie umzustellen. Der Pfeil zeigt, wohin der nächste Zug fährt. Tasten 1–3 gehen auch!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Klick auf eine Weiche (Kreis), um sie umzustellen. Der Pfeil zeigt, wohin der nächste Zug fährt. Tasten 1–3 gehen auch!', 'Click a switch (circle) to change it. The arrow shows where the next train goes. Keys 1–3 work too!')));
   addLeaderboardUI('trainswitch', 'Weichensteller');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

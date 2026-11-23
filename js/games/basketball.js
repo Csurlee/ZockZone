@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🏀 KORBWURF – zieh den Ball nach hinten wie eine Steinschleuder und lass los!
 // ---------- 🛠️ LUKI-ECKE ----------
 const WUERFE      = 10;    // Wie viele Würfe hast du?
@@ -10,12 +13,12 @@ const WURFKRAFT   = 0.16;  // Wie stark wird der Ball geworfen?
 const W = 380, H = 420, BALL_R = 13;
 
 export function build(){
-  const scoreEl = hud(['Körbe','bbScore'], ['Würfe','bbLeft'], ['Bestwert','bbBest']);
+  const scoreEl = hud([L('Körbe', 'Baskets'),'bbScore'], [L('Würfe', 'Rolls'),'bbLeft'], [L('Bestwert', 'Best'),'bbBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.cursor = 'grab'; canvas.style.touchAction = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Drück auf den Ball, zieh nach hinten und lass los. Je weiter du ziehst, desto fester der Wurf!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Drück auf den Ball, zieh nach hinten und lass los. Je weiter du ziehst, desto fester der Wurf!', 'Press on the ball, pull back and let go. The further you pull, the harder the throw!')));
   addLeaderboardUI('basketball', 'Korbwurf');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

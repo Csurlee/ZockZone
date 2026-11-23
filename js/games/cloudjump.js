@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // ☁️ WOLKENHÜPFER – spring von Wolke zu Wolke immer höher!
 // ---------- 🛠️ LUKI-ECKE ----------
 const SPRUNGKRAFT = 11;    // Wie hoch springt die Figur?
@@ -10,11 +13,11 @@ const LAUFTEMPO   = 6;     // Wie schnell läuft sie nach links/rechts?
 const W = 340, H = 480;
 
 export function build(){
-  const scoreEl = hud(['Höhe','cjHeight'], ['Bestwert','cjBest']);
+  const scoreEl = hud([L('Höhe', 'Height'),'cjHeight'], [L('Bestwert', 'Best'),'cjBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('← → oder A D zum Lenken. Am Handy: links oder rechts tippen. Wer aus dem Bild fällt, verliert!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('← → oder A D zum Lenken. Am Handy: links oder rechts tippen. Wer aus dem Bild fällt, verliert!', '← → or A D to steer. On a phone: tap left or right. Fall off the screen and you lose!')));
   addLeaderboardUI('cloudjump', 'Wolkenhüpfer');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

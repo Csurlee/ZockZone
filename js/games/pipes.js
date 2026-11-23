@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🚰 ROHRLEITUNG – dreh die Rohrstücke, bis das Wasser vom Hahn 🚰 bis zur Blume 🌻 fließt!
 // Jedes Level baut der Computer so, dass es garantiert lösbar ist.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -12,12 +15,12 @@ const DIR = [[-1, 0, 1, 4], [0, 1, 2, 8], [1, 0, 4, 1], [0, -1, 8, 2]];
 const rot = m => ((m << 1) | (m >> 3)) & 15;   // 90° im Uhrzeigersinn drehen
 
 export function build(){
-  const scoreEl = hud(['Level','ppLevel'], ['Drehungen','ppTurns']);
+  const scoreEl = hud([L('Level', 'Level'),'ppLevel'], [L('Drehungen', 'Turns'),'ppTurns']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = S; canvas.height = S;
   canvas.style.cursor = 'pointer';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Klick ein Rohr, um es zu drehen. Blaue Rohre sind schon mit dem Wasser verbunden. Bring das Wasser zur Blume!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Klick ein Rohr, um es zu drehen. Blaue Rohre sind schon mit dem Wasser verbunden. Bring das Wasser zur Blume!', 'Click a pipe to turn it. Blue pipes already carry water. Get the water to the flower!')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', () => { level++; make(); });
   let N, C, grid, src, dst, level = 1, turns, done, wet;

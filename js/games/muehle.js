@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // ⚪ MÜHLE – der Brettspiel-Klassiker für 2 Spieler
 // Regeln: Jeder setzt 9 Steine. Drei in einer Reihe = Mühle → einen gegnerischen Stein wegnehmen.
 // Danach werden Steine auf freie Nachbarpunkte geschoben. Wer nur noch 3 Steine hat, darf springen.
@@ -16,14 +19,14 @@ const pos = i => [M + P[i][0] * (S - 2 * M) / 6, M + P[i][1] * (S - 2 * M) / 6];
 const NAMES = ['Weiß', 'Schwarz'];
 
 export function build(){
-  const scoreEl = hud(['Weiß','mhW'], ['Schwarz','mhB']);
+  const scoreEl = hud([L('Weiß', 'White'),'mhW'], [L('Schwarz', 'Black'),'mhB']);
   const statusEl = document.createElement('div');
   statusEl.style.cssText = 'font-family:Fredoka; font-weight:600; min-height:22px; text-align:center;';
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = S; canvas.height = S;
   canvas.style.cursor = 'pointer';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, statusEl, wrap, mkHint('2 Spieler abwechselnd. Erst Steine setzen, dann schieben. 3 in einer Reihe = Mühle: Nimm dem Gegner einen Stein weg!'));
+  playerBody.append(scoreEl, statusEl, wrap, mkHint(L('2 Spieler abwechselnd. Erst Steine setzen, dann schieben. 3 in einer Reihe = Mühle: Nimm dem Gegner einen Stein weg!', '2 players take turns. First place your pieces, then slide them. 3 in a row = a mill: remove one of your opponent’s pieces!')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let board, turn, toPlace, onBoard, mode, sel, done, starter = 1;

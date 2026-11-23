@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🎈 BALLON-JAGD – lass die Ballons platzen, bevor sie wegfliegen!
 // ---------- 🛠️ LUKI-ECKE ----------
 const SPIELZEIT    = 45;   // Sekunden pro Runde
@@ -10,12 +13,12 @@ const W = 360, H = 440;
 const COLORS = ['#EF4444', '#F59E0B', '#22C55E', '#3B82F6', '#A855F7', '#EC4899', '#14B8A6'];
 
 export function build(){
-  const scoreEl = hud(['Punkte','balScore'], ['Zeit','balTime'], ['Entwischt','balMiss']);
+  const scoreEl = hud([L('Punkte', 'Points'),'balScore'], [L('Zeit', 'Time'),'balTime'], [L('Entwischt', 'Escaped'),'balMiss']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.cursor = 'crosshair';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Klick oder tipp auf die Ballons! Kleine Ballons geben 3 Punkte, goldene 10.'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Klick oder tipp auf die Ballons! Kleine Ballons geben 3 Punkte, goldene 10.', 'Click or tap the balloons! Small balloons give 3 points, golden ones 10.')));
   addLeaderboardUI('balloons', 'Ballon-Jagd');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

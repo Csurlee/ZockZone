@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🪢 SEILZIEHEN – 2 Spieler an einer Tastatur. Hämmert so schnell ihr könnt auf eure Taste!
 // Spieler 1: A · Spieler 2: L (am Handy: linke/rechte Hälfte antippen). Wer das Seil über seine Linie zieht, gewinnt.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -10,12 +13,12 @@ const SIEG_ABSTAND  = 120;   // Wie weit muss die Mitte gezogen werden?
 const W = 400, H = 240;
 
 export function build(){
-  const scoreEl = hud(['Spieler 1 (A)','twP1'], ['Spieler 2 (L)','twP2']);
+  const scoreEl = hud([L('Spieler 1 (A)', 'Player 1 (A)'),'twP1'], [L('Spieler 2 (L)', 'Player 2 (L)'),'twP2']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Countdown abwarten, dann hämmern! Spieler 1: A (links tippen) · Spieler 2: L (rechts tippen).'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Countdown abwarten, dann hämmern! Spieler 1: A (links tippen) · Spieler 2: L (rechts tippen).', 'Wait for the countdown, then hammer! Player 1: A (tap left) · Player 2: L (tap right).')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let pos, vel, wins = [0, 0], phase, count, timer, loopId, taps, shake;

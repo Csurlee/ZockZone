@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 💥 KETTENREAKTION – du hast nur EINEN Klick! Er macht eine Explosion. Jeder Punkt, der sie berührt,
 // explodiert auch. Schaffst du genug Punkte für das nächste Level?
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -11,12 +14,12 @@ const W = 380, H = 380;
 const LEVELS = [[5, 10], [10, 15], [15, 20], [22, 28], [30, 35], [38, 42], [45, 48], [50, 52], [54, 55], [58, 58]];   // [Ziel, Punkte]
 
 export function build(){
-  const scoreEl = hud(['Level','crLevel'], ['Getroffen','crHit'], ['Ziel','crGoal']);
+  const scoreEl = hud([L('Level', 'Level'),'crLevel'], [L('Getroffen', 'Hit'),'crHit'], [L('Ziel', 'Goal'),'crGoal']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.cursor = 'crosshair';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Warte auf den richtigen Moment und klick EINMAL. Die Explosionen stecken sich gegenseitig an!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Warte auf den richtigen Moment und klick EINMAL. Die Explosionen stecken sich gegenseitig an!', 'Wait for the right moment and click ONCE. The explosions set each other off!')));
   addLeaderboardUI('chainreaction', 'Kettenreaktion');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', () => { if(passed) level++; setup(); });   // geschafft = nächstes Level, sonst nochmal

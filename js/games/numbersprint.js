@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🔢 ZAHLEN-SPRINT – tipp die Zahlen von 1 bis 25 so schnell wie möglich der Reihe nach an!
 // ---------- 🛠️ LUKI-ECKE ----------
 const BIS = 25;          // Bis zu welcher Zahl?
@@ -9,12 +12,12 @@ const STRAFE = 2;        // Sekunden Strafe für einen falschen Klick
 const W = 360, H = 360;
 
 export function build(){
-  const scoreEl = hud(['Nächste','nsNext'], ['Zeit','nsTime'], ['Bestzeit','nsBest']);
+  const scoreEl = hud([L('Nächste', 'Next'),'nsNext'], [L('Zeit', 'Time'),'nsTime'], [L('Bestzeit', 'Best time'),'nsBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.cursor = 'pointer';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint(`Finde die 1, dann die 2, dann die 3 … bis ${BIS}! Falsch getippt = ${STRAFE} Sekunden Strafe.`));
+  playerBody.append(scoreEl, wrap, mkHint(L(`Finde die 1, dann die 2, dann die 3 … bis ${BIS}! Falsch getippt = ${STRAFE} Sekunden Strafe.`, `Find 1, then 2, then 3 … up to ${BIS}! Wrong tap = ${STRAFE} seconds penalty.`)));
   addLeaderboardUI('numbersprint', 'Zahlen-Sprint');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

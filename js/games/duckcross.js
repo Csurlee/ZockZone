@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🦆 ENTEN-ÜBERQUERUNG – bring die Entenküken heil über die Straße und den Fluss nach Hause!
 // Auf der Straße: Autos ausweichen. Im Fluss: nur auf Baumstämmen und Seerosen stehen!
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -24,12 +27,12 @@ const LANES = [
 ];
 
 export function build(){
-  const scoreEl = hud(['Gerettet','dcSaved'], ['Leben','dcLives'], ['Bestwert','dcBest']);
+  const scoreEl = hud([L('Gerettet', 'Rescued'),'dcSaved'], [L('Leben', 'Lives'),'dcLives'], [L('Bestwert', 'Best'),'dcBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Pfeiltasten oder WASD. Am Handy: über, unter, links oder rechts neben die Ente tippen. Im Fluss nicht ins Wasser!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Pfeiltasten oder WASD. Am Handy: über, unter, links oder rechts neben die Ente tippen. Im Fluss nicht ins Wasser!', 'Arrow keys or WASD. On a phone: tap above, below, left or right of the duck. Don’t fall into the river!')));
   addLeaderboardUI('duckcross', 'Enten-Überquerung');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

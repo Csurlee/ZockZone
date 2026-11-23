@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🪂 FALLSCHIRM – lenk den Fallschirmspringer aufs Boot! Achtung, der Wind ändert sich.
 // Je näher an der Mitte vom Boot, desto mehr Punkte.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -10,12 +13,12 @@ const MAX_WIND = 1.2;    // Wie stark kann der Wind wehen?
 const W = 360, H = 440, SEA = 400;
 
 export function build(){
-  const scoreEl = hud(['Punkte','pcScore'], ['Sprung','pcJump'], ['Wind','pcWind']);
+  const scoreEl = hud([L('Punkte', 'Points'),'pcScore'], [L('Sprung', 'Jump'),'pcJump'], [L('Wind', 'Wind'),'pcWind']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
   canvas.style.touchAction = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('← → oder A D lenken (Handy: links/rechts gedrückt halten). Lande genau in der Mitte vom Boot!'));
+  playerBody.append(scoreEl, wrap, mkHint(L('← → oder A D lenken (Handy: links/rechts gedrückt halten). Lande genau in der Mitte vom Boot!', '← → or A D to steer (phone: hold left/right). Land right in the middle of the boat!')));
   addLeaderboardUI('parachute', 'Fallschirm');
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);

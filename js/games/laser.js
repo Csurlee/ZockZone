@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🔦 LASER-SPIEGEL – klick auf die Spiegel, um sie zu drehen. Lenk den Laser in den Kristall!
 // Jedes Level wird vom Computer erfunden: Er baut zuerst einen Laserweg und verdreht dann die Spiegel.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -12,12 +15,12 @@ const DIRS = [[0, 1], [1, 0], [0, -1], [-1, 0]];   // rechts, runter, links, hoc
 const BOUNCE = { '/': [3, 2, 1, 0], '\\': [1, 0, 3, 2] };
 
 export function build(){
-  const scoreEl = hud(['Level','lzLevel'], ['Klicks','lzClicks']);
+  const scoreEl = hud([L('Level', 'Level'),'lzLevel'], [L('Klicks', 'Clicks'),'lzClicks']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = S; canvas.height = S;
   canvas.style.cursor = 'pointer';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Klick auf einen Spiegel, um ihn zu drehen (/ ↔ \\). Der Laser startet links beim 🔦 und muss den 💎 treffen.'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Klick auf einen Spiegel, um ihn zu drehen (/ ↔ \\). Der Laser startet links beim 🔦 und muss den 💎 treffen.', 'Click a mirror to turn it (/ ↔ \\). The laser starts on the left at 🔦 and has to hit the 💎.')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', () => { level++; make(); });
   let grid, src, gem, level = 1, clicks, solved, path;

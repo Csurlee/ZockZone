@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, addLeaderboardUI, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🎹 KLAVIER-ECHO – hör dir die Melodie an und spiel sie nach! Jede Runde kommt ein Ton dazu.
 // Die Melodien werden zufällig erfunden – jede Runde ein neues kleines Lied.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -26,7 +29,7 @@ function note(f, dur = 0.35){
 }
 
 export function build(){
-  const scoreEl = hud(['Töne','peLevel'], ['Bestwert','peBest']);
+  const scoreEl = hud([L('Töne', 'Notes'),'peLevel'], [L('Bestwert', 'Best'),'peBest']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:14px; align-items:center;';
   const status = document.createElement('div');
@@ -41,7 +44,7 @@ export function build(){
     piano.appendChild(b); return b;
   });
   wrap.append(status, piano);
-  playerBody.append(scoreEl, wrap, mkHint('Hör gut zu, dann tipp die Tasten in der gleichen Reihenfolge (oder Tasten A S D F G H J K).'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Hör gut zu, dann tipp die Tasten in der gleichen Reihenfolge (oder Tasten A S D F G H J K).', 'Listen closely, then tap the keys in the same order (or keys A S D F G H J K).')));
   addLeaderboardUI('pianoecho', 'Klavier-Echo');
   const over = overMsg(wrap, '', start);
   let melody, pos, phase, best = 0, timers = [];

@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🐧 PINGUIN-RUTSCHE – auf dem Eis rutscht der Pinguin, bis er an einen Stein oder Rand stößt.
 // Bring ihn zum Fisch 🐟 in möglichst wenigen Zügen! Jedes Level ist garantiert lösbar.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -10,12 +13,12 @@ const STEINE  = 12;   // Wie viele Steine liegen auf dem Eis?
 const S = 352, C = S / GROESSE;
 
 export function build(){
-  const scoreEl = hud(['Level','psLevel'], ['Züge','psMoves'], ['Bestmöglich','psPar']);
+  const scoreEl = hud([L('Level', 'Level'),'psLevel'], [L('Züge', 'Moves'),'psMoves'], [L('Bestmöglich', 'Best possible'),'psPar']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   const canvas = document.createElement('canvas'); canvas.width = S; canvas.height = S;
   canvas.style.touchAction = 'none';
   wrap.appendChild(canvas);
-  playerBody.append(scoreEl, wrap, mkHint('Pfeiltasten/WASD oder wischen. Der Pinguin rutscht immer, bis er anstößt! ↺ = Level neu starten.'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Pfeiltasten/WASD oder wischen. Der Pinguin rutscht immer, bis er anstößt! ↺ = Level neu starten.', 'Arrow keys/WASD or swipe. The penguin always slides until it bumps into something! ↺ = restart level.')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', () => { level++; make(); });
   let rocks, peng, fish, start0, level = 1, moves, par, anim, done;

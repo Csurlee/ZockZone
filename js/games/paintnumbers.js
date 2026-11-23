@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🖌️ MALEN NACH ZAHLEN – wähl eine Farbe und mal alle Felder mit derselben Zahl aus!
 // ---------- 🛠️ LUKI-ECKE: eigene Bilder malen! ----------
 // Jedes Bild ist ein Raster aus Ziffern. Ziffer = Farbe aus der Liste darunter (0 = erste Farbe).
@@ -48,14 +51,14 @@ const BILDER = [
 // ----------------------------------------------------------
 
 export function build(){
-  const scoreEl = hud(['Bild','pnPic'], ['Fertig','pnPct']);
+  const scoreEl = hud([L('Bild', 'Picture'),'pnPic'], [L('Fertig', 'Done'),'pnPct']);
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:12px; align-items:center;';
   const canvas = document.createElement('canvas'); canvas.width = 364; canvas.height = 336;
   canvas.style.touchAction = 'none'; canvas.style.cursor = 'crosshair';
   const pal = document.createElement('div'); pal.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap; justify-content:center;';
   wrap.append(canvas, pal);
-  playerBody.append(scoreEl, wrap, mkHint('Farbe unten wählen, dann über die Felder mit der passenden Zahl wischen. Falsche Felder werden nicht bemalt.'));
+  playerBody.append(scoreEl, wrap, mkHint(L('Farbe unten wählen, dann über die Felder mit der passenden Zahl wischen. Falsche Felder werden nicht bemalt.', 'Pick a color below, then swipe over the squares with the matching number. Wrong squares stay blank.')));
   const ctx = canvas.getContext('2d');
   const over = overMsg(wrap, '', start);
   let pic = -1, grid, painted, color, down = false;

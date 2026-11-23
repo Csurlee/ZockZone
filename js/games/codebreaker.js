@@ -1,6 +1,9 @@
 import { sfx } from '../sfx.js';
 import { hud, overMsg, mkHint, mkButton, playerBody } from '../core.js';
 
+// Texte auf Deutsch oder Englisch (je nach Spracheinstellung der ZockZone)
+const L = (de, en) => { try { return localStorage.getItem('zz_lang') === 'en' ? en : de; } catch { return de; } };
+
 // 🔐 CODEKNACKER – der Computer hat einen geheimen Code aus 4 Farben. Knack ihn!
 // ⚫ = richtige Farbe am richtigen Platz, ⚪ = richtige Farbe, aber falscher Platz.
 // ---------- 🛠️ LUKI-ECKE ----------
@@ -11,7 +14,7 @@ const DOPPELT  = false; // Dürfen Farben doppelt vorkommen? (true = schwerer)
 const COLORS = ['#EF4444', '#F59E0B', '#22C55E', '#3B82F6', '#A855F7', '#EC4899'];
 
 export function build(){
-  const scoreEl = hud(['Versuch','cbTry'], ['Gewonnen','cbWins']);
+  const scoreEl = hud([L('Versuch', 'Try'),'cbTry'], [L('Gewonnen', 'Won'),'cbWins']);
   const board = document.createElement('div');
   board.style.cssText = 'display:flex; flex-direction:column; gap:6px; background:#1D1730; padding:12px; border-radius:14px; max-height:420px; overflow:auto;';
   const current = document.createElement('div');
@@ -25,7 +28,7 @@ export function build(){
   const wrap = document.createElement('div'); wrap.className = 'canvas-wrap';
   wrap.style.cssText = 'display:flex; flex-direction:column; gap:12px; align-items:center;';
   wrap.append(board, current, palette, controls);
-  playerBody.append(scoreEl, wrap, mkHint(`Wähle ${LAENGE} Farben und drück Prüfen. ⚫ = richtig am richtigen Platz, ⚪ = Farbe kommt vor, aber woanders.`));
+  playerBody.append(scoreEl, wrap, mkHint(L(`Wähle ${LAENGE} Farben und drück Prüfen. ⚫ = richtig am richtigen Platz, ⚪ = Farbe kommt vor, aber woanders.`, `Pick ${LAENGE} colors and press Check. ⚫ = right color in the right place, ⚪ = color is in the code, but elsewhere.`)));
   const over = overMsg(wrap, '', start);
   const peg = (c, size = 34) => { const d = document.createElement('div'); d.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;background:${c || '#0F0B1C'};border:2px solid rgba(255,255,255,${c ? .3 : .12});`; return d; };
   let secret, guess, tries, wins = 0, done;
