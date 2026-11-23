@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js?v=20261122o';
-import { GAMES } from './games-list.js?v=20261123c';
+import { GAMES } from './games-list.js?v=20261123d';
 import { makeHD } from './hd.js?v=20261122r';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
@@ -114,6 +114,15 @@ window.addEventListener('zz:lang-changed', () => renderGrid());
 
 function thumbBg(id){
   const map = {
+    domino:'linear-gradient(135deg,#14532D,#F8FAFC)',
+    pumpdare:'linear-gradient(135deg,#EF4444,#1E1B4B)',
+    conveyor:'linear-gradient(135deg,#374151,#F59E0B)',
+    spacepatrol:'linear-gradient(135deg,#38BDF8,#05030C)',
+    scale:'linear-gradient(135deg,#A8A29E,#1D1730)',
+    beeflight:'linear-gradient(135deg,#FACC15,#86EFAC)',
+    firefighter:'linear-gradient(135deg,#EF4444,#1E293B)',
+    ultimatettt:'linear-gradient(135deg,#7C3AED,#C6FF3D)',
+    numpyramid:'linear-gradient(135deg,#B45309,#1D1730)',
     flipper:'linear-gradient(135deg,#F472B6,#1E1B4B)',
     duckcross:'linear-gradient(135deg,#65A30D,#0284C7)',
     treasure:'linear-gradient(135deg,#FDE68A,#B45309)',
@@ -365,7 +374,16 @@ const builders = {
   lightracer: () => import('./games/lightracer.js?v=20261123c'),
   parachute: () => import('./games/parachute.js?v=20261123c'),
   chainreaction: () => import('./games/chainreaction.js?v=20261123c'),
-  pipes: () => import('./games/pipes.js?v=20261123c')
+  pipes: () => import('./games/pipes.js?v=20261123c'),
+  domino: () => import('./games/domino.js?v=20261123d'),
+  pumpdare: () => import('./games/pumpdare.js?v=20261123d'),
+  conveyor: () => import('./games/conveyor.js?v=20261123d'),
+  spacepatrol: () => import('./games/spacepatrol.js?v=20261123d'),
+  scale: () => import('./games/scale.js?v=20261123d'),
+  beeflight: () => import('./games/beeflight.js?v=20261123d'),
+  firefighter: () => import('./games/firefighter.js?v=20261123d'),
+  ultimatettt: () => import('./games/ultimatettt.js?v=20261123d'),
+  numpyramid: () => import('./games/numpyramid.js?v=20261123d')
 };
 
 async function loadGame(id){
