@@ -262,6 +262,78 @@ const GAMES = {
       return n;
     },
   },
+
+  // ===== NIM =====
+  // Nimm 1, 2 oder 3 Stäbchen. Wer das LETZTE Stäbchen nimmt, verliert.
+  nim: {
+    size: [360, 220],
+    marks: [{ name: 'Blau', color: '#38BDF8' }, { name: 'Pink', color: '#F472B6' }],
+    init(start) { return { sticks: 15 + Math.floor(Math.random() * 6), turn: start, winner: null, last: null }; },
+    draw(ctx, s, me) {
+      ctx.fillStyle = '#1D1730'; ctx.fillRect(0, 0, 360, 220);
+      const n = s.sticks, gap = Math.min(16, 320 / Math.max(1, n));
+      for (let i = 0; i < n; i++) {
+        const x = 180 - (n - 1) * gap / 2 + i * gap;
+        ctx.fillStyle = '#D6B98C'; ctx.fillRect(x - 3, 30, 6, 90);
+        ctx.fillStyle = '#EF4444'; ctx.beginPath(); ctx.arc(x, 30, 5, 0, 7); ctx.fill();
+      }
+      ctx.fillStyle = '#F3EEFF'; ctx.font = 'bold 14px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(`${n} Stäbchen übrig` + (s.last ? ` · zuletzt ${s.last.n} genommen` : ''), 180, 140);
+      const myTurn = s.winner === null && s.turn === me;
+      [1, 2, 3].forEach((k, i) => {
+        const x = 60 + i * 90, ok = myTurn && k <= n;
+        ctx.fillStyle = ok ? this.marks[me].color : '#3A2F63'; roundRect(ctx, x, 160, 70, 44, 10); ctx.fill();
+        ctx.fillStyle = ok ? '#14101F' : '#8B83A8'; ctx.font = 'bold 18px Fredoka, sans-serif'; ctx.fillText('Nimm ' + k, x + 35, 182);
+      });
+    },
+    click(s, x, y, me) {
+      if (y < 160 || y > 204) return null;
+      const k = [1, 2, 3].find((v, i) => x >= 60 + i * 90 && x <= 130 + i * 90);
+      if (!k || k > s.sticks) return null;
+      const n = copy(s);
+      n.sticks -= k; n.last = { p: me, n: k };
+      if (n.sticks <= 0) n.winner = 1 - me;   // letztes Stäbchen genommen = verloren
+      else n.turn = 1 - me;
+      return n;
+    },
+  },
+
+  // ===== LEITERSPIEL =====
+  // Würfeln und laufen. Leitern bringen dich hoch, Schlangen zurück. Wer zuerst Feld 30 erreicht, gewinnt.
+  ladders: {
+    size: [360, 330],
+    marks: [{ name: '🟢', color: '#22C55E' }, { name: '🔴', color: '#EF4444' }],
+    SPECIAL: { 4: 14, 9: 2, 17: 26, 20: 6, 24: 29, 28: 12 },
+    init(start) { return { pos: [0, 0], turn: start, winner: null, roll: null }; },
+    cell(i) { const r = Math.floor((i - 1) / 6), c = (i - 1) % 6; return [(r % 2 ? 5 - c : c) * 60 + 30, 270 - r * 60 + 30 - 30]; },
+    draw(ctx, s, me) {
+      ctx.fillStyle = '#1D1730'; ctx.fillRect(0, 0, 360, 330);
+      for (let i = 1; i <= 30; i++) {
+        const [x, y] = this.cell(i);
+        ctx.fillStyle = (i % 2) ? '#2E2560' : '#241C40'; ctx.fillRect(x - 30, y - 30, 60, 60);
+        ctx.fillStyle = '#8B83A8'; ctx.font = '11px Fredoka, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(i, x - 26, y - 26);
+      }
+      ctx.lineWidth = 5; ctx.lineCap = 'round';
+      for (const [a, b] of Object.entries(this.SPECIAL)) {
+        const [x1, y1] = this.cell(+a), [x2, y2] = this.cell(b);
+        ctx.strokeStyle = b > a ? 'rgba(250,204,21,.8)' : 'rgba(34,197,94,.7)';
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(b > a ? '🪜' : '🐍', (x1 + x2) / 2, (y1 + y2) / 2);
+      }
+      s.pos.forEach((p, i) => { const [x, y] = p ? this.cell(p) : [-20, 300]; ctx.font = '22px sans-serif'; ctx.fillText(this.marks[i].name, x + (i ? 12 : -12), y + 12); });
+      ctx.fillStyle = '#F3EEFF'; ctx.font = 'bold 14px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+      ctx.fillText(s.roll ? `${this.marks[s.roll.p].name} würfelt ${faces[s.roll.n - 1]} ${s.roll.n}` : 'Klick aufs Brett zum Würfeln!', 180, 318);
+    },
+    click(s, x, y, me) {
+      const n = copy(s), roll = 1 + Math.floor(Math.random() * 6);   // der Würfelnde würfelt, das Ergebnis wird mitgeschickt
+      let p = Math.min(30, n.pos[me] + roll);
+      if (this.SPECIAL[p]) p = this.SPECIAL[p];
+      n.pos[me] = p; n.roll = { p: me, n: roll };
+      if (p >= 30) n.winner = me; else n.turn = 1 - me;
+      return n;
+    },
+  },
 };
 
 export const BOARD_GAMES = Object.keys(GAMES);
@@ -288,7 +360,7 @@ export function startBoardOnline(canvas, gameName, env) {
   const chan = sb.channel('board-' + env.roomId, { config: { broadcast: { self: false } } });
 
   function send() {
-    chan.send({ type: 'broadcast', event: 'state', payload: { seq, round, wins, s } });
+    chan.send({ type: 'broadcast', event: 'state', payload: { seq, round, wins, s, from: me } });
   }
 
   function newRound() {
@@ -353,7 +425,8 @@ export function startBoardOnline(canvas, gameName, env) {
 
   chan
     .on('broadcast', { event: 'state' }, ({ payload }) => {
-      if (payload.seq <= seq && s) return; // alter Stand
+      // alter Stand ignorieren; gleich alt (beide gleichzeitig neu gestartet)? Dann gilt der Stand vom Host
+      if (s && (payload.seq < seq || (payload.seq === seq && !(payload.from === 0 && me === 1)))) return;
       const wasMyTurn = s && s.turn === me;
       s = payload.s; seq = payload.seq; round = payload.round; wins = payload.wins;
       ui.sel = null;

@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { sfx } from './sfx.js';
 import { t } from './i18n.js?v=20261122o';
 import { makeHD } from './hd.js?v=20261122r';
-import { startBoardOnline, BOARD_GAMES } from './online-board.js?v=20261122b';
+import { startBoardOnline, BOARD_GAMES } from './online-board.js?v=20261123e';
 import { startTanksOnline } from './online-tanks.js?v=20261122d';
 
 const SUPABASE_URL     = 'https://supabase.hackthelab.uk';

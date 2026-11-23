@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { t } from './i18n.js?v=20261122o';
-import { GAMES } from './games-list.js?v=20261123d';
+import { t, getLang } from './i18n.js?v=20261122o';
+import { GAMES } from './games-list.js?v=20261123e';
 import { makeHD } from './hd.js?v=20261122r';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
@@ -76,11 +76,14 @@ window.zzCardClick = (id) => {
   openGame(id);
 };
 
+// Spieltitel in der eingestellten Sprache (Englisch, falls vorhanden)
+const gameTitle = g => (getLang() === 'en' && g.en) ? g.en : g.title;
+
 function renderGrid(filter=lastFilter, search=lastSearch){
   lastFilter = filter; lastSearch = search;
   const list = GAMES.filter(g =>
     (filter==='all' || g.cat===filter || g.tag===filter) &&
-    g.title.toLowerCase().includes(search.toLowerCase())
+    (g.title + ' ' + (g.en || '')).toLowerCase().includes(search.toLowerCase())
   );
   countLabel.textContent = t('count.games', list.length);
   const loggedIn = window.zzIsLoggedIn && window.zzIsLoggedIn();
@@ -100,7 +103,7 @@ function renderGrid(filter=lastFilter, search=lastSearch){
         ${g.icon}
       </div>
       <div class="card-info">
-        <h3>${g.title}</h3>
+        <h3>${gameTitle(g)}</h3>
         <div class="meta">${starsHtml} · ${t('card.plays', g.plays)}</div>
       </div>
     </div>
@@ -249,7 +252,7 @@ let currentCleanup = null;
 
 function openGame(id){
   const g = GAMES.find(x=>x.id===id);
-  playerTitle.textContent = g.icon + '  ' + g.title;
+  playerTitle.textContent = g.icon + '  ' + gameTitle(g);
   overlay.classList.add('open');
   renderPlayerRating(id);
   loadGame(id);
