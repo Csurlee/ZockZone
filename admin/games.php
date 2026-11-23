@@ -12,7 +12,7 @@ require __DIR__ . '/includes/layout_top.php';
 </table>
 
 <script type="module">
-import { GAMES } from '../js/games-list.js?v=20261123a';
+import { GAMES } from '../js/games-list.js?v=20261123b';
 
 async function loadGames(){
   const dbGames = await apiCall('GET', 'api/games.php');

@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { t } from './i18n.js?v=20261122o';
-import { GAMES } from './games-list.js?v=20261123a';
+import { GAMES } from './games-list.js?v=20261123b';
 import { makeHD } from './hd.js?v=20261122r';
 
 const _sb = createClient('https://supabase.hackthelab.uk', 'sb_publishable_rWR-Aesm3GyJxEnvrhcZ2M_ZmMoQWdB');
@@ -114,6 +114,16 @@ window.addEventListener('zz:lang-changed', () => renderGrid());
 
 function thumbBg(id){
   const map = {
+    wordsearch:'linear-gradient(135deg,#38BDF8,#1D1730)',
+    fivedice:'linear-gradient(135deg,#F8FAFC,#7C3AED)',
+    paintnumbers:'linear-gradient(135deg,#F472B6,#38BDF8)',
+    pianoecho:'linear-gradient(135deg,#111827,#8B5CF6)',
+    parking:'linear-gradient(135deg,#EF4444,#4B5563)',
+    canthrow:'linear-gradient(135deg,#7C2D12,#FACC15)',
+    quickdraw:'linear-gradient(135deg,#B45309,#166534)',
+    tugofwar:'linear-gradient(135deg,#65A30D,#78350F)',
+    maumau:'linear-gradient(135deg,#5B21B6,#DC2626)',
+    numbersprint:'linear-gradient(135deg,#C6FF3D,#1D1730)',
     clockquiz:'linear-gradient(135deg,#7C3AED,#F8FAFC)',
     meteorshield:'linear-gradient(135deg,#1E3A8A,#05030C)',
     trainswitch:'linear-gradient(135deg,#57534E,#3F6212)',
@@ -325,7 +335,17 @@ const builders = {
   timesrace: () => import('./games/timesrace.js?v=20261122t'),
   clockquiz: () => import('./games/clockquiz.js?v=20261123a'),
   meteorshield: () => import('./games/meteorshield.js?v=20261123a'),
-  trainswitch: () => import('./games/trainswitch.js?v=20261123a')
+  trainswitch: () => import('./games/trainswitch.js?v=20261123a'),
+  wordsearch: () => import('./games/wordsearch.js?v=20261123b'),
+  fivedice: () => import('./games/fivedice.js?v=20261123b'),
+  paintnumbers: () => import('./games/paintnumbers.js?v=20261123b'),
+  pianoecho: () => import('./games/pianoecho.js?v=20261123b'),
+  parking: () => import('./games/parking.js?v=20261123b'),
+  canthrow: () => import('./games/canthrow.js?v=20261123b'),
+  quickdraw: () => import('./games/quickdraw.js?v=20261123b'),
+  tugofwar: () => import('./games/tugofwar.js?v=20261123b'),
+  maumau: () => import('./games/maumau.js?v=20261123b'),
+  numbersprint: () => import('./games/numbersprint.js?v=20261123b')
 };
 
 async function loadGame(id){
