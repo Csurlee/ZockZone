@@ -330,7 +330,7 @@ const builders = {
   snakesladders: () => import('./games/snakesladders.js'),
   darts: () => import('./games/darts.js'),
   clicker: () => import('./games/clicker.js'),
-  airhockey: () => import('./games/airhockey.js'),
+  airhockey: () => import('./games/airhockey.js?v=20261123h'),
   timingbar: () => import('./games/timingbar.js'),
   match3: () => import('./games/match3.js'),
   typing: () => import('./games/typing.js'),

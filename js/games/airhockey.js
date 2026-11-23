@@ -23,25 +23,38 @@ export function build(){
   }
   function loop(){
     puck.x+=puck.vx; puck.y+=puck.vy;
-    if(puck.y<12||puck.y>248) puck.vy*=-1;
+    // 1) Bande: Puck zurück aufs Feld schieben (sonst "zittert" er außerhalb und bleibt hängen)
+    if(puck.y<12){ puck.y=12; puck.vy=Math.abs(puck.vy); }
+    if(puck.y>248){ puck.y=248; puck.vy=-Math.abs(puck.vy); }
     [paddle,cpu].forEach(p=>{
       const d=Math.hypot(puck.x-p.x, puck.y-p.y);
-      if(d<28){ sfx.puckHit();
+      if(d<28){
         const ang=Math.atan2(puck.y-p.y, puck.x-p.x);
-        puck.vx=Math.cos(ang)*6; puck.vy=Math.sin(ang)*6;
+        // 3) Puck aus dem Schläger herausschieben, damit er nicht jedes Bild neu "getroffen" wird
+        puck.x=p.x+Math.cos(ang)*29; puck.y=p.y+Math.sin(ang)*29;
+        const vRel=puck.vx*Math.cos(ang)+puck.vy*Math.sin(ang);
+        if(vRel<6){ sfx.puckHit(); puck.vx=Math.cos(ang)*6; puck.vy=Math.sin(ang)*6; }
+        // nie fast senkrecht: immer etwas Richtung Gegner-Tor
+        const toward = p===cpu ? -1 : 1;
+        if(Math.abs(puck.vx)<1.5) puck.vx=1.5*toward;
       }
     });
     if(puck.x<0){ cScore++; sfx.score(); document.getElementById('ahC').textContent=cScore; resetPuck(-1); }
     if(puck.x>400){ pScore++; sfx.score(); document.getElementById('ahP').textContent=pScore; resetPuck(1); }
+    // 2) Computer-Gegner: nicht an die Bande kleben und den Puck nicht gegen die Wand drücken
     const dy=puck.y-cpu.y;
-    if(puck.x>200){
+    const behind = puck.x > cpu.x - 5;   // Puck ist hinter/neben dem Computer
+    if(puck.x>200 && !behind){
       cpu.y+=Math.sign(dy)*Math.min(Math.abs(dy),3);
-      cpu.x+=(340-cpu.x)*0.12;
+      cpu.x+=((puck.x+40)-cpu.x)*0.06;          // dem Puck entgegen, aber von rechts kommend
+    } else if(behind){
+      cpu.x+=(385-cpu.x)*0.15;                  // zurück vors eigene Tor
+      cpu.y+=((puck.y<130? puck.y+45 : puck.y-45)-cpu.y)*0.12;   // seitlich ausweichen statt einklemmen
     } else {
       cpu.x+=(340-cpu.x)*0.08;
       cpu.y+=(130-cpu.y)*0.08;
     }
-    cpu.x=Math.max(210,Math.min(390,cpu.x)); cpu.y=Math.max(12,Math.min(248,cpu.y));
+    cpu.x=Math.max(230,Math.min(390,cpu.x)); cpu.y=Math.max(30,Math.min(230,cpu.y));
     draw();
     if(pScore>=7||cScore>=7){ over.querySelector('div').textContent = (pScore>=7?sfx.win():sfx.lose(), pScore>=7?'Du gewinnst! 🎉':'CPU gewinnt.'); over.classList.add('show'); return; }
     loopId=requestAnimationFrame(loop);
