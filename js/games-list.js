@@ -51,7 +51,7 @@ export const GAMES = [
   {id:'minesweeper', title:'Minesweeper', en:'Minesweeper', icon:'💣', cat:'puzzle', tag:'', rating:'4.7', plays:'720'},
   {id:'sudoku', title:'Mini-Sudoku', en:'Mini Sudoku', icon:'🧮', cat:'puzzle', tag:'', rating:'4.6', plays:'480'},
   {id:'minigolf', title:'Minigolf', en:'Mini Golf', icon:'⛳', cat:'arcade', tag:'', rating:'–', plays:'0'},
-  {id:'muehle', en:'Nine Men's Morris', title:'Mühle', icon:'🔘', cat:'2player', tag:'', rating:'–', plays:'0'},
+  {id:'muehle', en:'Nine Men’s Morris', title:'Mühle', icon:'🔘', cat:'2player', tag:'', rating:'–', plays:'0'},
   {id:'pumpdare', title:'Mutprobe', en:'Pump Dare', icon:'💨', cat:'reflex', tag:'new', rating:'–', plays:'0'},
   {id:'nim', title:'Nim', en:'Nim', icon:'🪵', cat:'2player', tag:'', rating:'4.0', plays:'180'},
   {id:'catcher', title:'Obstkorb', en:'Fruit Basket', icon:'🧺', cat:'arcade', tag:'', rating:'–', plays:'0'},
