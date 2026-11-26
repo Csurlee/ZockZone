@@ -155,7 +155,7 @@
 <meta name="twitter:description" content="100 kostenlose Mini-Games direkt im Browser spielen. Kein Download nötig!">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261122o">
+<link rel="stylesheet" href="css/style.css?v=20261126a">
 </head>
 <body>
 
@@ -263,6 +263,9 @@
     <div class="profile-avatar-wrap">
       <div class="profile-avatar-big" id="profileAvatarBig"></div>
     </div>
+    <!-- 📊 Profil-Übersicht: Name, Favoriten, Rekorde (wird von auth.js gefüllt) -->
+    <div id="profileOverview" class="profile-overview"></div>
+
     <p class="auth-step-label" data-i18n="profile.avatar.change">Avatar ändern:</p>
     <div class="avatar-grid" id="profileAvatarGrid"></div>
 
@@ -322,6 +325,7 @@
 
 <div class="chips">
   <div class="chip active" data-filter="all" data-i18n="filter.all">Alle</div>
+  <div class="chip chip-fav" data-filter="fav" id="favChip">⭐ Favoriten</div>
   <div class="chip chip-hot" data-filter="hot" data-i18n="filter.hot">🔥 HOT</div>
   <div class="chip chip-new" data-filter="new" data-i18n="filter.new">✨ NEU</div>
   <div class="chip" data-filter="arcade" data-i18n="filter.arcade">Arcade</div>
@@ -362,6 +366,7 @@
       <h2 id="playerTitle"></h2>
       <div style="display:flex; gap:8px; align-items:center;">
         <div id="playerRating" class="player-rating"></div>
+        <button class="icon-btn fav-player-btn" id="playerFavBtn" title="Favorit">☆</button>
         <button class="icon-btn" onclick="zzOpenReport()" title="Problem melden" data-i18n-title="report.btn">🐞</button>
         <button class="icon-btn" id="fullscreenBtn" title="Vollbild">⛶</button>
         <button class="icon-btn" id="restartBtn" title="Neu starten">⟳</button>
@@ -617,8 +622,8 @@
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script type="module" src="js/i18n.js?v=20261122o"></script>
 <script type="module" src="js/consent.js?v=20260906p"></script>
-<script type="module" src="js/auth.js?v=20261123j"></script>
-<script type="module" src="js/core.js?v=20261123j"></script>
+<script type="module" src="js/auth.js?v=20261126a"></script>
+<script type="module" src="js/core.js?v=20261126a"></script>
 <script type="module" src="js/chat.js?v=20261123j"></script>
 <script type="module" src="js/online.js?v=20261123j"></script>
 <script type="module" src="js/music.js?v=20261122r"></script>

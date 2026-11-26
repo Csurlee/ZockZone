@@ -123,7 +123,57 @@ window.zzOpenProfile = async () => {
 
   renderProfileAvatarGrid(currentUser.user_metadata?.avatar || '');
   document.getElementById('profileOverlay').classList.add('open');
+  renderProfileOverview();
 };
+
+// ============ 📊 PROFIL-ÜBERSICHT ============
+// Zeigt oben im Profil: Name, seit wann dabei, Favoriten und die eigenen Rekorde (mit Platz in der Rangliste).
+const LL = (de, en) => getLang() === 'en' ? en : de;
+async function renderProfileOverview(){
+  const box = document.getElementById('profileOverview');
+  if(!box || !currentUser) return;
+  const user = currentUser;
+  const since = user.created_at ? new Date(user.created_at).toLocaleDateString(t('date.locale'), { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
+  const favs = window.zzGetFavs ? window.zzGetFavs() : [];
+  const info = id => (window.zzGameInfo && window.zzGameInfo(id)) || { icon: '🎮', title: id };
+  const favHtml = favs.length
+    ? favs.map(id => { const g = info(id); return `<button class="po-game" data-game="${escapeHtml(id)}">${g.icon} ${escapeHtml(g.title)}</button>`; }).join('')
+    : `<span class="po-empty">${LL('Noch keine – tipp bei einem Spiel auf den Stern ☆!', 'None yet – tap the star ☆ on a game!')}</span>`;
+  box.innerHTML = `
+    <div class="po-name">${escapeHtml(displayNameOf(user))}</div>
+    ${since ? `<div class="po-since">${LL('Dabei seit', 'Member since')} ${since}</div>` : ''}
+    <div class="po-stats">
+      <div class="po-stat"><b>${favs.length}</b><span>⭐ ${LL('Favoriten', 'Favourites')}</span></div>
+      <div class="po-stat"><b id="poRecords">…</b><span>🏆 ${LL('Rekorde', 'Records')}</span></div>
+      <div class="po-stat"><b id="poTop">…</b><span>🥇 ${LL('Top 3', 'Top 3')}</span></div>
+    </div>
+    <h3 class="po-head">⭐ ${LL('Meine Favoriten', 'My favourites')}</h3>
+    <div class="po-games">${favHtml}</div>
+    <h3 class="po-head">🏆 ${LL('Meine Rekorde', 'My records')}</h3>
+    <div class="po-records" id="poRecordList"><span class="po-empty">${LL('Lade…', 'Loading…')}</span></div>`;
+  box.querySelectorAll('.po-game').forEach(b => b.addEventListener('click', () => { window.zzCloseProfile(); window.openGame?.(b.dataset.game); }));
+
+  const { data: rows } = await supabase.from('highscores')
+    .select('game_id, game_title, score, updated_at')
+    .eq('user_id', user.id)
+    .order('updated_at', { ascending: false });
+  if(currentUser?.id !== user.id) return;
+  const list = rows || [];
+  // Platz in der Rangliste: Wie viele Leute haben bei diesem Spiel MEHR Punkte? +1 = mein Platz
+  const ranks = await Promise.all(list.map(r =>
+    supabase.from('highscores').select('user_id', { count: 'exact', head: true }).eq('game_id', r.game_id).gt('score', r.score)
+      .then(({ count }) => (count ?? 0) + 1).catch(() => null)
+  ));
+  if(currentUser?.id !== user.id) return;
+  const top3 = ranks.filter(n => n && n <= 3).length;
+  document.getElementById('poRecords').textContent = list.length;
+  document.getElementById('poTop').textContent = top3;
+  const medal = n => n === 1 ? '🥇' : n === 2 ? '🥈' : n === 3 ? '🥉' : (n ? `#${n}` : '');
+  document.getElementById('poRecordList').innerHTML = list.length
+    ? list.map((r, i) => { const g = info(r.game_id); return `<button class="po-rec" data-game="${escapeHtml(r.game_id)}"><span>${g.icon} ${escapeHtml(g.title)}</span><span class="po-score">${Number(r.score).toLocaleString(t('date.locale'))}</span><span class="po-rank">${medal(ranks[i])}</span></button>`; }).join('')
+    : `<span class="po-empty">${LL('Noch keine Rekorde – spiel was und schlag deinen Bestwert!', 'No records yet – play a game and beat your best!')}</span>`;
+  document.querySelectorAll('#poRecordList .po-rec').forEach(b => b.addEventListener('click', () => { window.zzCloseProfile(); window.openGame?.(b.dataset.game); }));
+}
 window.zzCloseProfile = () => document.getElementById('profileOverlay').classList.remove('open');
 
 let profileSelectedAvatar = null;
@@ -501,6 +551,13 @@ function updateAccountUI(user){
 }
 
 window.zzIsLoggedIn = () => !!currentUser;
+// ⭐ Favoriten im Konto speichern (core.js ruft das auf, wenn man einen Stern antippt)
+window.zzAccountFavs = () => currentUser ? (currentUser.user_metadata?.favorites ?? null) : null;
+window.zzSyncFavs = async (list) => {
+  if(!currentUser) return;
+  try { await supabase.auth.updateUser({ data: { favorites: list } }); }
+  catch(e){ console.warn('Favoriten speichern fehlgeschlagen:', e.message); }
+};
 window.zzCurrentUserName = () => currentUser ? displayNameOf(currentUser) : '';
 
 supabase.auth.onAuthStateChange((event, session) => {

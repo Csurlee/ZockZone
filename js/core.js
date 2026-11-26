@@ -81,15 +81,65 @@ window.zzCardClick = (id) => {
 
 // Spieltitel in der eingestellten Sprache (Englisch, falls vorhanden)
 const gameTitle = g => (getLang() === 'en' && g.en) ? g.en : g.title;
+const L = (de, en) => getLang() === 'en' ? en : de;
+
+// ============ ⭐ FAVORITEN ============
+// Lieblingsspiele werden im Browser gespeichert (localStorage).
+// Wer eingeloggt ist, bekommt sie zusätzlich im Konto gespeichert (auth.js → zzSyncFavs),
+// dann sind sie auch auf dem Handy oder einem anderen PC da.
+const FAV_KEY = 'zz_favs';
+const validGame = id => GAMES.some(g => g.id === id);
+let favs = (() => { try { const a = JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); return Array.isArray(a) ? a.filter(validGame) : []; } catch { return []; } })();
+let favLoggedIn = false, currentGameId = null;
+const isFav = id => favs.includes(id);
+function saveFavs(syncToAccount = true){
+  try { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch {}
+  if(syncToAccount) window.zzSyncFavs?.(favs);
+  renderGrid(); renderPlayerFav();
+}
+window.zzGetFavs = () => favs.slice();
+window.zzToggleFav = (id) => {
+  if(!validGame(id)) return;
+  favs = isFav(id) ? favs.filter(x => x !== id) : [...favs, id];
+  saveFavs();
+};
+window.zzGameInfo = (id) => { const g = GAMES.find(x => x.id === id); return g ? { icon: g.icon, title: gameTitle(g) } : null; };
+// Beim Einloggen: Favoriten vom Konto und vom Browser zusammenlegen. Beim Ausloggen: Liste leeren (sie ist ja im Konto gespeichert).
+function mergeAccountFavs(){
+  const loggedIn = !!(window.zzIsLoggedIn && window.zzIsLoggedIn());
+  if(loggedIn){
+    const remote = window.zzAccountFavs?.();
+    const r = Array.isArray(remote) ? remote.filter(validGame) : [];
+    const merged = [...new Set([...r, ...favs])];
+    const needSync = !Array.isArray(remote) || merged.length !== remote.length;
+    favs = merged; saveFavs(needSync && merged.length > 0);
+  } else if(favLoggedIn){ favs = []; saveFavs(false); }
+  favLoggedIn = loggedIn;
+}
+window.addEventListener('zz:auth-changed', mergeAccountFavs);
+function renderPlayerFav(){
+  const b = document.getElementById('playerFavBtn');
+  if(!b || !currentGameId) return;
+  const on = isFav(currentGameId);
+  b.textContent = on ? '⭐' : '☆';
+  b.classList.toggle('on', on);
+  b.title = on ? L('Aus Favoriten entfernen', 'Remove from favourites') : L('Zu Favoriten hinzufügen', 'Add to favourites');
+}
+function renderFavChip(){ const c = document.getElementById('favChip'); if(c) c.textContent = L('⭐ Favoriten', '⭐ Favourites') + (favs.length ? ` (${favs.length})` : ''); }
 
 function renderGrid(filter=lastFilter, search=lastSearch){
   lastFilter = filter; lastSearch = search;
   const list = GAMES.filter(g =>
-    (filter==='all' || g.cat===filter || g.tag===filter) &&
+    (filter==='all' || (filter==='fav' ? isFav(g.id) : (g.cat===filter || g.tag===filter))) &&
     (g.title + ' ' + (g.en || '')).toLowerCase().includes(search.toLowerCase())
   );
   countLabel.textContent = t('count.games', list.length);
   const loggedIn = window.zzIsLoggedIn && window.zzIsLoggedIn();
+  renderFavChip();
+  if(filter === 'fav' && !list.length){
+    grid.innerHTML = `<div class="fav-empty">${search ? L('Kein Favorit passt zur Suche.', 'No favourite matches your search.') : L('Noch keine Favoriten. Tipp bei einem Spiel auf den Stern ☆, dann landet es hier! ⭐', 'No favourites yet. Tap the star ☆ on a game and it shows up here! ⭐')}</div>`;
+    return;
+  }
   grid.innerHTML = list.map(g => {
     const lock = gameLockState(g.id);
     const lockBadge = lock === 'disabled' ? `<span class="tag locked">${t('game.disabled')}</span>`
@@ -103,6 +153,7 @@ function renderGrid(filter=lastFilter, search=lastSearch){
     <div class="game-card${lock ? ' locked' : ''}" onclick="zzCardClick('${g.id}')">
       <div class="thumb" style="background:${thumbBg(g.id)}">
         ${lockBadge || (g.tag ? `<span class="tag ${g.tag}">${tagLabel}</span>` : '')}
+        <button class="fav-btn${isFav(g.id) ? ' on' : ''}" onclick="event.stopPropagation(); zzToggleFav('${g.id}')" title="${isFav(g.id) ? L('Aus Favoriten entfernen', 'Remove from favourites') : L('Zu Favoriten hinzufügen', 'Add to favourites')}">${isFav(g.id) ? '⭐' : '☆'}</button>
         ${g.icon}
       </div>
       <div class="card-info">
@@ -251,11 +302,13 @@ export const overlay = document.getElementById('overlay');
 export const playerTitle = document.getElementById('playerTitle');
 export const playerBody = document.getElementById('playerBody');
 export const restartBtn = document.getElementById('restartBtn');
+document.getElementById('playerFavBtn')?.addEventListener('click', () => { if(currentGameId) window.zzToggleFav(currentGameId); });
 let currentCleanup = null;
 
 function openGame(id){
   const g = GAMES.find(x=>x.id===id);
   playerTitle.textContent = g.icon + '  ' + gameTitle(g);
+  currentGameId = id; renderPlayerFav();
   overlay.classList.add('open');
   renderPlayerRating(id);
   loadGame(id);
